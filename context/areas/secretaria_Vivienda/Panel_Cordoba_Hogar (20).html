@@ -1,0 +1,1256 @@
+<html lang="es"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel — Córdoba Hogar</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #EAF2FB; color: #1C2833; font-size: 14px; }
+
+  .header { background: #0D47A1; color: #fff; padding: 0 24px; display: flex; align-items: center; gap: 14px; height: 62px; border-left: 6px solid #1976D2; }
+  .header-logo  { font-size: 13px; font-weight: 700; color: #FFE0B2; letter-spacing: 1px; line-height: 1.3; }
+  .header-title { font-size: 16px; font-weight: 700; color: #fff; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink:0; }
+  .header-ts    { font-size: 11px; color: #90CAF9; }
+  .btn-hdr { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 13px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .btn-hdr:hover { background: rgba(255,255,255,0.25); }
+  .btn-hdr.save-btn { background: #1976D2; border-color: #1976D2; color: #1C2833; }
+  .btn-hdr.save-btn:hover { background: #1565C0; }
+
+  .save-hint { background: #1976D2; color: #1C2833; text-align: center; padding: 7px 16px; font-size: 12px; font-weight: 700; display: none; }
+  .save-hint.visible { display: block; }
+
+  .summary { display: flex; gap: 12px; padding: 16px 24px 8px; flex-wrap: wrap; }
+  .scard { background: #fff; border-radius: 6px; padding: 12px 18px; min-width: 150px; box-shadow: 0 1px 5px rgba(13,71,161,.12); border-top: 4px solid #1565C0; }
+  .scard.monto { border-color: #1565C0; } .scard.ok { border-color: #2E7D32; } .scard.nodoc { border-color: #C62828; }
+  .scard .num { font-size: 28px; font-weight: 700; line-height: 1; color: #1565C0; }
+  .scard.monto .num { color: #1565C0; font-size: 20px; } .scard.ok .num { color: #2E7D32; } .scard.nodoc .num { color: #C62828; }
+
+  .scard.pres   { border-color: #E65100; cursor:pointer; }
+  .scard.saldo  { border-color: #6A1B9A; }
+  .scard.pres  .num { color: #E65100; font-size: 18px; }
+  .scard.saldo .num { color: #6A1B9A; font-size: 18px; }
+  .scard-edit { font-size: 10px; color: #aaa; margin-top:2px; }
+  .scard .lbl { font-size: 10px; color: #7F8C8D; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .filterbar { display: flex; gap: 10px; padding: 10px 24px; background: #fff; border-bottom: 1px solid #BBDEFB; align-items: center; flex-wrap: wrap; }
+  .filterbar label { font-size: 11px; font-weight: 700; color: #0D47A1; text-transform: uppercase; }
+  .filterbar input, .filterbar select { border: 1px solid #BBDEFB; border-radius: 4px; padding: 6px 10px; font-size: 13px; font-family: inherit; outline: none; }
+  .filterbar input:focus, .filterbar select:focus { border-color: #0D47A1; }
+  .filterbar input { width: 220px; }
+  .filter-count { margin-left: auto; font-size: 12px; color: #7F8C8D; }
+  .btn-clear { background: none; border: 1px solid #BBDEFB; color: #0D47A1; padding: 5px 11px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
+
+  .panel-wrap { background: #fff; margin: 0 24px 24px; border-radius: 6px; box-shadow: 0 2px 8px rgba(13,71,161,.10); border: 1px solid #BBDEFB; overflow: hidden; }
+  .panel-toolbar { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #EAF2FB; background: #E3F2FD; }
+  .panel-toolbar h2 { font-size: 12px; color: #0D47A1; flex: 1; font-weight: 700; }
+  .legend-wrap { display: flex; flex-wrap: wrap; gap: 8px; padding: 7px 14px; background: #E3F2FD; border-bottom: 1px solid #BBDEFB; }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #4A5568; }
+  .legend-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead tr { background: #0D47A1; color: #fff; }
+  thead th { padding: 9px 10px; text-align: left; font-weight: 600; font-size: 11px; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid #EAF2FB; }
+  tbody tr:hover { background: #FFF8F5; }
+  tbody tr.hidden-row { display: none; }
+  tbody td { padding: 7px 10px; vertical-align: middle; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .ok-si { background: #E3F2FD; color: #2E7D32; } .ok-no { background: #FFEBEE; color: #C62828; } .ok-tr { background: #FFE0B2; color: #F57F17; }
+  .doc-si { background: #E3F2FD; color: #1565C0; font-size: 10px; }
+  .avance-wrap { display: flex; align-items: center; gap: 6px; min-width: 80px; }
+  .avance-bar  { flex: 1; height: 6px; background: #E0E0E0; border-radius: 3px; overflow: hidden; }
+  .avance-fill { height: 100%; border-radius: 3px; }
+  .avance-pct  { font-size: 11px; color: #7F8C8D; min-width: 26px; }
+  .monto-cell { font-size: 11px; color: #1565C0; font-weight: 600; white-space: nowrap; }
+  .depto-tag  { background: #E8EAF6; color: #283593; padding: 2px 7px; border-radius: 10px; font-size: 10px; white-space: nowrap; }
+  .casas-cell { font-size: 14px; font-weight: 700; color: #E65100; text-align: center; }
+  .btn-icon { background: none; border: none; cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 3px; opacity: 0.55; }
+  .btn-icon:hover { opacity: 1; background: #EAF2FB; }
+  .empty-state { text-align: center; padding: 44px 20px; color: #9E9E9E; font-size: 13px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(13,71,161,0.45); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 8px; width: 740px; max-width: 97vw; max-height: 92vh; overflow-y: auto; box-shadow: 0 8px 30px rgba(0,0,0,0.22); }
+  .modal-sm { width: 500px; }
+  .modal-header { background: #0D47A1; color: #fff; padding: 14px 18px; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 1; }
+  .modal-header h3 { flex: 1; font-size: 14px; }
+  .modal-close { background: none; border: none; color: #90CAF9; cursor: pointer; font-size: 20px; line-height: 1; }
+  .modal-close:hover { color: #fff; }
+  .modal-body { padding: 18px; }
+  .modal-footer { padding: 13px 18px; border-top: 1px solid #EAF2FB; display: flex; justify-content: flex-end; gap: 10px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 11px; font-weight: 700; color: #4A5568; text-transform: uppercase; letter-spacing: 0.4px; }
+  .form-group input, .form-group select, .form-group textarea { border: 1px solid #BBDEFB; border-radius: 4px; padding: 7px 9px; font-size: 13px; font-family: inherit; outline: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0D47A1; }
+  .sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0D47A1; margin: 14px 0 8px; }
+  .estado-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+  .estado-section { background: #E3F2FD; border: 1px solid #BBDEFB; border-radius: 6px; padding: 10px; }
+  .estado-section h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #0D47A1; margin-bottom: 7px; font-weight: 700; }
+  .btn-cancel { background: #EAF2FB; color: #0D47A1; border: 1px solid #BBDEFB; padding: 7px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-save   { background: #0D47A1; color: #fff; border: none; padding: 7px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-save:hover { background: #1565C0; }
+  .btn-danger { background: #C62828; color: #fff; border: none; padding: 7px 18px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+
+  .estado-list { display: flex; flex-direction: column; gap: 7px; }
+  .estado-row { display: flex; align-items: center; gap: 9px; background: #E3F2FD; border: 1px solid #BBDEFB; border-radius: 6px; padding: 9px 11px; }
+  .estado-row .swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: pointer; }
+  .estado-row input.nombre-estado { flex: 1; border: 1px solid #BBDEFB; border-radius: 4px; padding: 6px 9px; font-size: 13px; font-family: inherit; outline: none; }
+  .btn-del-estado { background: none; border: none; cursor: pointer; font-size: 15px; color: #C62828; opacity: 0.6; padding: 3px; }
+  .color-picker-wrap { position: relative; }
+  .color-grid { display: none; position: absolute; top: 34px; left: 0; z-index: 200; background: #fff; border: 1px solid #BBDEFB; border-radius: 8px; padding: 9px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); grid-template-columns: repeat(5,28px); gap: 5px; }
+  .color-grid.open { display: grid; }
+  .color-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; }
+  .color-dot:hover { transform: scale(1.15); } .color-dot.selected { border-color: #0D47A1; }
+  .add-estado-row { display: flex; align-items: center; gap: 9px; padding: 10px; background: #EAF2FB; border: 2px dashed #BBDEFB; border-radius: 6px; margin-top: 6px; }
+  .add-estado-row input { flex: 1; border: 1px solid #BBDEFB; border-radius: 4px; padding: 6px 9px; font-size: 13px; font-family: inherit; outline: none; }
+  .btn-add-estado { background: #0D47A1; color: #fff; border: none; padding: 6px 13px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(13,71,161,0.45); z-index: 200; align-items: center; justify-content: center; }
+  .confirm-overlay.open { display: flex; }
+  .confirm-box { background: #fff; border-radius: 8px; padding: 26px 30px; max-width: 370px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+  .confirm-box p { margin-bottom: 18px; color: #4A5568; font-size: 14px; }
+  footer { text-align: center; padding: 14px; color: #90CAF9; font-size: 11px; background: #0D47A1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-logo">PROGRAMA PROVINCIAL</div>
+    <div class="header-title">CÓRDOBA HOGAR</div>
+    <div style="font-size:11px;color:#FFE0B2;font-weight:700;margin-top:1px;">💰 Valor de referencia por vivienda: $34.000.000</div>
+  </div>
+  <div class="header-right">
+    <span class="header-ts" id="last-update">Guardado: 3/7/2026, 12:08:32</span>
+    <button class="btn-hdr save-btn" onclick="guardarArchivo()">💾 Guardar y compartir</button>
+    <button class="btn-hdr" onclick="openEstadosModal()">⚙ Estados</button>
+    <button class="btn-hdr" onclick="openModal(null)">+ Agregar</button>
+  </div>
+</div>
+<div class="save-hint" id="save-hint">✏️ Cambios sin guardar — hacé clic en <strong>💾 Guardar y compartir</strong></div>
+
+<div class="summary">
+  <div class="scard"><div class="num" id="cnt-total">44</div><div class="lbl">Localidades</div></div>
+  <div class="scard" style="border-color:#E65100;"><div class="num" id="cnt-casas" style="color:#E65100;">151</div><div class="lbl">Total Casas Anunciadas</div></div>
+  <div class="scard" style="border-color:#F57F17;"><div class="num" style="color:#F57F17;font-size:18px;">$34.000.000</div><div class="lbl">Valor de Referencia / Vivienda</div></div>
+  <div class="scard monto"><div class="num" id="cnt-monto">$5.13B</div><div class="lbl">Monto Total</div></div>
+  <div class="scard pres" onclick="editPresupuesto()" title="Clic para editar el crédito asignado">
+    <div class="num" id="cnt-pres" style="font-size: 13px;">— (clic para ingresar)</div>
+    <div class="lbl">Crédito Asignado</div>
+    <div class="scard-edit">✏️ clic para editar</div>
+  </div>
+  <div class="scard saldo"><div class="num" id="cnt-saldo">—</div><div class="lbl">Saldo</div></div>
+  <div class="scard ok"><div class="num" id="cnt-ok">43</div><div class="lbl">OK Min. de Gobierno</div></div>
+  <div class="scard nodoc"><div class="num" id="cnt-nodoc">1</div><div class="lbl">Sin Documentación</div></div>
+</div>
+
+<div class="filterbar">
+  <label>Buscar:</label>
+  <input type="text" id="search-input" placeholder="Localidad, expediente, observaciones..." oninput="applyFilters()">
+  <label>Departamento:</label>
+  <select id="depto-filter" onchange="applyFilters()">
+    <option value="">— Todos —</option>
+    <option>Calamuchita</option><option>Capital</option><option>Colón</option>
+    <option>Cruz del Eje</option><option>General Roca</option><option>General San Martín</option>
+    <option>Ischilín</option><option>Juárez Celman</option><option>Marcos Juárez</option>
+    <option>Minas</option><option>Pocho</option><option>Presidente Roque Sáenz Peña</option>
+    <option>Punilla</option><option>Río Cuarto</option><option>Río Primero</option>
+    <option>Río Seco</option><option>Río Segundo</option><option>San Alberto</option>
+    <option>San Javier</option><option>San Justo</option><option>Santa María</option>
+    <option>Sobremonte</option><option>Tercero Arriba</option><option>Totoral</option>
+    <option>Tulumba</option><option>Unión</option>
+  </select>
+  <label>OK Gob.:</label>
+  <select id="ok-filter" onchange="applyFilters()">
+    <option value="">— Todos —</option>
+    <option value="SI">SI</option><option value="NO">NO</option>
+  </select>
+  <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
+  <span class="filter-count" id="filter-count">44 localidades</span>
+</div>
+
+<div class="panel-wrap">
+  <div class="panel-toolbar"><h2>CÓRDOBA HOGAR — Seguimiento de Anuncios de Viviendas</h2></div>
+  <div class="legend-wrap" id="legend-main"><span style="font-size:11px;font-weight:700;color:#0D47A1;margin-right:5px;">ESTADOS:</span><span class="legend-item"><span class="legend-dot" style="background:#ECEFF1;border:1px solid #455A64;"></span>Sin Iniciar</span><span class="legend-item"><span class="legend-dot" style="background:#FFF3CD;border:1px solid #856404;"></span>Anuncio Realizado</span><span class="legend-item"><span class="legend-dot" style="background:#DBEAFE;border:1px solid #1E40AF;"></span>Notificado al Municipio</span><span class="legend-item"><span class="legend-dot" style="background:#FFE5D0;border:1px solid #8B3A00;"></span>A la espera de Documentación</span><span class="legend-item"><span class="legend-dot" style="background:#BBDEFB;border:1px solid #0D47A1;"></span>En revisión técnica</span><span class="legend-item"><span class="legend-dot" style="background:#EDE7F6;border:1px solid #4527A0;"></span>En Corrección</span><span class="legend-item"><span class="legend-dot" style="background:#E0F2F1;border:1px solid #00695C;"></span>Documentación Completada</span><span class="legend-item"><span class="legend-dot" style="background:#D4EDDA;border:1px solid #155724;"></span>Legales para Convenio</span><span class="legend-item"><span class="legend-dot" style="background:#E0F7FA;border:1px solid #006064;"></span>Convenio Firmado</span><span class="legend-item"><span class="legend-dot" style="background:#FCE4EC;border:1px solid #880E4F;"></span>Obra en Ejecución</span><span class="legend-item"><span class="legend-dot" style="background:#E3F2FD;border:1px solid #0D47A1;"></span>Obra Finalizada</span></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Localidad</th><th>Departamento</th><th>Fecha Anuncio</th><th>Expediente N°</th>
+        <th>Monto</th>
+        <th>OK Gob.</th><th>Exp. Documentación</th>
+        <th>Est. Jurídico-Adm.</th><th>Est. Técnico</th><th>Est. Presup./Fin.</th>
+        <th>Avance</th><th style="white-space:nowrap;">Cantidad de Casas</th><th></th>
+      </tr></thead>
+      <tbody id="tbody-main"><tr id="tr-1" class="">
+      <td style="color:#9E9E9E;font-size:11px;">1</td>
+      <td style="font-weight:700;font-size:12px;">SAIRA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 pasado los MODELOS</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">28/04/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-044993/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781886808370" class="">
+      <td style="color:#9E9E9E;font-size:11px;">2</td>
+      <td style="font-weight:700;font-size:12px;">VILLA ELISA</td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">28/04/2026</td>
+      <td style="font-size:11px;color:#4A5568;"><span style="color:#ccc;">—</span></td>
+      <td class="monto-cell">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 NO VA 22/6</span></td>
+      <td><span class="badge" style="background:#FFF3CD;color:#856404;">Anuncio Realizado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:3%;background:#F39C12;"></div></div><span class="avance-pct">3%</span></div></td>
+      <td class="casas-cell">S/D</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781886808370)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781886808370)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781886911496" class="">
+      <td style="color:#9E9E9E;font-size:11px;">3</td>
+      <td style="font-weight:700;font-size:12px;">CAMILO ALDAO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">29/04/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-044994/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781886911496)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781886911496)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781886976856" class="">
+      <td style="color:#9E9E9E;font-size:11px;">4</td>
+      <td style="font-weight:700;font-size:12px;">COLONIA BARGE<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">29/04/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-044995/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781886976856)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781886976856)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781887368276" class="">
+      <td style="color:#9E9E9E;font-size:11px;">5</td>
+      <td style="font-weight:700;font-size:12px;">GENERAL BALDISERA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se manda MODELOS
+SE DEBE MODIFICAR EL CONVENIO 5 CASAS</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">29/04/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-044996/2026</td>
+      <td class="monto-cell">$136.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#FFF3CD;color:#856404;">Anuncio Realizado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:3%;background:#F39C12;"></div></div><span class="avance-pct">3%</span></div></td>
+      <td class="casas-cell">4</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781887368276)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781887368276)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-4" class="">
+      <td style="color:#9E9E9E;font-size:11px;">6</td>
+      <td style="font-weight:700;font-size:12px;">ALEJO LEDESMA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">29/6 se mandan MODELOS
+2/7 se reune el consejo</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">30/04/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-044999/2026</td>
+      <td class="monto-cell">$204.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">6</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(4)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(4)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-3" class="">
+      <td style="color:#9E9E9E;font-size:11px;">7</td>
+      <td style="font-weight:700;font-size:12px;">ARIAS<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR
+30/6 vuelvo a comunicarme - Semana que viene se reune el Consejo</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">30/04/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-044998/2026</td>
+      <td class="monto-cell">$204.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO - PRIMER EXP PARA EL TC</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">6</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(3)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(3)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-2" class="">
+      <td style="color:#9E9E9E;font-size:11px;">8</td>
+      <td style="font-weight:700;font-size:12px;">GUATIMOZIN<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se pasan MODELOS</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">30/04/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-044997/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(2)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(2)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781879415867" class="">
+      <td style="color:#9E9E9E;font-size:11px;">9</td>
+      <td style="font-weight:700;font-size:12px;">LA CUMBRECITA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">NO FUE A LA FIRMA DE CONVENIO</span></td>
+      <td><span class="depto-tag">Calamuchita</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">05/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;"><span style="color:#ccc;">—</span></td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:0%;background:#9E9E9E;"></div></div><span class="avance-pct">0%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781879415867)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781879415867)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781879462106" class="">
+      <td style="color:#9E9E9E;font-size:11px;">10</td>
+      <td style="font-weight:700;font-size:12px;">LOS MOLINOS<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Calamuchita</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">05/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045000/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781879462106)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781879462106)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781888872242" class="">
+      <td style="color:#9E9E9E;font-size:11px;">11</td>
+      <td style="font-weight:700;font-size:12px;">LOS REARTES<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Calamuchita</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">05/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045001/2026</td>
+      <td class="monto-cell">$136.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">4</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781888872242)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781888872242)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781879509332" class="">
+      <td style="color:#9E9E9E;font-size:11px;">12</td>
+      <td style="font-weight:700;font-size:12px;">VILLA CIUDAD PARQUE<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR</span></td>
+      <td><span class="depto-tag">Calamuchita</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">05/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045002/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781879509332)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781879509332)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-5" class="">
+      <td style="color:#9E9E9E;font-size:11px;">13</td>
+      <td style="font-weight:700;font-size:12px;">EL CHACHO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">26/6 se manda MODELOS</span></td>
+      <td><span class="depto-tag">Minas</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">08/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045003/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(5)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(5)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-7" class="">
+      <td style="color:#9E9E9E;font-size:11px;">14</td>
+      <td style="font-weight:700;font-size:12px;">GUASAPAMPA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Minas</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">08/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045005/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(7)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(7)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-6" class="">
+      <td style="color:#9E9E9E;font-size:11px;">15</td>
+      <td style="font-weight:700;font-size:12px;">LA PLAYA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Minas</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">08/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045004/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(6)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(6)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-8" class="">
+      <td style="color:#9E9E9E;font-size:11px;">16</td>
+      <td style="font-weight:700;font-size:12px;">TALA CAÑADA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">2/7 llega doc legal, se devuelven observaciones</span></td>
+      <td><span class="depto-tag">Pocho</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">08/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045006/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Corrección</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:17%;background:#F39C12;"></div></div><span class="avance-pct">17%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(8)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(8)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-9" class="">
+      <td style="color:#9E9E9E;font-size:11px;">17</td>
+      <td style="font-weight:700;font-size:12px;">VILLA DE POCHO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Pocho</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">11/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045007/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(9)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(9)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-14" class="">
+      <td style="color:#9E9E9E;font-size:11px;">18</td>
+      <td style="font-weight:700;font-size:12px;">ALICIA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">26/6 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">12/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045012/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(14)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(14)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-13" class="">
+      <td style="color:#9E9E9E;font-size:11px;">19</td>
+      <td style="font-weight:700;font-size:12px;">EL ARAÑADO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">12/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045011/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(13)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(13)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-10" class="">
+      <td style="color:#9E9E9E;font-size:11px;">20</td>
+      <td style="font-weight:700;font-size:12px;">LAS VARAS<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">30/6 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">12/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045008/2026</td>
+      <td class="monto-cell">$136.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">4</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(10)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(10)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-11" class="">
+      <td style="color:#9E9E9E;font-size:11px;">21</td>
+      <td style="font-weight:700;font-size:12px;">SACANTA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">12/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045009/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(11)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(11)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-12" class="">
+      <td style="color:#9E9E9E;font-size:11px;">22</td>
+      <td style="font-weight:700;font-size:12px;">VILLA SAN ESTEBAN<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">12/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045010/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(12)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(12)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-15" class="">
+      <td style="color:#9E9E9E;font-size:11px;">23</td>
+      <td style="font-weight:700;font-size:12px;">EL FORTIN<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR
+1/7 VUELVO A ACOMUNICARME</span></td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">13/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045013/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(15)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(15)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-16" class="">
+      <td style="color:#9E9E9E;font-size:11px;">24</td>
+      <td style="font-weight:700;font-size:12px;">CAPILLA DEL CARMEN<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR
+1/7 VUELVO A COMUNICARME</span></td>
+      <td><span class="depto-tag">Río Segundo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">15/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045014/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(16)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(16)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-18" class="">
+      <td style="color:#9E9E9E;font-size:11px;">25</td>
+      <td style="font-weight:700;font-size:12px;">RINCON<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR
+1/7 me vuelvo a comunicar</span></td>
+      <td><span class="depto-tag">Río Segundo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">15/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045015/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(18)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(18)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-21" class="">
+      <td style="color:#9E9E9E;font-size:11px;">26</td>
+      <td style="font-weight:700;font-size:12px;">VALLE DE ANISACATE<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">30/6 se pasan MODELOS</span></td>
+      <td><span class="depto-tag">Santa María</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">16/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045017/2026</td>
+      <td class="monto-cell">$204.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">6</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(21)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(21)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-20" class="">
+      <td style="color:#9E9E9E;font-size:11px;">27</td>
+      <td style="font-weight:700;font-size:12px;">VILLA DEL PRADO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR
+1/7 ME VUELVO A COMUNICAR</span></td>
+      <td><span class="depto-tag">Santa María</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">16/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045016/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(20)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(20)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-19" class="">
+      <td style="color:#9E9E9E;font-size:11px;">28</td>
+      <td style="font-weight:700;font-size:12px;">VILLA PARQUE SANTA ANA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">Se habian anunciado 5 casas</span></td>
+      <td><span class="depto-tag">Santa María</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">16/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;"><span style="color:#ccc;">—</span></td>
+      <td class="monto-cell">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 NO QUIEREN RECIBIR 22/6</span></td>
+      <td><span class="badge" style="background:#FFF3CD;color:#856404;">Anuncio Realizado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:3%;background:#F39C12;"></div></div><span class="avance-pct">3%</span></div></td>
+      <td class="casas-cell">S/D</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(19)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(19)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-24" class="">
+      <td style="color:#9E9E9E;font-size:11px;">29</td>
+      <td style="font-weight:700;font-size:12px;">POTRERO DE GARAY</td>
+      <td><span class="depto-tag">Santa María</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">17/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;"><span style="color:#ccc;">—</span></td>
+      <td class="monto-cell">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 NO FIRMO - 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#FFF3CD;color:#856404;">Anuncio Realizado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:3%;background:#F39C12;"></div></div><span class="avance-pct">3%</span></div></td>
+      <td class="casas-cell">S/D</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(24)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(24)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-23" class="">
+      <td style="color:#9E9E9E;font-size:11px;">30</td>
+      <td style="font-weight:700;font-size:12px;">VILLA CIUDAD AMERICA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR
+1/7 VUELVO A COMUNICARME</span></td>
+      <td><span class="depto-tag">Santa María</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">17/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045018/2026</td>
+      <td class="monto-cell">$136.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">4</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(23)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(23)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-22" class="">
+      <td style="color:#9E9E9E;font-size:11px;">31</td>
+      <td style="font-weight:700;font-size:12px;">VILLA LA BOLSA</td>
+      <td><span class="depto-tag">Santa María</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">17/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;"><span style="color:#ccc;">—</span></td>
+      <td class="monto-cell">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 NO FIRMO - 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#FFF3CD;color:#856404;">Anuncio Realizado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:3%;background:#F39C12;"></div></div><span class="avance-pct">3%</span></div></td>
+      <td class="casas-cell">S/D</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(22)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(22)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1781879538980" class="">
+      <td style="color:#9E9E9E;font-size:11px;">32</td>
+      <td style="font-weight:700;font-size:12px;">LA TOSQUITA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">LUCIANO pasa listado a Viana</span></td>
+      <td><span class="depto-tag">Río Cuarto</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">18/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;"><span style="color:#ccc;">—</span></td>
+      <td class="monto-cell">—</td>
+      <td><span class="badge ok-no">NO</span></td>
+      <td style="font-size:10px;"><span style="color:#ccc;">—</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:0%;background:#9E9E9E;"></div></div><span class="avance-pct">0%</span></div></td>
+      <td class="casas-cell">S/D</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1781879538980)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1781879538980)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-25" class="">
+      <td style="color:#9E9E9E;font-size:11px;">33</td>
+      <td style="font-weight:700;font-size:12px;">LOS CISNES<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se envian MODELOS y listado de DOCUMENTACION a PRESENTAR
+1/7 VUELVO A COMUNICAR</span></td>
+      <td><span class="depto-tag">Juárez Celman</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">25/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045019/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(25)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(25)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-28" class="">
+      <td style="color:#9E9E9E;font-size:11px;">34</td>
+      <td style="font-weight:700;font-size:12px;">BENGOLEA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR
+1/7 vuelvo a comunicarme</span></td>
+      <td><span class="depto-tag">Juárez Celman</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">26/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045021/2026</td>
+      <td class="monto-cell">$136.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">4</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(28)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(28)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-31" class="">
+      <td style="color:#9E9E9E;font-size:11px;">35</td>
+      <td style="font-weight:700;font-size:12px;">CARNERILLO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 mando MODELOS</span></td>
+      <td><span class="depto-tag">Juárez Celman</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">26/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045024/2026</td>
+      <td class="monto-cell">$136.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">4</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(31)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(31)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-30" class="">
+      <td style="color:#9E9E9E;font-size:11px;">36</td>
+      <td style="font-weight:700;font-size:12px;">CHARRAS<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">25/6 SE MANDAN MODELOS
+1/7 VUELVO A COMUNICARME</span></td>
+      <td><span class="depto-tag">Juárez Celman</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">26/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045023/2026</td>
+      <td class="monto-cell">$136.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">4</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(30)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(30)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-29" class="">
+      <td style="color:#9E9E9E;font-size:11px;">37</td>
+      <td style="font-weight:700;font-size:12px;">OLAETA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Juárez Celman</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">26/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045022/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(29)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(29)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-27" class="">
+      <td style="color:#9E9E9E;font-size:11px;">38</td>
+      <td style="font-weight:700;font-size:12px;">SANTA EUFEMIA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 SE MANDAN MODELOS</span></td>
+      <td><span class="depto-tag">Juárez Celman</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">26/05/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045020/2026</td>
+      <td class="monto-cell">$136.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 23/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">4</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(27)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(27)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1782826236001" class="">
+      <td style="color:#9E9E9E;font-size:11px;">39</td>
+      <td style="font-weight:700;font-size:12px;">BAÑADO DE SOTO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 SE MANDAN MODELOS</span></td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">30/06/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045041/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 30/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1782826236001)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1782826236001)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1782824247205" class="">
+      <td style="color:#9E9E9E;font-size:11px;">40</td>
+      <td style="font-weight:700;font-size:12px;">PASO VIEJO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">2/7 Se solicita la geolocalizacion en direccion s/n - Firmas Pegadas</span></td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">30/06/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045039/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 30/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Corrección</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:17%;background:#F39C12;"></div></div><span class="avance-pct">17%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1782824247205)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1782824247205)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1782826185241" class="">
+      <td style="color:#9E9E9E;font-size:11px;">41</td>
+      <td style="font-weight:700;font-size:12px;">SAN MARCOS SIERRAS<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 SE MANDAN MODELOS</span></td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">30/06/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045040/2026</td>
+      <td class="monto-cell">$170.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 30/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">5</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1782826185241)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1782826185241)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1782826266033" class="">
+      <td style="color:#9E9E9E;font-size:11px;">42</td>
+      <td style="font-weight:700;font-size:12px;">TUCLAME<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan modelos</span></td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">30/06/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045042/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 30/6 FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1782826266033)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1782826266033)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1782824187979" class="">
+      <td style="color:#9E9E9E;font-size:11px;">43</td>
+      <td style="font-weight:700;font-size:12px;">LOS CHAÑARITOS<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">1/7 se mandan MODELOS</span></td>
+      <td><span class="depto-tag">Río Segundo</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">30/06/2026</td>
+      <td style="font-size:11px;color:#4A5568;">0135-045038/2026</td>
+      <td class="monto-cell">$102.000.000</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 30/6 Firma CONVENIO</span></td>
+      <td><span class="badge" style="background:#E0F7FA;color:#006064;">Convenio Firmado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:27%;background:#F39C12;"></div></div><span class="avance-pct">27%</span></div></td>
+      <td class="casas-cell">3</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1782824187979)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1782824187979)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-1783086577337" class="">
+      <td style="color:#9E9E9E;font-size:11px;">44</td>
+      <td style="font-weight:700;font-size:12px;">LAS HIGUERAS<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">3/7 se pasa para V.B</span></td>
+      <td><span class="depto-tag">Río Cuarto</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">—</td>
+      <td style="font-size:11px;color:#4A5568;">077284011105626</td>
+      <td class="monto-cell">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 Intendente solicita Viviendas</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:0%;background:#9E9E9E;"></div></div><span class="avance-pct">0%</span></div></td>
+      <td class="casas-cell">S/D</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1783086577337)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1783086577337)" title="Eliminar">🗑️</button>
+      </td>
+    </tr></tbody>
+    </table>
+    <div class="empty-state" id="empty-main" style="display: none;">Sin resultados para los filtros aplicados.</div>
+  </div>
+</div>
+
+<!-- MODAL PROYECTO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modal-title">Nueva Localidad</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="f-id" value="">
+      <div class="form-grid">
+        <div class="form-group full"><label>Localidad *</label><input type="text" id="f-localidad" placeholder="Nombre de la localidad"></div>
+        <div class="form-group"><label>Departamento</label>
+          <select id="f-departamento"><option value="">—</option>
+            <option>Calamuchita</option><option>Capital</option><option>Colón</option>
+            <option>Cruz del Eje</option><option>General Roca</option><option>General San Martín</option>
+            <option>Ischilín</option><option>Juárez Celman</option><option>Marcos Juárez</option>
+            <option>Minas</option><option>Pocho</option><option>Presidente Roque Sáenz Peña</option>
+            <option>Punilla</option><option>Río Cuarto</option><option>Río Primero</option>
+            <option>Río Seco</option><option>Río Segundo</option><option>San Alberto</option>
+            <option>San Javier</option><option>San Justo</option><option>Santa María</option>
+            <option>Sobremonte</option><option>Tercero Arriba</option><option>Totoral</option>
+            <option>Tulumba</option><option>Unión</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Fecha Anuncio</label><input type="date" id="f-fecha"></div>
+        <div class="form-group"><label>Expediente N°</label><input type="text" id="f-expediente" placeholder="0423-XXXXXX/2026"></div>
+        <div class="form-group"><label>Cantidad de Casas</label><input type="number" id="f-cantidad_casas" min="0" step="1" placeholder="Ej: 5" oninput="recalcMontoForm()"></div>
+        <div class="form-group"><label>Monto (auto: casas × $34.000.000)</label><input type="text" id="f-monto" readonly="" style="background:#EAF2FB;font-weight:700;color:#1565C0;"></div>
+        <div class="form-group"><label>OK Gobernación</label>
+          <select id="f-ok_gob"><option value="SI">SI</option><option value="NO">NO</option><option value="En trámite">En trámite</option></select>
+        </div>
+        <div class="form-group full"><label>Expediente de Documentación</label><input type="text" id="f-doc_exp" placeholder="Nº expediente de documentación presentada"></div>
+        <div class="form-group full"><label>Observaciones</label><textarea id="f-obs" rows="2" placeholder="Notas adicionales..."></textarea></div>
+      </div>
+      <div class="sec-title">Estados por Dimensión</div>
+      <div class="estado-grid">
+        <div class="estado-section"><h4>⚖️ Jurídico / Administrativo</h4><select id="f-ejuridico"><option value="1" selected="">Sin Iniciar</option><option value="2">Anuncio Realizado</option><option value="3">Notificado al Municipio</option><option value="4">A la espera de Documentación</option><option value="5">En revisión técnica</option><option value="6">En Corrección</option><option value="7">Documentación Completada</option><option value="8">Legales para Convenio</option><option value="9">Convenio Firmado</option><option value="10">Obra en Ejecución</option><option value="11">Obra Finalizada</option></select></div>
+        <div class="estado-section"><h4>🔧 Técnico</h4><select id="f-etecnico"><option value="1" selected="">Sin Iniciar</option><option value="2">Anuncio Realizado</option><option value="3">Notificado al Municipio</option><option value="4">A la espera de Documentación</option><option value="5">En revisión técnica</option><option value="6">En Corrección</option><option value="7">Documentación Completada</option><option value="8">Legales para Convenio</option><option value="9">Convenio Firmado</option><option value="10">Obra en Ejecución</option><option value="11">Obra Finalizada</option></select></div>
+        <div class="estado-section"><h4>💰 Presup. / Financiero</h4><select id="f-efinanciero"><option value="1" selected="">Sin Iniciar</option><option value="2">Anuncio Realizado</option><option value="3">Notificado al Municipio</option><option value="4">A la espera de Documentación</option><option value="5">En revisión técnica</option><option value="6">En Corrección</option><option value="7">Documentación Completada</option><option value="8">Legales para Convenio</option><option value="9">Convenio Firmado</option><option value="10">Obra en Ejecución</option><option value="11">Obra Finalizada</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveProject()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- MODAL ESTADOS -->
+<div class="modal-overlay" id="modal-estados-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>⚙ Gestionar Estados</h3><button class="modal-close" onclick="closeEstadosModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#7F8C8D;margin-bottom:12px;">El orden de arriba a abajo define el nivel de avance.</p>
+      <div class="estado-list" id="estados-list"><div class="estado-row" id="erow-1"><div class="color-picker-wrap"><div class="swatch" style="background:#ECEFF1;" onclick="toggleColorPicker('cgrid-1')"></div><div class="color-grid" id="cgrid-1"><div class="color-dot selected" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1',1)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1',1)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1',1)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1',1)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1',1)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1',1)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1',1)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1',1)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1',1)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-1',1)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1',1)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-1',1)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1',1)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1',1)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1',1)"></div></div></div><input class="nombre-estado" type="text" value="Sin Iniciar" onchange="updEstLabel(1,this.value)"><button class="btn-del-estado" onclick="removeEst(1)">✕</button></div><div class="estado-row" id="erow-2"><div class="color-picker-wrap"><div class="swatch" style="background:#FFF3CD;" onclick="toggleColorPicker('cgrid-2')"></div><div class="color-grid" id="cgrid-2"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-2',2)"></div><div class="color-dot selected" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-2',2)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-2',2)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-2',2)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-2',2)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-2',2)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-2',2)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-2',2)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-2',2)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-2',2)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-2',2)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-2',2)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-2',2)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-2',2)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-2',2)"></div></div></div><input class="nombre-estado" type="text" value="Anuncio Realizado" onchange="updEstLabel(2,this.value)"><button class="btn-del-estado" onclick="removeEst(2)">✕</button></div><div class="estado-row" id="erow-3"><div class="color-picker-wrap"><div class="swatch" style="background:#DBEAFE;" onclick="toggleColorPicker('cgrid-3')"></div><div class="color-grid" id="cgrid-3"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-3',3)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-3',3)"></div><div class="color-dot selected" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-3',3)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-3',3)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-3',3)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-3',3)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-3',3)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-3',3)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-3',3)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-3',3)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-3',3)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-3',3)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-3',3)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-3',3)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-3',3)"></div></div></div><input class="nombre-estado" type="text" value="Notificado al Municipio" onchange="updEstLabel(3,this.value)"><button class="btn-del-estado" onclick="removeEst(3)">✕</button></div><div class="estado-row" id="erow-4"><div class="color-picker-wrap"><div class="swatch" style="background:#FFE5D0;" onclick="toggleColorPicker('cgrid-4')"></div><div class="color-grid" id="cgrid-4"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-4',4)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-4',4)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-4',4)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-4',4)"></div><div class="color-dot selected" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-4',4)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-4',4)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-4',4)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-4',4)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-4',4)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-4',4)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-4',4)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-4',4)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-4',4)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-4',4)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-4',4)"></div></div></div><input class="nombre-estado" type="text" value="A la espera de Documentación" onchange="updEstLabel(4,this.value)"><button class="btn-del-estado" onclick="removeEst(4)">✕</button></div><div class="estado-row" id="erow-5"><div class="color-picker-wrap"><div class="swatch" style="background:#BBDEFB;" onclick="toggleColorPicker('cgrid-5')"></div><div class="color-grid" id="cgrid-5"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-5',5)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-5',5)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-5',5)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-5',5)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-5',5)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-5',5)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-5',5)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-5',5)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-5',5)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-5',5)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-5',5)"></div><div class="color-dot selected" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-5',5)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-5',5)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-5',5)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-5',5)"></div></div></div><input class="nombre-estado" type="text" value="En revisión técnica" onchange="updEstLabel(5,this.value)"><button class="btn-del-estado" onclick="removeEst(5)">✕</button></div><div class="estado-row" id="erow-6"><div class="color-picker-wrap"><div class="swatch" style="background:#EDE7F6;" onclick="toggleColorPicker('cgrid-6')"></div><div class="color-grid" id="cgrid-6"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-6',6)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-6',6)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-6',6)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-6',6)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-6',6)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-6',6)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-6',6)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-6',6)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-6',6)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-6',6)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-6',6)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-6',6)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-6',6)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-6',6)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-6',6)"></div></div></div><input class="nombre-estado" type="text" value="En Corrección" onchange="updEstLabel(6,this.value)"><button class="btn-del-estado" onclick="removeEst(6)">✕</button></div><div class="estado-row" id="erow-7"><div class="color-picker-wrap"><div class="swatch" style="background:#E0F2F1;" onclick="toggleColorPicker('cgrid-7')"></div><div class="color-grid" id="cgrid-7"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-7',7)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-7',7)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-7',7)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-7',7)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-7',7)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-7',7)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-7',7)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-7',7)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-7',7)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-7',7)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-7',7)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-7',7)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-7',7)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-7',7)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-7',7)"></div></div></div><input class="nombre-estado" type="text" value="Documentación Completada" onchange="updEstLabel(7,this.value)"><button class="btn-del-estado" onclick="removeEst(7)">✕</button></div><div class="estado-row" id="erow-8"><div class="color-picker-wrap"><div class="swatch" style="background:#D4EDDA;" onclick="toggleColorPicker('cgrid-8')"></div><div class="color-grid" id="cgrid-8"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-8',8)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-8',8)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-8',8)"></div><div class="color-dot selected" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-8',8)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-8',8)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-8',8)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-8',8)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-8',8)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-8',8)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-8',8)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-8',8)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-8',8)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-8',8)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-8',8)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-8',8)"></div></div></div><input class="nombre-estado" type="text" value="Legales para Convenio" onchange="updEstLabel(8,this.value)"><button class="btn-del-estado" onclick="removeEst(8)">✕</button></div><div class="estado-row" id="erow-9"><div class="color-picker-wrap"><div class="swatch" style="background:#E0F7FA;" onclick="toggleColorPicker('cgrid-9')"></div><div class="color-grid" id="cgrid-9"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-9',9)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-9',9)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-9',9)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-9',9)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-9',9)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-9',9)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-9',9)"></div><div class="color-dot selected" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-9',9)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-9',9)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-9',9)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-9',9)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-9',9)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-9',9)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-9',9)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-9',9)"></div></div></div><input class="nombre-estado" type="text" value="Convenio Firmado" onchange="updEstLabel(9,this.value)"><button class="btn-del-estado" onclick="removeEst(9)">✕</button></div><div class="estado-row" id="erow-10"><div class="color-picker-wrap"><div class="swatch" style="background:#FCE4EC;" onclick="toggleColorPicker('cgrid-10')"></div><div class="color-grid" id="cgrid-10"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-10',10)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-10',10)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-10',10)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-10',10)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-10',10)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-10',10)"></div><div class="color-dot selected" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-10',10)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-10',10)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-10',10)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-10',10)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-10',10)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-10',10)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-10',10)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-10',10)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-10',10)"></div></div></div><input class="nombre-estado" type="text" value="Obra en Ejecución" onchange="updEstLabel(10,this.value)"><button class="btn-del-estado" onclick="removeEst(10)">✕</button></div><div class="estado-row" id="erow-11"><div class="color-picker-wrap"><div class="swatch" style="background:#E3F2FD;" onclick="toggleColorPicker('cgrid-11')"></div><div class="color-grid" id="cgrid-11"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-11',11)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-11',11)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-11',11)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-11',11)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-11',11)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-11',11)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-11',11)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-11',11)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-11',11)"></div><div class="color-dot selected" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'cgrid-11',11)"></div><div class="color-dot selected" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-11',11)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'cgrid-11',11)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-11',11)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-11',11)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-11',11)"></div></div></div><input class="nombre-estado" type="text" value="Obra Finalizada" onchange="updEstLabel(11,this.value)"><button class="btn-del-estado" onclick="removeEst(11)">✕</button></div></div>
+      <div class="add-estado-row" style="margin-top:12px;">
+        <div class="color-picker-wrap" id="new-color-wrap">
+          <div class="swatch" id="new-swatch" style="background: rgb(236, 239, 241);" onclick="toggleColorPicker('new-color-grid')"></div>
+          <div class="color-grid" id="new-color-grid"><div class="color-dot selected" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'new-color-grid',null)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'new-color-grid',null)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'new-color-grid',null)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'new-color-grid',null)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'new-color-grid',null)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'new-color-grid',null)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'new-color-grid',null)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'new-color-grid',null)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'new-color-grid',null)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(9,'new-color-grid',null)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'new-color-grid',null)"></div><div class="color-dot" style="background:#BBDEFB;border-color:#0D47A1;" onclick="selectColor(11,'new-color-grid',null)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'new-color-grid',null)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'new-color-grid',null)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'new-color-grid',null)"></div></div>
+        </div>
+        <input type="text" id="new-estado-nombre" placeholder="Nombre del nuevo estado...">
+        <button class="btn-add-estado" onclick="addEstado()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeEstadosModal()">Cancelar</button><button class="btn-save" onclick="saveEstados()">Guardar estados</button></div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirm-msg">¿Eliminar esta localidad? No se puede deshacer.</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn-danger" onclick="runConfirm()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<footer>CÓRDOBA HOGAR — Programa Provincial de Vivienda — Provincia de Córdoba &nbsp;|&nbsp; Panel de Seguimiento</footer>
+
+<script>
+const EMBEDDED_DATA = /*DATA_START*/{"version":1,"updated":"3/7/2026, 04:26:30","proyectos":[{"id":1,"localidad":"SAIRA","departamento":"Marcos Juárez","fecha":"2026-04-28","expediente":"0135-044993/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 pasado los MODELOS"},{"id":2,"localidad":"GUATIMOZIN","departamento":"Marcos Juárez","fecha":"2026-04-30","expediente":"0135-044997/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se pasan MODELOS"},{"id":3,"localidad":"ARIAS","departamento":"Marcos Juárez","fecha":"2026-04-30","expediente":"0135-044998/2026","monto":204000000,"cantidad_casas":6,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO - PRIMER EXP PARA EL TC","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR\n30/6 vuelvo a comunicarme - Semana que viene se reune el Consejo"},{"id":4,"localidad":"ALEJO LEDESMA","departamento":"Marcos Juárez","fecha":"2026-04-30","expediente":"0135-044999/2026","monto":204000000,"cantidad_casas":6,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"29/6 se mandan MODELOS\n2/7 se reune el consejo"},{"id":5,"localidad":"EL CHACHO","departamento":"Minas","fecha":"2026-05-08","expediente":"0135-045003/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"26/6 se manda MODELOS"},{"id":6,"localidad":"LA PLAYA","departamento":"Minas","fecha":"2026-05-08","expediente":"0135-045004/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":7,"localidad":"GUASAPAMPA","departamento":"Minas","fecha":"2026-05-08","expediente":"0135-045005/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":8,"localidad":"TALA CAÑADA","departamento":"Pocho","fecha":"2026-05-08","expediente":"0135-045006/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":6,"etecnico":1,"efinanciero":1,"obs":"2/7 llega doc legal, se devuelven observaciones"},{"id":9,"localidad":"VILLA DE POCHO","departamento":"Pocho","fecha":"2026-05-11","expediente":"0135-045007/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":10,"localidad":"LAS VARAS","departamento":"San Justo","fecha":"2026-05-12","expediente":"0135-045008/2026","monto":136000000,"cantidad_casas":4,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"30/6 se mandan MODELOS"},{"id":11,"localidad":"SACANTA","departamento":"San Justo","fecha":"2026-05-12","expediente":"0135-045009/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":12,"localidad":"VILLA SAN ESTEBAN","departamento":"San Justo","fecha":"2026-05-12","expediente":"0135-045010/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":13,"localidad":"EL ARAÑADO","departamento":"San Justo","fecha":"2026-05-12","expediente":"0135-045011/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":14,"localidad":"ALICIA","departamento":"San Justo","fecha":"2026-05-12","expediente":"0135-045012/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"26/6 se mandan MODELOS"},{"id":15,"localidad":"EL FORTIN","departamento":"San Justo","fecha":"2026-05-13","expediente":"0135-045013/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR\n1/7 VUELVO A ACOMUNICARME"},{"id":16,"localidad":"CAPILLA DEL CARMEN","departamento":"Río Segundo","fecha":"2026-05-15","expediente":"0135-045014/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR\n1/7 VUELVO A COMUNICARME"},{"id":18,"localidad":"RINCON","departamento":"Río Segundo","fecha":"2026-05-15","expediente":"0135-045015/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR\n1/7 me vuelvo a comunicar"},{"id":19,"localidad":"VILLA PARQUE SANTA ANA","departamento":"Santa María","fecha":"2026-05-16","expediente":"","monto":0,"cantidad_casas":null,"ok_gob":"SI","doc_exp":"NO QUIEREN RECIBIR 22/6","ejuridico":2,"etecnico":1,"efinanciero":1,"obs":"Se habian anunciado 5 casas"},{"id":20,"localidad":"VILLA DEL PRADO","departamento":"Santa María","fecha":"2026-05-16","expediente":"0135-045016/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR\n1/7 ME VUELVO A COMUNICAR"},{"id":21,"localidad":"VALLE DE ANISACATE","departamento":"Santa María","fecha":"2026-05-16","expediente":"0135-045017/2026","monto":204000000,"cantidad_casas":6,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"30/6 se pasan MODELOS"},{"id":22,"localidad":"VILLA LA BOLSA","departamento":"Santa María","fecha":"2026-05-17","expediente":"","monto":0,"cantidad_casas":null,"ok_gob":"SI","doc_exp":"NO FIRMO - 23/6 FIRMA CONVENIO","ejuridico":2,"etecnico":1,"efinanciero":1,"obs":""},{"id":23,"localidad":"VILLA CIUDAD AMERICA","departamento":"Santa María","fecha":"2026-05-17","expediente":"0135-045018/2026","monto":136000000,"cantidad_casas":4,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR\n1/7 VUELVO A COMUNICARME"},{"id":24,"localidad":"POTRERO DE GARAY","departamento":"Santa María","fecha":"2026-05-17","expediente":"","monto":0,"cantidad_casas":null,"ok_gob":"SI","doc_exp":"NO FIRMO - 23/6 FIRMA CONVENIO","ejuridico":2,"etecnico":1,"efinanciero":1,"obs":""},{"id":25,"localidad":"LOS CISNES","departamento":"Juárez Celman","fecha":"2026-05-25","expediente":"0135-045019/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se envian MODELOS y listado de DOCUMENTACION a PRESENTAR\n1/7 VUELVO A COMUNICAR"},{"id":27,"localidad":"SANTA EUFEMIA","departamento":"Juárez Celman","fecha":"2026-05-26","expediente":"0135-045020/2026","monto":136000000,"cantidad_casas":4,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 SE MANDAN MODELOS"},{"id":28,"localidad":"BENGOLEA","departamento":"Juárez Celman","fecha":"2026-05-26","expediente":"0135-045021/2026","monto":136000000,"cantidad_casas":4,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR\n1/7 vuelvo a comunicarme"},{"id":29,"localidad":"OLAETA","departamento":"Juárez Celman","fecha":"2026-05-26","expediente":"0135-045022/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":30,"localidad":"CHARRAS","departamento":"Juárez Celman","fecha":"2026-05-26","expediente":"0135-045023/2026","monto":136000000,"cantidad_casas":4,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"25/6 SE MANDAN MODELOS\n1/7 VUELVO A COMUNICARME"},{"id":31,"localidad":"CARNERILLO","departamento":"Juárez Celman","fecha":"2026-05-26","expediente":"0135-045024/2026","monto":136000000,"cantidad_casas":4,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 mando MODELOS"},{"id":1781879415867,"localidad":"LA CUMBRECITA","departamento":"Calamuchita","fecha":"2026-05-05","expediente":"","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":1,"etecnico":1,"efinanciero":1,"obs":"NO FUE A LA FIRMA DE CONVENIO"},{"id":1781879462106,"localidad":"LOS MOLINOS","departamento":"Calamuchita","fecha":"2026-05-05","expediente":"0135-045000/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":1781879509332,"localidad":"VILLA CIUDAD PARQUE","departamento":"Calamuchita","fecha":"2026-05-05","expediente":"0135-045002/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"24/6 se le envian MODELOS y listado de DOCUMENTACION a PRESENTAR"},{"id":1781879538980,"localidad":"LA TOSQUITA","departamento":"Río Cuarto","fecha":"2026-05-18","expediente":"","monto":0,"cantidad_casas":null,"ok_gob":"NO","doc_exp":"","ejuridico":1,"etecnico":1,"efinanciero":1,"obs":"LUCIANO pasa listado a Viana"},{"id":1781886808370,"localidad":"VILLA ELISA","departamento":"Marcos Juárez","fecha":"2026-04-28","expediente":"","monto":0,"cantidad_casas":null,"ok_gob":"SI","doc_exp":"NO VA 22/6","ejuridico":2,"etecnico":1,"efinanciero":1,"obs":""},{"id":1781886911496,"localidad":"CAMILO ALDAO","departamento":"Marcos Juárez","fecha":"2026-04-29","expediente":"0135-044994/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":1781886976856,"localidad":"COLONIA BARGE","departamento":"Marcos Juárez","fecha":"2026-04-29","expediente":"0135-044995/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":1781887368276,"localidad":"GENERAL BALDISERA","departamento":"Marcos Juárez","fecha":"2026-04-29","expediente":"0135-044996/2026","monto":136000000,"cantidad_casas":4,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":2,"etecnico":1,"efinanciero":1,"obs":"1/7 se manda MODELOS\nSE DEBE MODIFICAR EL CONVENIO 5 CASAS"},{"id":1781888872242,"localidad":"LOS REARTES","departamento":"Calamuchita","fecha":"2026-05-05","expediente":"0135-045001/2026","monto":136000000,"cantidad_casas":4,"ok_gob":"SI","doc_exp":"23/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":1782824187979,"localidad":"LOS CHAÑARITOS","departamento":"Río Segundo","fecha":"2026-06-30","expediente":"0135-045038/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"30/6 Firma CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan MODELOS"},{"id":1782824247205,"localidad":"PASO VIEJO","departamento":"Cruz del Eje","fecha":"2026-06-30","expediente":"0135-045039/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"30/6 FIRMA CONVENIO","ejuridico":6,"etecnico":1,"efinanciero":1,"obs":"2/7 Se solicita la geolocalizacion en direccion s/n - Firmas Pegadas"},{"id":1782826185241,"localidad":"SAN MARCOS SIERRAS","departamento":"Cruz del Eje","fecha":"2026-06-30","expediente":"0135-045040/2026","monto":170000000,"cantidad_casas":5,"ok_gob":"SI","doc_exp":"30/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 SE MANDAN MODELOS"},{"id":1782826236001,"localidad":"BAÑADO DE SOTO","departamento":"Cruz del Eje","fecha":"2026-06-30","expediente":"0135-045041/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"30/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 SE MANDAN MODELOS"},{"id":1782826266033,"localidad":"TUCLAME","departamento":"Cruz del Eje","fecha":"2026-06-30","expediente":"0135-045042/2026","monto":102000000,"cantidad_casas":3,"ok_gob":"SI","doc_exp":"30/6 FIRMA CONVENIO","ejuridico":9,"etecnico":1,"efinanciero":1,"obs":"1/7 se mandan modelos"},{"id":1783086577337,"localidad":"LAS HIGUERAS","departamento":"Río Cuarto","fecha":null,"expediente":"077284011105626","monto":0,"cantidad_casas":null,"ok_gob":"SI","doc_exp":"Intendente solicita Viviendas","ejuridico":1,"etecnico":1,"efinanciero":1,"obs":"3/7 se pasa para V.B"}],"estados":[{"id":1,"label":"Sin Iniciar","bg":"#ECEFF1","text":"#455A64"},{"id":2,"label":"Anuncio Realizado","bg":"#FFF3CD","text":"#856404"},{"id":3,"label":"Notificado al Municipio","bg":"#DBEAFE","text":"#1E40AF"},{"id":4,"label":"A la espera de Documentación","bg":"#FFE5D0","text":"#8B3A00"},{"id":5,"label":"En revisión técnica","bg":"#BBDEFB","text":"#0D47A1"},{"id":6,"label":"En Corrección","bg":"#EDE7F6","text":"#4527A0"},{"id":7,"label":"Documentación Completada","bg":"#E0F2F1","text":"#00695C"},{"id":8,"label":"Legales para Convenio","bg":"#D4EDDA","text":"#155724"},{"id":9,"label":"Convenio Firmado","bg":"#E0F7FA","text":"#006064"},{"id":10,"label":"Obra en Ejecución","bg":"#FCE4EC","text":"#880E4F"},{"id":11,"label":"Obra Finalizada","bg":"#E3F2FD","text":"#0D47A1"}],"presupuesto":0}/*DATA_END*/;
+
+let _proj=JSON.parse(JSON.stringify(EMBEDDED_DATA.proyectos));
+let _est=JSON.parse(JSON.stringify(EMBEDDED_DATA.estados));
+let _dirty=false;
+let _pres=EMBEDDED_DATA.presupuesto||0;
+const VALOR_VIVIENDA=34000000;
+
+function markDirty(){_dirty=true;document.getElementById('save-hint').classList.add('visible');}
+function markClean(){_dirty=false;document.getElementById('save-hint').classList.remove('visible');}
+
+function guardarArchivo(){
+  const ts=new Date().toLocaleString('es-AR');
+  const payload={version:1,updated:ts,proyectos:_proj,estados:_est,presupuesto:_pres};
+  const newJson=JSON.stringify(payload);
+  const html=document.documentElement.outerHTML;
+  const updated=html.replace(/\/\*DATA_START\*\/[\s\S]*?\/\*DATA_END\*\//,'/*DATA_START*/'+newJson+'/*DATA_END*/');
+  const blob=new Blob([updated],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='Panel_Cordoba_Hogar.html';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.getElementById('last-update').textContent='Guardado: '+ts;
+  markClean();
+}
+
+window.addEventListener('beforeunload',function(e){if(_dirty){e.preventDefault();e.returnValue='';}});
+
+const COLOR_PALETTE=[{bg:'#ECEFF1',text:'#455A64'},{bg:'#FFF3CD',text:'#856404'},{bg:'#DBEAFE',text:'#1E40AF'},{bg:'#D4EDDA',text:'#155724'},{bg:'#FFE5D0',text:'#8B3A00'},{bg:'#E8D5F5',text:'#6B21A8'},{bg:'#FCE4EC',text:'#880E4F'},{bg:'#E0F7FA',text:'#006064'},{bg:'#FFF8E1',text:'#F57F17'},{bg:'#E3F2FD',text:'#0D47A1'},{bg:'#E3F2FD',text:'#0D47A1'},{bg:'#BBDEFB',text:'#0D47A1'},{bg:'#B2DFDB',text:'#004D40'},{bg:'#F8BBD0',text:'#880E4F'},{bg:'#CFD8DC',text:'#263238'}];
+let _newColor=COLOR_PALETTE[0];
+
+function getEst(id){return _est.find(e=>e.id===id)||{label:'—',bg:'#EEE',text:'#999'};}
+function renderBadge(id){const e=getEst(id);return `<span class="badge" style="background:${e.bg};color:${e.text};">${esc(e.label)}</span>`;}
+function okBadge(v){const cls=v==='SI'?'ok-si':v==='NO'?'ok-no':'ok-tr';return `<span class="badge ${cls}">${esc(v||'—')}</span>`;}
+function fmtMonto(n){if(!n)return '—';return '$'+Number(n).toLocaleString('es-AR');}
+function recalcMontoForm(){
+  const c=parseInt(document.getElementById('f-cantidad_casas').value);
+  const monto=(!isNaN(c)&&c>0)?c*VALOR_VIVIENDA:0;
+  document.getElementById('f-monto').value=monto?fmtMonto(monto):'—';
+}
+function fmtFecha(s){if(!s)return '—';const p=s.split('-');if(p.length!==3)return s;return p[2]+'/'+p[1]+'/'+p[0];}
+function avancePct(p){const maxPos=Math.max(_est.length-1,1);const pos=id=>{const i=_est.findIndex(e=>e.id===id);return i<0?0:i;};return Math.round(((pos(p.ejuridico)+pos(p.etecnico)+pos(p.efinanciero))/(maxPos*3))*100);}
+function avanceColor(pct){if(pct===0)return '#9E9E9E';if(pct<40)return '#F39C12';if(pct<80)return '#2196F3';return '#27AE60';}
+function populateSelects(vals){['f-ejuridico','f-etecnico','f-efinanciero'].forEach((sid,i)=>{document.getElementById(sid).innerHTML=_est.map(e=>`<option value="${e.id}"${vals&&vals[i]===e.id?' selected':''}>${esc(e.label)}</option>`).join('');});}
+
+function renderLegend(){document.getElementById('legend-main').innerHTML='<span style="font-size:11px;font-weight:700;color:#0D47A1;margin-right:5px;">ESTADOS:</span>'+_est.map(e=>`<span class="legend-item"><span class="legend-dot" style="background:${e.bg};border:1px solid ${e.text};"></span>${esc(e.label)}</span>`).join('');}
+
+function getSortedProj(){
+  return [..._proj].sort((a,b)=>{
+    const fa=a.fecha||'9999-99-99', fb=b.fecha||'9999-99-99';
+    if(fa!==fb) return fa<fb?-1:1;
+    const da=(a.departamento||'').localeCompare(b.departamento||'','es');
+    if(da!==0) return da;
+    return (a.localidad||'').localeCompare(b.localidad||'','es');
+  });
+}
+
+function renderTable(){
+  const tbody=document.getElementById('tbody-main');
+  const sorted=getSortedProj();
+  tbody.innerHTML=sorted.map((p,idx)=>{
+    const pct=avancePct(p),col=avanceColor(pct);
+    return `<tr id="tr-${p.id}">
+      <td style="color:#9E9E9E;font-size:11px;">${idx+1}</td>
+      <td style="font-weight:700;font-size:12px;">${esc(p.localidad)}${p.obs?`<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">${esc(p.obs)}</span>`:''}</td>
+      <td><span class="depto-tag">${esc(p.departamento)}</span></td>
+      <td style="font-size:11px;color:#4A5568;white-space:nowrap;">${fmtFecha(p.fecha)}</td>
+      <td style="font-size:11px;color:#4A5568;">${p.expediente?esc(p.expediente):'<span style="color:#ccc;">—</span>'}</td>
+      <td class="monto-cell">${fmtMonto(p.monto)}</td>
+      <td>${okBadge(p.ok_gob)}</td>
+      <td style="font-size:10px;">${p.doc_exp?`<span class="badge doc-si">📄 ${esc(p.doc_exp)}</span>`:'<span style="color:#ccc;">—</span>'}</td>
+      <td>${renderBadge(p.ejuridico)}</td>
+      <td>${renderBadge(p.etecnico)}</td>
+      <td>${renderBadge(p.efinanciero)}</td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:${pct}%;background:${col};"></div></div><span class="avance-pct">${pct}%</span></div></td>
+      <td class="casas-cell">${(p.cantidad_casas!==undefined&&p.cantidad_casas!==null)?p.cantidad_casas:'S/D'}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(${p.id})" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(${p.id})" title="Eliminar">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  renderLegend();updateSummary();applyFilters();
+}
+
+function fmtM(n){return n>=1e9?'$'+((n/1e9).toFixed(2))+'B':'$'+((n/1e6).toFixed(1))+'M';}
+function updateSummary(){
+  const monto=_proj.reduce((s,p)=>s+(p.monto||0),0);
+  const saldo=monto-(_pres||0);
+  const ok=_proj.filter(p=>p.ok_gob==='SI').length;
+  const nodoc=_proj.filter(p=>!p.doc_exp).length;
+  const totalCasas=_proj.reduce((s,p)=>s+(p.cantidad_casas||0),0);
+  document.getElementById('cnt-total').textContent=_proj.length;
+  document.getElementById('cnt-casas').textContent=totalCasas.toLocaleString('es-AR');
+  document.getElementById('cnt-monto').textContent=fmtM(monto);
+  const presEl=document.getElementById('cnt-pres');
+  presEl.textContent=_pres?fmtM(_pres):'— (clic para ingresar)';
+  presEl.style.fontSize=_pres?'18px':'13px';
+  const salEl=document.getElementById('cnt-saldo');
+  salEl.textContent=_pres?fmtM(saldo):'—';
+  if(_pres) salEl.style.color=saldo>=0?'#2E7D32':'#C62828';
+  document.getElementById('cnt-ok').textContent=ok;
+  document.getElementById('cnt-nodoc').textContent=nodoc;
+}
+function editPresupuesto(){
+  const raw=_pres?String(_pres):'';
+  const val=prompt('Ingresá el Crédito Asignado (importe en $):\nEjemplo: 5000000000 para $5B', raw);
+  if(val===null)return;
+  const n=parseInt(val.replace(/[^0-9]/g,''))||0;
+  _pres=n;markDirty();updateSummary();
+}
+
+function applyFilters(){
+  const q=document.getElementById('search-input').value.toLowerCase().trim();
+  const depto=document.getElementById('depto-filter').value;
+  const okF=document.getElementById('ok-filter').value;
+  let visible=0;
+  _proj.forEach(p=>{
+    const tr=document.getElementById('tr-'+p.id); if(!tr)return;
+    const mQ=!q||[p.localidad,p.expediente,p.obs,p.departamento].some(v=>v&&v.toLowerCase().includes(q));
+    const mD=!depto||p.departamento===depto;
+    const mO=!okF||p.ok_gob===okF;
+    const show=mQ&&mD&&mO;
+    tr.classList.toggle('hidden-row',!show);
+    if(show)visible++;
+  });
+  document.getElementById('filter-count').textContent=visible<_proj.length?`Mostrando ${visible} de ${_proj.length}`:`${_proj.length} localidades`;
+  document.getElementById('empty-main').style.display=visible===0?'block':'none';
+}
+
+function clearFilters(){document.getElementById('search-input').value='';document.getElementById('depto-filter').value='';document.getElementById('ok-filter').value='';applyFilters();}
+
+function openModal(id){
+  document.getElementById('f-id').value=id||'';
+  document.getElementById('modal-title').textContent=id?'Editar Localidad':'Nueva Localidad';
+  let vals=null;
+  if(id){const p=_proj.find(x=>x.id===id);if(p){document.getElementById('f-localidad').value=p.localidad;document.getElementById('f-departamento').value=p.departamento;document.getElementById('f-fecha').value=p.fecha||'';document.getElementById('f-expediente').value=p.expediente||'';document.getElementById('f-cantidad_casas').value=(p.cantidad_casas!==undefined&&p.cantidad_casas!==null)?p.cantidad_casas:'';document.getElementById('f-ok_gob').value=p.ok_gob;document.getElementById('f-doc_exp').value=p.doc_exp||'';document.getElementById('f-obs').value=p.obs||'';vals=[p.ejuridico,p.etecnico,p.efinanciero];}}
+  else{['f-localidad','f-fecha','f-expediente','f-cantidad_casas','f-doc_exp','f-obs'].forEach(fid=>{document.getElementById(fid).value='';});document.getElementById('f-departamento').value='';document.getElementById('f-ok_gob').value='SI';const first=(_est[0]||{}).id;vals=[first,first,first];}
+  populateSelects(vals);
+  recalcMontoForm();
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('f-localidad').focus();
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function saveProject(){
+  const localidad=document.getElementById('f-localidad').value.trim();
+  if(!localidad){alert('La localidad es obligatoria.');return;}
+  const id=document.getElementById('f-id').value;
+  const casasVal=document.getElementById('f-cantidad_casas').value;
+  const cantidad_casas=casasVal!==''?parseInt(casasVal):null;
+  const monto=cantidad_casas?cantidad_casas*VALOR_VIVIENDA:0;
+  const proj={id:id?parseInt(id):Date.now(),localidad,departamento:document.getElementById('f-departamento').value,fecha:document.getElementById('f-fecha').value||null,expediente:document.getElementById('f-expediente').value.trim(),monto,cantidad_casas,ok_gob:document.getElementById('f-ok_gob').value,doc_exp:document.getElementById('f-doc_exp').value.trim(),ejuridico:parseInt(document.getElementById('f-ejuridico').value),etecnico:parseInt(document.getElementById('f-etecnico').value),efinanciero:parseInt(document.getElementById('f-efinanciero').value),obs:document.getElementById('f-obs').value.trim()};
+  if(id){const i=_proj.findIndex(x=>x.id===parseInt(id));if(i>=0)_proj[i]=proj;}else{_proj.push(proj);}
+  markDirty();closeModal();renderTable();
+}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+let _editEst=[];
+function openEstadosModal(){_editEst=JSON.parse(JSON.stringify(_est));_newColor=COLOR_PALETTE[0];renderEstList();buildColorGrid('new-color-grid',null);document.getElementById('new-swatch').style.background=_newColor.bg;document.getElementById('new-estado-nombre').value='';document.getElementById('modal-estados-overlay').classList.add('open');}
+function closeEstadosModal(){document.getElementById('modal-estados-overlay').classList.remove('open');closeAllGrids();}
+function renderEstList(){document.getElementById('estados-list').innerHTML=_editEst.map(e=>`<div class="estado-row" id="erow-${e.id}"><div class="color-picker-wrap"><div class="swatch" style="background:${e.bg};" onclick="toggleColorPicker('cgrid-${e.id}')"></div><div class="color-grid" id="cgrid-${e.id}"></div></div><input class="nombre-estado" type="text" value="${esc(e.label)}" onchange="updEstLabel(${e.id},this.value)"><button class="btn-del-estado" onclick="removeEst(${e.id})">✕</button></div>`).join('');_editEst.forEach(e=>buildColorGrid(`cgrid-${e.id}`,e.id));}
+function buildColorGrid(gid,estId){const g=document.getElementById(gid);if(!g)return;g.innerHTML=COLOR_PALETTE.map((c,i)=>{const sel=estId?(_editEst.find(e=>e.id===estId)||{}).bg===c.bg:_newColor.bg===c.bg;return `<div class="color-dot${sel?' selected':''}" style="background:${c.bg};border-color:${c.text};" onclick="selectColor(${i},'${gid}',${estId||'null'})"></div>`;}).join('');}
+function selectColor(idx,gid,estId){const c=COLOR_PALETTE[idx];if(estId){const e=_editEst.find(x=>x.id===estId);if(e){e.bg=c.bg;e.text=c.text;}const sw=document.querySelector(`#erow-${estId} .swatch`);if(sw)sw.style.background=c.bg;}else{_newColor=c;document.getElementById('new-swatch').style.background=c.bg;}buildColorGrid(gid,estId);closeAllGrids();}
+function toggleColorPicker(gid){const g=document.getElementById(gid);if(!g)return;const was=g.classList.contains('open');closeAllGrids();if(!was)g.classList.add('open');}
+function closeAllGrids(){document.querySelectorAll('.color-grid.open').forEach(g=>g.classList.remove('open'));}
+function updEstLabel(id,val){const e=_editEst.find(x=>x.id===id);if(e)e.label=val;}
+function removeEst(id){if(_editEst.length<=1){alert('Debe haber al menos un estado.');return;}_editEst=_editEst.filter(e=>e.id!==id);renderEstList();}
+function addEstado(){const n=document.getElementById('new-estado-nombre').value.trim();if(!n){document.getElementById('new-estado-nombre').focus();return;}_editEst.push({id:Date.now(),label:n,bg:_newColor.bg,text:_newColor.text});document.getElementById('new-estado-nombre').value='';renderEstList();}
+function saveEstados(){_editEst.forEach(e=>{const inp=document.querySelector(`#erow-${e.id} .nombre-estado`);if(inp)e.label=inp.value.trim()||e.label;});_est=_editEst;markDirty();closeEstadosModal();renderTable();}
+document.getElementById('modal-estados-overlay').addEventListener('click',function(e){if(e.target===this)closeEstadosModal();});
+document.addEventListener('click',function(e){if(!e.target.closest('.color-picker-wrap'))closeAllGrids();});
+document.getElementById('new-estado-nombre').addEventListener('keydown',function(e){if(e.key==='Enter')addEstado();});
+
+let _confirmFn=null;
+function askDelete(id){document.getElementById('confirm-msg').textContent='¿Eliminar esta localidad? No se puede deshacer.';_confirmFn=()=>{_proj=_proj.filter(x=>x.id!==id);markDirty();renderTable();};document.getElementById('confirm-overlay').classList.add('open');}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');_confirmFn=null;}
+function runConfirm(){if(_confirmFn)_confirmFn();closeConfirm();}
+
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+if(EMBEDDED_DATA.updated)document.getElementById('last-update').textContent='Guardado: '+EMBEDDED_DATA.updated;
+renderTable();
+</script>
+
+</body></html>

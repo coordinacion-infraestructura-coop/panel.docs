@@ -1,0 +1,3858 @@
+[{
+  "id_geo": "17",
+  "departamento": "CALAMUCHITA",
+  "localidad": "VILLA GENERAL BELGRANO",
+  "lat_centro": "-31.978690884",
+  "lon_centro": "-64.554059177",
+  "activo": "true"
+}, {
+  "id_geo": "2",
+  "departamento": "CALAMUCHITA",
+  "localidad": "CALMAYO",
+  "lat_centro": "-32.027796138",
+  "lon_centro": "-64.463906383",
+  "activo": "true"
+}, {
+  "id_geo": "385",
+  "departamento": "CALAMUCHITA",
+  "localidad": "ATHOS PAMPA",
+  "lat_centro": "-31.989683204",
+  "lon_centro": "-64.693039066",
+  "activo": "true"
+}, {
+  "id_geo": "13",
+  "departamento": "CALAMUCHITA",
+  "localidad": "SAN AGUSTIN",
+  "lat_centro": "-31.976312484",
+  "lon_centro": "-64.373307585",
+  "activo": "true"
+}, {
+  "id_geo": "16",
+  "departamento": "CALAMUCHITA",
+  "localidad": "VILLA DEL DIQUE",
+  "lat_centro": "-32.169685094",
+  "lon_centro": "-64.456789951",
+  "activo": "true"
+}, {
+  "id_geo": "20",
+  "departamento": "CALAMUCHITA",
+  "localidad": "VILLA YACANTO",
+  "lat_centro": "-32.103170929",
+  "lon_centro": "-64.752187318",
+  "activo": "true"
+}, {
+  "id_geo": "508",
+  "departamento": "CALAMUCHITA",
+  "localidad": "AMBOY",
+  "lat_centro": "-32.175922167",
+  "lon_centro": "-64.57654785",
+  "activo": "true"
+}, {
+  "id_geo": "509",
+  "departamento": "CALAMUCHITA",
+  "localidad": "VILLA AMANCAY",
+  "lat_centro": "-32.188918299",
+  "lon_centro": "-64.568490661",
+  "activo": "true"
+}, {
+  "id_geo": "382",
+  "departamento": "CALAMUCHITA",
+  "localidad": "ARROYO DE SAN ANTONIO",
+  "lat_centro": "-32.257146386",
+  "lon_centro": "-64.607788332",
+  "activo": "true"
+}, {
+  "id_geo": "8",
+  "departamento": "CALAMUCHITA",
+  "localidad": "LAS CALERAS",
+  "lat_centro": "-32.38935598",
+  "lon_centro": "-64.518591904",
+  "activo": "true"
+}, {
+  "id_geo": "510",
+  "departamento": "CALAMUCHITA",
+  "localidad": "VILLA CAÑADA DEL SAUCE",
+  "lat_centro": "-32.368002474",
+  "lon_centro": "-64.642521337",
+  "activo": "true"
+}, {
+  "id_geo": "18",
+  "departamento": "CALAMUCHITA",
+  "localidad": "VILLA QUILLINZO",
+  "lat_centro": "-32.234175289",
+  "lon_centro": "-64.516947956",
+  "activo": "true"
+}, {
+  "id_geo": "15",
+  "departamento": "CALAMUCHITA",
+  "localidad": "SEGUNDA USINA",
+  "lat_centro": "-32.165036063",
+  "lon_centro": "-64.378421427",
+  "activo": "true"
+}, {
+  "id_geo": "11",
+  "departamento": "CALAMUCHITA",
+  "localidad": "LOS REARTES",
+  "lat_centro": "-31.907072112",
+  "lon_centro": "-64.571181468",
+  "activo": "true"
+}, {
+  "id_geo": "12",
+  "departamento": "CALAMUCHITA",
+  "localidad": "RIO DE LOS SAUCES",
+  "lat_centro": "-32.52655883",
+  "lon_centro": "-64.586953436",
+  "activo": "true"
+}, {
+  "id_geo": "5",
+  "departamento": "CALAMUCHITA",
+  "localidad": "LA CRUZ",
+  "lat_centro": "-32.303401321",
+  "lon_centro": "-64.483109828",
+  "activo": "true"
+}, {
+  "id_geo": "4",
+  "departamento": "CALAMUCHITA",
+  "localidad": "EMBALSE",
+  "lat_centro": "-32.206503819",
+  "lon_centro": "-64.400617672",
+  "activo": "true"
+}, {
+  "id_geo": "19",
+  "departamento": "CALAMUCHITA",
+  "localidad": "VILLA RUMIPAL",
+  "lat_centro": "-32.18937883",
+  "lon_centro": "-64.47920051",
+  "activo": "true"
+}, {
+  "id_geo": "6",
+  "departamento": "CALAMUCHITA",
+  "localidad": "LA CUMBRECITA",
+  "lat_centro": "-31.897031853",
+  "lon_centro": "-64.781008827",
+  "activo": "true"
+}, {
+  "id_geo": "7",
+  "departamento": "CALAMUCHITA",
+  "localidad": "LAS BAJADAS",
+  "lat_centro": "-32.095409454",
+  "lon_centro": "-64.331053826",
+  "activo": "true"
+}, {
+  "id_geo": "384",
+  "departamento": "CALAMUCHITA",
+  "localidad": "VILLA SANTA MONICA",
+  "lat_centro": "-32.068820111",
+  "lon_centro": "-64.57337683",
+  "activo": "true"
+}, {
+  "id_geo": "9",
+  "departamento": "CALAMUCHITA",
+  "localidad": "LOS CONDORES",
+  "lat_centro": "-32.321123274",
+  "lon_centro": "-64.281007718",
+  "activo": "true"
+}, {
+  "id_geo": "560",
+  "departamento": "CALAMUCHITA",
+  "localidad": "Villa Ciudad Parque los Reartes",
+  "lat_centro": "-31.889890399",
+  "lon_centro": "-64.521625257",
+  "activo": "true"
+}, {
+  "id_geo": "10",
+  "departamento": "CALAMUCHITA",
+  "localidad": "LOS MOLINOS",
+  "lat_centro": "-31.856820837",
+  "lon_centro": "-64.377946112",
+  "activo": "true"
+}, {
+  "id_geo": "3",
+  "departamento": "CALAMUCHITA",
+  "localidad": "LUTTI",
+  "lat_centro": "-32.318408475",
+  "lon_centro": "-64.747010827",
+  "activo": "true"
+}, {
+  "id_geo": "387",
+  "departamento": "CALAMUCHITA",
+  "localidad": "SOCONCHO (las Bajadas)",
+  "lat_centro": "-32.052194754",
+  "lon_centro": "-64.382689859",
+  "activo": "true"
+}, {
+  "id_geo": "14",
+  "departamento": "CALAMUCHITA",
+  "localidad": "SANTA ROSA DE CALAMUCHITA",
+  "lat_centro": "-32.071596085",
+  "lon_centro": "-64.530071299",
+  "activo": "true"
+}, {
+  "id_geo": "1",
+  "departamento": "CALAMUCHITA",
+  "localidad": "SAN IGNACIO",
+  "lat_centro": "-32.165681651",
+  "lon_centro": "-64.518620956",
+  "activo": "true"
+}, {
+  "id_geo": "386",
+  "departamento": "CALAMUCHITA",
+  "localidad": "CERRO DE SAN LORENZO (Salto de Toledo)",
+  "lat_centro": "-32.61656755",
+  "lon_centro": "-64.599248035",
+  "activo": "true"
+}, {
+  "id_geo": "21",
+  "departamento": "CAPITAL",
+  "localidad": "CORDOBA",
+  "lat_centro": "-31.413821998",
+  "lon_centro": "-64.183332484",
+  "activo": "true"
+}, {
+  "id_geo": "402",
+  "departamento": "COLÓN",
+  "localidad": "SAN CARLOS DE ASCOCHINGA",
+  "lat_centro": "-30.964527344",
+  "lon_centro": "-64.271412486",
+  "activo": "true"
+}, {
+  "id_geo": "395",
+  "departamento": "COLÓN",
+  "localidad": "LA PUERTA",
+  "lat_centro": "-31.143260703",
+  "lon_centro": "-64.041749052",
+  "activo": "true"
+}, {
+  "id_geo": "38",
+  "departamento": "COLÓN",
+  "localidad": "UNQUILLO",
+  "lat_centro": "-31.231968963",
+  "lon_centro": "-64.317737155",
+  "activo": "true"
+}, {
+  "id_geo": "23",
+  "departamento": "COLÓN",
+  "localidad": "COLONIA CAROYA",
+  "lat_centro": "-31.017234293",
+  "lon_centro": "-64.066722504",
+  "activo": "true"
+}, {
+  "id_geo": "24",
+  "departamento": "COLÓN",
+  "localidad": "COLONIA TIROLESA",
+  "lat_centro": "-31.235789227",
+  "lon_centro": "-64.067249948",
+  "activo": "true"
+}, {
+  "id_geo": "392",
+  "departamento": "COLÓN",
+  "localidad": "MONTE CRISTO",
+  "lat_centro": "-31.344528486",
+  "lon_centro": "-63.947706067",
+  "activo": "true"
+}, {
+  "id_geo": "400",
+  "departamento": "COLÓN",
+  "localidad": "VILLA COLANCHANGA",
+  "lat_centro": "-31.13867146",
+  "lon_centro": "-64.358504763",
+  "activo": "true"
+}, {
+  "id_geo": "389",
+  "departamento": "COLÓN",
+  "localidad": "GUIÑAZU",
+  "lat_centro": "-31.306948245",
+  "lon_centro": "-64.175849076",
+  "activo": "true"
+}, {
+  "id_geo": "35",
+  "departamento": "COLÓN",
+  "localidad": "SALDAN",
+  "lat_centro": "-31.314263771",
+  "lon_centro": "-64.312904968",
+  "activo": "true"
+}, {
+  "id_geo": "37",
+  "departamento": "COLÓN",
+  "localidad": "COLONIA VICENTE AGÜERO",
+  "lat_centro": "-31.028350317",
+  "lon_centro": "-64.018545213",
+  "activo": "true"
+}, {
+  "id_geo": "28",
+  "departamento": "COLÓN",
+  "localidad": "JESUS MARIA",
+  "lat_centro": "-30.981195247",
+  "lon_centro": "-64.095767296",
+  "activo": "true"
+}, {
+  "id_geo": "40",
+  "departamento": "COLÓN",
+  "localidad": "VILLA CERRO AZUL",
+  "lat_centro": "-31.07021458",
+  "lon_centro": "-64.319733781",
+  "activo": "true"
+}, {
+  "id_geo": "31",
+  "departamento": "COLÓN",
+  "localidad": "MALVINAS ARGENTINAS",
+  "lat_centro": "-31.36769786",
+  "lon_centro": "-64.050313037",
+  "activo": "true"
+}, {
+  "id_geo": "388",
+  "departamento": "COLÓN",
+  "localidad": "VILLA LOS LLANOS",
+  "lat_centro": "-31.274969044",
+  "lon_centro": "-64.163168863",
+  "activo": "true"
+}, {
+  "id_geo": "398",
+  "departamento": "COLÓN",
+  "localidad": "TEJEDA",
+  "lat_centro": "-31.387630819",
+  "lon_centro": "-63.983712758",
+  "activo": "true"
+}, {
+  "id_geo": "32",
+  "departamento": "COLÓN",
+  "localidad": "MENDIOLAZA",
+  "lat_centro": "-31.263466923",
+  "lon_centro": "-64.303833833",
+  "activo": "true"
+}, {
+  "id_geo": "25",
+  "departamento": "COLÓN",
+  "localidad": "EL MANZANO",
+  "lat_centro": "-31.08176194",
+  "lon_centro": "-64.29982719",
+  "activo": "true"
+}, {
+  "id_geo": "531",
+  "departamento": "COLÓN",
+  "localidad": "TINOCO",
+  "lat_centro": "-31.123881167",
+  "lon_centro": "-63.892376497",
+  "activo": "true"
+}, {
+  "id_geo": "30",
+  "departamento": "COLÓN",
+  "localidad": "LA GRANJA",
+  "lat_centro": "-31.005438307",
+  "lon_centro": "-64.261684354",
+  "activo": "true"
+}, {
+  "id_geo": "39",
+  "departamento": "COLÓN",
+  "localidad": "VILLA ALLENDE",
+  "lat_centro": "-31.292206846",
+  "lon_centro": "-64.295008869",
+  "activo": "true"
+}, {
+  "id_geo": "27",
+  "departamento": "COLÓN",
+  "localidad": "ESTACION JUAREZ CELMAN",
+  "lat_centro": "-31.25709345",
+  "lon_centro": "-64.162612739",
+  "activo": "true"
+}, {
+  "id_geo": "391",
+  "departamento": "COLÓN",
+  "localidad": "ASCOCHINGA",
+  "lat_centro": "-30.964781658",
+  "lon_centro": "-64.277557993",
+  "activo": "true"
+}, {
+  "id_geo": "34",
+  "departamento": "COLÓN",
+  "localidad": "RIO CEBALLOS",
+  "lat_centro": "-31.174848678",
+  "lon_centro": "-64.309676818",
+  "activo": "true"
+}, {
+  "id_geo": "401",
+  "departamento": "COLÓN",
+  "localidad": "VILLA CORAZON DE MARIA",
+  "lat_centro": "-31.443668405",
+  "lon_centro": "-63.995347482",
+  "activo": "true"
+}, {
+  "id_geo": "399",
+  "departamento": "COLÓN",
+  "localidad": "NUÑEZ DEL PRADO",
+  "lat_centro": "-31.162302135",
+  "lon_centro": "-63.9554177",
+  "activo": "true"
+}, {
+  "id_geo": "29",
+  "departamento": "COLÓN",
+  "localidad": "LA CALERA",
+  "lat_centro": "-31.344155363",
+  "lon_centro": "-64.336803968",
+  "activo": "true"
+}, {
+  "id_geo": "393",
+  "departamento": "COLÓN",
+  "localidad": "EL PUEBLITO",
+  "lat_centro": "-31.124071561",
+  "lon_centro": "-64.289469056",
+  "activo": "true"
+}, {
+  "id_geo": "26",
+  "departamento": "COLÓN",
+  "localidad": "GENERAL PAZ",
+  "lat_centro": "-31.134112372",
+  "lon_centro": "-64.141000703",
+  "activo": "true"
+}, {
+  "id_geo": "36",
+  "departamento": "COLÓN",
+  "localidad": "SALSIPUEDES",
+  "lat_centro": "-31.138832255",
+  "lon_centro": "-64.290655072",
+  "activo": "true"
+}, {
+  "id_geo": "394",
+  "departamento": "COLÓN",
+  "localidad": "BLAS DE ROSALES",
+  "lat_centro": "-31.259364442",
+  "lon_centro": "-63.877063621",
+  "activo": "true"
+}, {
+  "id_geo": "33",
+  "departamento": "COLÓN",
+  "localidad": "MI GRANJA",
+  "lat_centro": "-31.350110877",
+  "lon_centro": "-63.999644947",
+  "activo": "true"
+}, {
+  "id_geo": "396",
+  "departamento": "COLÓN",
+  "localidad": "EL DIQUESITO",
+  "lat_centro": "-31.348181028",
+  "lon_centro": "-64.365436593",
+  "activo": "true"
+}, {
+  "id_geo": "390",
+  "departamento": "COLÓN",
+  "localidad": "CUATRO HOJAS",
+  "lat_centro": "-31.256990745",
+  "lon_centro": "-64.30776439",
+  "activo": "true"
+}, {
+  "id_geo": "22",
+  "departamento": "COLÓN",
+  "localidad": "AGUA DE ORO",
+  "lat_centro": "-31.058221503",
+  "lon_centro": "-64.295578542",
+  "activo": "true"
+}, {
+  "id_geo": "539",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "Los Chañaritos",
+  "lat_centro": "-30.564994445",
+  "lon_centro": "-64.956992718",
+  "activo": "true"
+}, {
+  "id_geo": "46",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "SERREZUELA",
+  "lat_centro": "-30.639201996",
+  "lon_centro": "-65.38130139",
+  "activo": "true"
+}, {
+  "id_geo": "536",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "Bañado de Soto",
+  "lat_centro": "-30.79439344",
+  "lon_centro": "-65.053504826",
+  "activo": "true"
+}, {
+  "id_geo": "538",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "Las Playas",
+  "lat_centro": "-30.709445381",
+  "lon_centro": "-64.841847951",
+  "activo": "true"
+}, {
+  "id_geo": "533",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "La Higuera",
+  "lat_centro": "-31.013378308",
+  "lon_centro": "-65.10253155",
+  "activo": "true"
+}, {
+  "id_geo": "534",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "Las Cañadas",
+  "lat_centro": "-30.915721331",
+  "lon_centro": "-64.734524044",
+  "activo": "true"
+}, {
+  "id_geo": "43",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "HIGUERAS (la Higuera)",
+  "lat_centro": "-31.013311884",
+  "lon_centro": "-65.100740087",
+  "activo": "true"
+}, {
+  "id_geo": "45",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "SAN MARCOS SIERRA",
+  "lat_centro": "-30.764748977",
+  "lon_centro": "-64.662238854",
+  "activo": "true"
+}, {
+  "id_geo": "405",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "LOS SAUCES (San Marcos)",
+  "lat_centro": "-30.735728844",
+  "lon_centro": "-64.683557124",
+  "activo": "true"
+}, {
+  "id_geo": "540",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "Guanaco Muerto",
+  "lat_centro": "-30.480599518",
+  "lon_centro": "-65.061606245",
+  "activo": "true"
+}, {
+  "id_geo": "404",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "PICHANAS",
+  "lat_centro": "-30.799552039",
+  "lon_centro": "-65.172236719",
+  "activo": "true"
+}, {
+  "id_geo": "47",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "TUCLAME",
+  "lat_centro": "-30.747498063",
+  "lon_centro": "-65.235597747",
+  "activo": "true"
+}, {
+  "id_geo": "535",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "Cruz de Caña",
+  "lat_centro": "-31.067114643",
+  "lon_centro": "-64.940295587",
+  "activo": "true"
+}, {
+  "id_geo": "42",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "EL BRETE",
+  "lat_centro": "-30.672212661",
+  "lon_centro": "-64.869902919",
+  "activo": "true"
+}, {
+  "id_geo": "44",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "PASO VIEJO",
+  "lat_centro": "-30.766482489",
+  "lon_centro": "-65.190428791",
+  "activo": "true"
+}, {
+  "id_geo": "537",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "La Batea",
+  "lat_centro": "-30.374283431",
+  "lon_centro": "-65.308311967",
+  "activo": "true"
+}, {
+  "id_geo": "41",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "CRUZ DEL EJE",
+  "lat_centro": "-30.721861442",
+  "lon_centro": "-64.807731892",
+  "activo": "true"
+}, {
+  "id_geo": "541",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "Alto de los Quebrachos",
+  "lat_centro": "-30.554130993",
+  "lon_centro": "-65.028619593",
+  "activo": "true"
+}, {
+  "id_geo": "542",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "Media Naranja",
+  "lat_centro": "-30.636731344",
+  "lon_centro": "-64.9369655",
+  "activo": "true"
+}, {
+  "id_geo": "403",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "CHARACATO",
+  "lat_centro": "-31.113305422",
+  "lon_centro": "-64.760749336",
+  "activo": "true"
+}, {
+  "id_geo": "48",
+  "departamento": "CRUZ DEL EJE",
+  "localidad": "VILLA DE SOTO (Est. Soto)",
+  "lat_centro": "-30.852972765",
+  "lon_centro": "-64.992500799",
+  "activo": "true"
+}, {
+  "id_geo": "59",
+  "departamento": "GRAL ROCA",
+  "localidad": "VILLA HUIDOBRO",
+  "lat_centro": "-34.837185065",
+  "lon_centro": "-64.583357627",
+  "activo": "true"
+}, {
+  "id_geo": "408",
+  "departamento": "GRAL ROCA",
+  "localidad": "DE LA SERNA",
+  "lat_centro": "-34.94421107",
+  "lon_centro": "-64.890368556",
+  "activo": "true"
+}, {
+  "id_geo": "50",
+  "departamento": "GRAL ROCA",
+  "localidad": "DEL CAMPILLO",
+  "lat_centro": "-34.376078868",
+  "lon_centro": "-64.494539971",
+  "activo": "true"
+}, {
+  "id_geo": "51",
+  "departamento": "GRAL ROCA",
+  "localidad": "HUINCA RENANCO",
+  "lat_centro": "-34.839729536",
+  "lon_centro": "-64.372488766",
+  "activo": "true"
+}, {
+  "id_geo": "49",
+  "departamento": "GRAL ROCA",
+  "localidad": "BUCHARDO - EST. H. BOUCHARDO",
+  "lat_centro": "-34.722316373",
+  "lon_centro": "-63.508013918",
+  "activo": "true"
+}, {
+  "id_geo": "52",
+  "departamento": "GRAL ROCA",
+  "localidad": "ITALO",
+  "lat_centro": "-34.791179284",
+  "lon_centro": "-63.781202226",
+  "activo": "true"
+}, {
+  "id_geo": "54",
+  "departamento": "GRAL ROCA",
+  "localidad": "MATTALDI",
+  "lat_centro": "-34.480384654",
+  "lon_centro": "-64.169503157",
+  "activo": "true"
+}, {
+  "id_geo": "53",
+  "departamento": "GRAL ROCA",
+  "localidad": "SANTA MAGDALENA (Est. Jovita)",
+  "lat_centro": "-34.519227101",
+  "lon_centro": "-63.947044833",
+  "activo": "true"
+}, {
+  "id_geo": "58",
+  "departamento": "GRAL ROCA",
+  "localidad": "RANQUELES",
+  "lat_centro": "-34.84370009",
+  "lon_centro": "-64.098778557",
+  "activo": "true"
+}, {
+  "id_geo": "60",
+  "departamento": "GRAL ROCA",
+  "localidad": "VILLA SARMIENTO",
+  "lat_centro": "-34.119874922",
+  "lon_centro": "-64.721320223",
+  "activo": "true"
+}, {
+  "id_geo": "407",
+  "departamento": "GRAL ROCA",
+  "localidad": "VILLA MODERNA",
+  "lat_centro": "-34.72074189",
+  "lon_centro": "-64.633936585",
+  "activo": "true"
+}, {
+  "id_geo": "61",
+  "departamento": "GRAL ROCA",
+  "localidad": "VILLA VALERIA",
+  "lat_centro": "-34.340847948",
+  "lon_centro": "-64.917845307",
+  "activo": "true"
+}, {
+  "id_geo": "55",
+  "departamento": "GRAL ROCA",
+  "localidad": "NICOLAS BRUZONE",
+  "lat_centro": "-34.438234139",
+  "lon_centro": "-64.338375183",
+  "activo": "true"
+}, {
+  "id_geo": "57",
+  "departamento": "GRAL ROCA",
+  "localidad": "PINCEN",
+  "lat_centro": "-34.837934156",
+  "lon_centro": "-63.915576371",
+  "activo": "true"
+}, {
+  "id_geo": "406",
+  "departamento": "GRAL ROCA",
+  "localidad": "LECUEDER",
+  "lat_centro": "-34.501112562",
+  "lon_centro": "-64.809890201",
+  "activo": "true"
+}, {
+  "id_geo": "56",
+  "departamento": "GRAL ROCA",
+  "localidad": "ONAGOITY",
+  "lat_centro": "-34.770297097",
+  "lon_centro": "-63.670327747",
+  "activo": "true"
+}, {
+  "id_geo": "412",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "SANTA VICTORIA",
+  "lat_centro": "-33.070364861",
+  "lon_centro": "-63.269876432",
+  "activo": "true"
+}, {
+  "id_geo": "64",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "AUSONIA",
+  "lat_centro": "-32.661376938",
+  "lon_centro": "-63.244796097",
+  "activo": "true"
+}, {
+  "id_geo": "69",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "LA PLAYOSA",
+  "lat_centro": "-32.099693959",
+  "lon_centro": "-63.032524371",
+  "activo": "true"
+}, {
+  "id_geo": "68",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "LA PALESTINA",
+  "lat_centro": "-32.615591977",
+  "lon_centro": "-63.409240908",
+  "activo": "true"
+}, {
+  "id_geo": "62",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "ARROYO ALGODON",
+  "lat_centro": "-32.201965569",
+  "lon_centro": "-63.16279283",
+  "activo": "true"
+}, {
+  "id_geo": "73",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "TICINO",
+  "lat_centro": "-32.691933782",
+  "lon_centro": "-63.435309242",
+  "activo": "true"
+}, {
+  "id_geo": "409",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "SANABRIA",
+  "lat_centro": "-32.528607852",
+  "lon_centro": "-63.248991609",
+  "activo": "true"
+}, {
+  "id_geo": "65",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "CHAZON",
+  "lat_centro": "-33.077254742",
+  "lon_centro": "-63.275436386",
+  "activo": "true"
+}, {
+  "id_geo": "66",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "ETRURIA",
+  "lat_centro": "-32.940512094",
+  "lon_centro": "-63.247251813",
+  "activo": "true"
+}, {
+  "id_geo": "63",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "ARROYO CABRAL",
+  "lat_centro": "-32.488986796",
+  "lon_centro": "-63.40147448",
+  "activo": "true"
+}, {
+  "id_geo": "75",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "VILLA MARIA",
+  "lat_centro": "-32.412080643",
+  "lon_centro": "-63.249988816",
+  "activo": "true"
+}, {
+  "id_geo": "410",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "CAYUQUEO",
+  "lat_centro": "-32.775476406",
+  "lon_centro": "-63.11070479",
+  "activo": "true"
+}, {
+  "id_geo": "71",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "PASCO",
+  "lat_centro": "-32.747004183",
+  "lon_centro": "-63.341125226",
+  "activo": "true"
+}, {
+  "id_geo": "70",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "LUCA",
+  "lat_centro": "-32.540197",
+  "lon_centro": "-63.476252859",
+  "activo": "true"
+}, {
+  "id_geo": "74",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "TIO PUJIO",
+  "lat_centro": "-32.286369002",
+  "lon_centro": "-63.354018268",
+  "activo": "true"
+}, {
+  "id_geo": "72",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "SILVIO PELLICO",
+  "lat_centro": "-32.250640222",
+  "lon_centro": "-62.931649743",
+  "activo": "true"
+}, {
+  "id_geo": "76",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "VILLA NUEVA",
+  "lat_centro": "-32.428818485",
+  "lon_centro": "-63.249365132",
+  "activo": "true"
+}, {
+  "id_geo": "67",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "LA LAGUNA",
+  "lat_centro": "-32.801414409",
+  "lon_centro": "-63.244004714",
+  "activo": "true"
+}, {
+  "id_geo": "411",
+  "departamento": "GRAL SAN MARTÍN",
+  "localidad": "LAS MOJARRAS",
+  "lat_centro": "-32.302154961",
+  "lon_centro": "-63.232708763",
+  "activo": "true"
+}, {
+  "id_geo": "552",
+  "departamento": "ISCHILÍN",
+  "localidad": "Copacabana",
+  "lat_centro": "-30.638154348",
+  "lon_centro": "-64.518322834",
+  "activo": "true"
+}, {
+  "id_geo": "418",
+  "departamento": "ISCHILÍN",
+  "localidad": "JAIME PETER",
+  "lat_centro": "-30.405274589",
+  "lon_centro": "-64.518622391",
+  "activo": "true"
+}, {
+  "id_geo": "81",
+  "departamento": "ISCHILÍN",
+  "localidad": "LOS POZOS (KM. 827)",
+  "lat_centro": "-30.515449436",
+  "lon_centro": "-64.266445276",
+  "activo": "true"
+}, {
+  "id_geo": "553",
+  "departamento": "ISCHILÍN",
+  "localidad": "Chuña",
+  "lat_centro": "-30.468138364",
+  "lon_centro": "-64.668553794",
+  "activo": "true"
+}, {
+  "id_geo": "415",
+  "departamento": "ISCHILÍN",
+  "localidad": "VILLA QUILINO",
+  "lat_centro": "-30.209655002",
+  "lon_centro": "-64.477209653",
+  "activo": "true"
+}, {
+  "id_geo": "78",
+  "departamento": "ISCHILÍN",
+  "localidad": "CAÑADA DE RIO PINTO (la Verde)",
+  "lat_centro": "-30.775911755",
+  "lon_centro": "-64.218297349",
+  "activo": "true"
+}, {
+  "id_geo": "532",
+  "departamento": "ISCHILÍN",
+  "localidad": "AVELLANEDA",
+  "lat_centro": "-30.594680846",
+  "lon_centro": "-64.207839498",
+  "activo": "true"
+}, {
+  "id_geo": "80",
+  "departamento": "ISCHILÍN",
+  "localidad": "DEAN FUNES",
+  "lat_centro": "-30.422940894",
+  "lon_centro": "-64.351670498",
+  "activo": "true"
+}, {
+  "id_geo": "420",
+  "departamento": "ISCHILÍN",
+  "localidad": "HUASCHA",
+  "lat_centro": "-30.603422093",
+  "lon_centro": "-64.740139897",
+  "activo": "true"
+}, {
+  "id_geo": "422",
+  "departamento": "ISCHILÍN",
+  "localidad": "ISCHILIN",
+  "lat_centro": "-30.567308106",
+  "lon_centro": "-64.402991204",
+  "activo": "true"
+}, {
+  "id_geo": "416",
+  "departamento": "ISCHILÍN",
+  "localidad": "VILLA COLIMBA",
+  "lat_centro": "-30.51927565",
+  "lon_centro": "-64.435417313",
+  "activo": "true"
+}, {
+  "id_geo": "419",
+  "departamento": "ISCHILÍN",
+  "localidad": "LOS CADILLOS",
+  "lat_centro": "-30.099422987",
+  "lon_centro": "-64.451240188",
+  "activo": "true"
+}, {
+  "id_geo": "421",
+  "departamento": "ISCHILÍN",
+  "localidad": "CERRO NEGRO",
+  "lat_centro": "-30.654654246",
+  "lon_centro": "-64.356168297",
+  "activo": "true"
+}, {
+  "id_geo": "79",
+  "departamento": "ISCHILÍN",
+  "localidad": "CHUÑ‘A",
+  "lat_centro": "-30.468725251",
+  "lon_centro": "-64.671232811",
+  "activo": "true"
+}, {
+  "id_geo": "413",
+  "departamento": "ISCHILÍN",
+  "localidad": "SAN PEDRO DE TOYOS",
+  "lat_centro": "-30.456086938",
+  "lon_centro": "-64.447942227",
+  "activo": "true"
+}, {
+  "id_geo": "554",
+  "departamento": "ISCHILÍN",
+  "localidad": "Olivares de San Nicolás",
+  "lat_centro": "-30.596382582",
+  "lon_centro": "-64.841981807",
+  "activo": "true"
+}, {
+  "id_geo": "551",
+  "departamento": "ISCHILÍN",
+  "localidad": "Cañada de Río Pinto",
+  "lat_centro": "-30.77536615",
+  "lon_centro": "-64.212983089",
+  "activo": "true"
+}, {
+  "id_geo": "77",
+  "departamento": "ISCHILÍN",
+  "localidad": "LOS POZOS",
+  "lat_centro": "-30.519283859",
+  "lon_centro": "-64.25226765",
+  "activo": "true"
+}, {
+  "id_geo": "83",
+  "departamento": "ISCHILÍN",
+  "localidad": "VILLA GUTIERREZ",
+  "lat_centro": "-30.678952565",
+  "lon_centro": "-64.160848216",
+  "activo": "true"
+}, {
+  "id_geo": "82",
+  "departamento": "ISCHILÍN",
+  "localidad": "QUILINO",
+  "lat_centro": "-30.215959209",
+  "lon_centro": "-64.502978131",
+  "activo": "true"
+}, {
+  "id_geo": "414",
+  "departamento": "ISCHILÍN",
+  "localidad": "VILLA ALBERTINA",
+  "lat_centro": "-30.688386949",
+  "lon_centro": "-64.318506145",
+  "activo": "true"
+}, {
+  "id_geo": "417",
+  "departamento": "ISCHILÍN",
+  "localidad": "ISCHILIN VIEJO",
+  "lat_centro": "-30.570512904",
+  "lon_centro": "-64.404126438",
+  "activo": "true"
+}, {
+  "id_geo": "97",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "REDUCCION",
+  "lat_centro": "-33.201453281",
+  "lon_centro": "-63.86222171",
+  "activo": "true"
+}, {
+  "id_geo": "434",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "PEDRO E. FUNES",
+  "lat_centro": "-33.242600783",
+  "lon_centro": "-63.276350928",
+  "activo": "true"
+}, {
+  "id_geo": "89",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "EL RASTREADOR",
+  "lat_centro": "-33.664484444",
+  "lon_centro": "-63.539230667",
+  "activo": "true"
+}, {
+  "id_geo": "84",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "ALEJANDRO ROCA (Est. Alejandro)",
+  "lat_centro": "-33.356456954",
+  "lon_centro": "-63.720557071",
+  "activo": "true"
+}, {
+  "id_geo": "88",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "CHARRAS (Villa ColOn)",
+  "lat_centro": "-33.024161741",
+  "lon_centro": "-64.045821993",
+  "activo": "true"
+}, {
+  "id_geo": "85",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "ASSUNTA",
+  "lat_centro": "-33.633294852",
+  "lon_centro": "-63.225900057",
+  "activo": "true"
+}, {
+  "id_geo": "96",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "ESTACION PACHECO DE MELO",
+  "lat_centro": "-33.760057035",
+  "lon_centro": "-63.489863552",
+  "activo": "true"
+}, {
+  "id_geo": "87",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "CARNERILLO",
+  "lat_centro": "-32.915314046",
+  "lon_centro": "-64.025651408",
+  "activo": "true"
+}, {
+  "id_geo": "99",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "UCACHA",
+  "lat_centro": "-33.033433024",
+  "lon_centro": "-63.508261463",
+  "activo": "true"
+}, {
+  "id_geo": "90",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "GENERAL CABRERA",
+  "lat_centro": "-32.811885786",
+  "lon_centro": "-63.873697646",
+  "activo": "true"
+}, {
+  "id_geo": "98",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "SANTA EUFEMIA (Pueblo Pelleschi)",
+  "lat_centro": "-33.176746559",
+  "lon_centro": "-63.282030251",
+  "activo": "true"
+}, {
+  "id_geo": "94",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "LOS CISNES",
+  "lat_centro": "-33.400054622",
+  "lon_centro": "-63.471656306",
+  "activo": "true"
+}, {
+  "id_geo": "86",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "BENGOLEA",
+  "lat_centro": "-33.02741142",
+  "lon_centro": "-63.671928044",
+  "activo": "true"
+}, {
+  "id_geo": "433",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "OLMOS (Villa Felipa)",
+  "lat_centro": "-33.50204761",
+  "lon_centro": "-63.165761617",
+  "activo": "true"
+}, {
+  "id_geo": "91",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "GENERAL DEHEZA",
+  "lat_centro": "-32.754928287",
+  "lon_centro": "-63.785043997",
+  "activo": "true"
+}, {
+  "id_geo": "93",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "LA CARLOTA",
+  "lat_centro": "-33.420169643",
+  "lon_centro": "-63.296974733",
+  "activo": "true"
+}, {
+  "id_geo": "92",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "HUANCHILLAS",
+  "lat_centro": "-33.665523486",
+  "lon_centro": "-63.637267055",
+  "activo": "true"
+}, {
+  "id_geo": "95",
+  "departamento": "JUÁREZ CELMAN",
+  "localidad": "OLAETA",
+  "lat_centro": "-33.043485286",
+  "lon_centro": "-63.908596074",
+  "activo": "true"
+}, {
+  "id_geo": "105",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "CASTRO URDIALES - Colonia 25 de Mayo",
+  "lat_centro": "-33.258543431",
+  "lon_centro": "-62.608156218",
+  "activo": "true"
+}, {
+  "id_geo": "112",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "INRIVILLE",
+  "lat_centro": "-32.94384268",
+  "lon_centro": "-62.230549848",
+  "activo": "true"
+}, {
+  "id_geo": "115",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "LOS SURGENTES",
+  "lat_centro": "-32.984377448",
+  "lon_centro": "-62.023702809",
+  "activo": "true"
+}, {
+  "id_geo": "118",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "SAIRA",
+  "lat_centro": "-32.406412674",
+  "lon_centro": "-62.102976836",
+  "activo": "true"
+}, {
+  "id_geo": "120",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "VILLA ELISA",
+  "lat_centro": "-32.833879271",
+  "lon_centro": "-62.295001143",
+  "activo": "true"
+}, {
+  "id_geo": "111",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "GUATIMOZIN",
+  "lat_centro": "-33.461740432",
+  "lon_centro": "-62.439137657",
+  "activo": "true"
+}, {
+  "id_geo": "119",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "SALADILLO",
+  "lat_centro": "-32.933159067",
+  "lon_centro": "-62.342877802",
+  "activo": "true"
+}, {
+  "id_geo": "114",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "LEONES",
+  "lat_centro": "-32.658391713",
+  "lon_centro": "-62.299913296",
+  "activo": "true"
+}, {
+  "id_geo": "109",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "GENERAL BALDISSERA",
+  "lat_centro": "-33.122022183",
+  "lon_centro": "-62.303725757",
+  "activo": "true"
+}, {
+  "id_geo": "437",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "COLONIA VEINTICINCO (RIo III)",
+  "lat_centro": "-32.886013751",
+  "lon_centro": "-61.951855916",
+  "activo": "true"
+}, {
+  "id_geo": "104",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "CAVANAGH",
+  "lat_centro": "-33.478333811",
+  "lon_centro": "-62.339340366",
+  "activo": "true"
+}, {
+  "id_geo": "102",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "CAMILO ALDAO",
+  "lat_centro": "-33.12374001",
+  "lon_centro": "-62.096589359",
+  "activo": "true"
+}, {
+  "id_geo": "113",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "ISLA VERDE",
+  "lat_centro": "-33.240107888",
+  "lon_centro": "-62.404430949",
+  "activo": "true"
+}, {
+  "id_geo": "436",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "SAN JOSE DEL SALTEÑO",
+  "lat_centro": "-32.296331757",
+  "lon_centro": "-62.279687564",
+  "activo": "true"
+}, {
+  "id_geo": "116",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "MARCOS JUAREZ",
+  "lat_centro": "-32.691314396",
+  "lon_centro": "-62.105800788",
+  "activo": "true"
+}, {
+  "id_geo": "101",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "ARIAS",
+  "lat_centro": "-33.641164914",
+  "lon_centro": "-62.402783741",
+  "activo": "true"
+}, {
+  "id_geo": "100",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "ALEJO LEDESMA",
+  "lat_centro": "-33.607610696",
+  "lon_centro": "-62.626140778",
+  "activo": "true"
+}, {
+  "id_geo": "106",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "COLONIA ITALIANA",
+  "lat_centro": "-33.311919723",
+  "lon_centro": "-62.180793526",
+  "activo": "true"
+}, {
+  "id_geo": "103",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "CAP. GRAL. B.OHIGGINS (Colonia Progreso)",
+  "lat_centro": "-33.247207009",
+  "lon_centro": "-62.269739302",
+  "activo": "true"
+}, {
+  "id_geo": "117",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "MONTE BUEY",
+  "lat_centro": "-32.917533927",
+  "lon_centro": "-62.457658146",
+  "activo": "true"
+}, {
+  "id_geo": "110",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "GENERAL ROCA",
+  "lat_centro": "-32.730510122",
+  "lon_centro": "-61.917137879",
+  "activo": "true"
+}, {
+  "id_geo": "108",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "CRUZ ALTA",
+  "lat_centro": "-33.006993228",
+  "lon_centro": "-61.810971898",
+  "activo": "true"
+}, {
+  "id_geo": "107",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "CORRAL DE BUSTOS",
+  "lat_centro": "-33.281620569",
+  "lon_centro": "-62.185445571",
+  "activo": "true"
+}, {
+  "id_geo": "546",
+  "departamento": "MINAS",
+  "localidad": "Tosno",
+  "lat_centro": "-30.958813568",
+  "lon_centro": "-65.313368344",
+  "activo": "true"
+}, {
+  "id_geo": "121",
+  "departamento": "MINAS",
+  "localidad": "CIENAGA DEL CORO",
+  "lat_centro": "-31.041556001",
+  "lon_centro": "-65.281809002",
+  "activo": "true"
+}, {
+  "id_geo": "543",
+  "departamento": "MINAS",
+  "localidad": "Talaini",
+  "lat_centro": "-31.24825035",
+  "lon_centro": "-65.169021178",
+  "activo": "true"
+}, {
+  "id_geo": "544",
+  "departamento": "MINAS",
+  "localidad": "Guasapampa",
+  "lat_centro": "-31.101350294",
+  "lon_centro": "-65.329686118",
+  "activo": "true"
+}, {
+  "id_geo": "124",
+  "departamento": "MINAS",
+  "localidad": "SAN CARLOS MINAS",
+  "lat_centro": "-31.175586548",
+  "lon_centro": "-65.101704262",
+  "activo": "true"
+}, {
+  "id_geo": "123",
+  "departamento": "MINAS",
+  "localidad": "LA PLAYA",
+  "lat_centro": "-31.009875415",
+  "lon_centro": "-65.362062476",
+  "activo": "true"
+}, {
+  "id_geo": "122",
+  "departamento": "MINAS",
+  "localidad": "EL CHACHO",
+  "lat_centro": "-30.801798347",
+  "lon_centro": "-65.644051576",
+  "activo": "true"
+}, {
+  "id_geo": "545",
+  "departamento": "MINAS",
+  "localidad": "Estancia de Guadalupe",
+  "lat_centro": "-31.129031846",
+  "lon_centro": "-65.217932093",
+  "activo": "true"
+}, {
+  "id_geo": "127",
+  "departamento": "POCHO",
+  "localidad": "TALA CAÑADA",
+  "lat_centro": "-31.353850946",
+  "lon_centro": "-64.977489836",
+  "activo": "true"
+}, {
+  "id_geo": "439",
+  "departamento": "POCHO",
+  "localidad": "ALTO DEL TALA",
+  "lat_centro": "-31.370299552",
+  "lon_centro": "-65.191996618",
+  "activo": "true"
+}, {
+  "id_geo": "549",
+  "departamento": "POCHO",
+  "localidad": "Villa de Pocho",
+  "lat_centro": "-31.490539117",
+  "lon_centro": "-65.281381075",
+  "activo": "true"
+}, {
+  "id_geo": "550",
+  "departamento": "POCHO",
+  "localidad": "Las Palmas",
+  "lat_centro": "-31.3778603",
+  "lon_centro": "-65.292460649",
+  "activo": "true"
+}, {
+  "id_geo": "438",
+  "departamento": "POCHO",
+  "localidad": "TANINGA",
+  "lat_centro": "-31.342696219",
+  "lon_centro": "-65.083614662",
+  "activo": "true"
+}, {
+  "id_geo": "547",
+  "departamento": "POCHO",
+  "localidad": "Los Talares",
+  "lat_centro": "-31.407054017",
+  "lon_centro": "-65.047235058",
+  "activo": "true"
+}, {
+  "id_geo": "125",
+  "departamento": "POCHO",
+  "localidad": "CHANCANI",
+  "lat_centro": "-31.417275635",
+  "lon_centro": "-65.445342616",
+  "activo": "true"
+}, {
+  "id_geo": "548",
+  "departamento": "POCHO",
+  "localidad": "San Gerónimo",
+  "lat_centro": "-31.344542725",
+  "lon_centro": "-64.918870713",
+  "activo": "true"
+}, {
+  "id_geo": "126",
+  "departamento": "POCHO",
+  "localidad": "SALSACATE",
+  "lat_centro": "-31.315155366",
+  "lon_centro": "-65.091019945",
+  "activo": "true"
+}, {
+  "id_geo": "132",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "MELO",
+  "lat_centro": "-34.348321034",
+  "lon_centro": "-63.447175721",
+  "activo": "true"
+}, {
+  "id_geo": "442",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "RUIZ DIAZ DE GUZMAN",
+  "lat_centro": "-33.866511216",
+  "lon_centro": "-63.46488206",
+  "activo": "true"
+}, {
+  "id_geo": "135",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "SAN JOAQUIN",
+  "lat_centro": "-34.510635686",
+  "lon_centro": "-63.713280953",
+  "activo": "true"
+}, {
+  "id_geo": "137",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "VILLA ROSSI",
+  "lat_centro": "-34.297936597",
+  "lon_centro": "-63.268538983",
+  "activo": "true"
+}, {
+  "id_geo": "440",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "CURAPALIGUE",
+  "lat_centro": "-34.07642581",
+  "lon_centro": "-63.614478035",
+  "activo": "true"
+}, {
+  "id_geo": "136",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "SERRANO",
+  "lat_centro": "-34.469987746",
+  "lon_centro": "-63.537555117",
+  "activo": "true"
+}, {
+  "id_geo": "129",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "LA CESIRA",
+  "lat_centro": "-33.951857987",
+  "lon_centro": "-62.974490699",
+  "activo": "true"
+}, {
+  "id_geo": "131",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "LEGUIZAMON",
+  "lat_centro": "-34.204076652",
+  "lon_centro": "-62.976888841",
+  "activo": "true"
+}, {
+  "id_geo": "134",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "ROSALES",
+  "lat_centro": "-34.17179016",
+  "lon_centro": "-63.153484166",
+  "activo": "true"
+}, {
+  "id_geo": "133",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "RIO BAMBA",
+  "lat_centro": "-34.051120552",
+  "lon_centro": "-63.7321536",
+  "activo": "true"
+}, {
+  "id_geo": "130",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "LABOULAYE",
+  "lat_centro": "-34.123617375",
+  "lon_centro": "-63.388646151",
+  "activo": "true"
+}, {
+  "id_geo": "441",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "GUARDIA VIEJA",
+  "lat_centro": "-34.097759981",
+  "lon_centro": "-63.51103513",
+  "activo": "true"
+}, {
+  "id_geo": "128",
+  "departamento": "PTE ROQUE SAENZ PEÑA",
+  "localidad": "GENERAL LE VALLE",
+  "lat_centro": "-34.009831373",
+  "lon_centro": "-63.922537506",
+  "activo": "true"
+}, {
+  "id_geo": "145",
+  "departamento": "PUNILLA",
+  "localidad": "HUERTA GRANDE",
+  "lat_centro": "-31.069594653",
+  "lon_centro": "-64.490952401",
+  "activo": "true"
+}, {
+  "id_geo": "555",
+  "departamento": "PUNILLA",
+  "localidad": "Charbonier",
+  "lat_centro": "-30.754491253",
+  "lon_centro": "-64.566941168",
+  "activo": "true"
+}, {
+  "id_geo": "141",
+  "departamento": "PUNILLA",
+  "localidad": "CHARBONIER",
+  "lat_centro": "-30.772088788",
+  "lon_centro": "-64.544159721",
+  "activo": "true"
+}, {
+  "id_geo": "149",
+  "departamento": "PUNILLA",
+  "localidad": "SAN ANTONIO DE ARREDONDO",
+  "lat_centro": "-31.514252033",
+  "lon_centro": "-64.541683152",
+  "activo": "true"
+}, {
+  "id_geo": "158",
+  "departamento": "PUNILLA",
+  "localidad": "ICHO CRUZ",
+  "lat_centro": "-31.487110263",
+  "lon_centro": "-64.561946662",
+  "activo": "true"
+}, {
+  "id_geo": "143",
+  "departamento": "PUNILLA",
+  "localidad": "MAYU SUMAJ",
+  "lat_centro": "-31.466019029",
+  "lon_centro": "-64.549640527",
+  "activo": "true"
+}, {
+  "id_geo": "423",
+  "departamento": "PUNILLA",
+  "localidad": "MALLIN",
+  "lat_centro": "-31.299306534",
+  "lon_centro": "-64.575201279",
+  "activo": "true"
+}, {
+  "id_geo": "153",
+  "departamento": "PUNILLA",
+  "localidad": "TANTI",
+  "lat_centro": "-31.360137933",
+  "lon_centro": "-64.580248883",
+  "activo": "true"
+}, {
+  "id_geo": "155",
+  "departamento": "PUNILLA",
+  "localidad": "VILLA CARLOS PAZ",
+  "lat_centro": "-31.421008119",
+  "lon_centro": "-64.507935186",
+  "activo": "true"
+}, {
+  "id_geo": "138",
+  "departamento": "PUNILLA",
+  "localidad": "BIALET MASSE",
+  "lat_centro": "-31.312307825",
+  "lon_centro": "-64.462965201",
+  "activo": "true"
+}, {
+  "id_geo": "147",
+  "departamento": "PUNILLA",
+  "localidad": "LA FALDA",
+  "lat_centro": "-31.094447737",
+  "lon_centro": "-64.488368639",
+  "activo": "true"
+}, {
+  "id_geo": "151",
+  "departamento": "PUNILLA",
+  "localidad": "SAN ROQUE",
+  "lat_centro": "-31.347399226",
+  "lon_centro": "-64.454925957",
+  "activo": "true"
+}, {
+  "id_geo": "139",
+  "departamento": "PUNILLA",
+  "localidad": "CAPILLA DEL MONTE",
+  "lat_centro": "-30.856396718",
+  "lon_centro": "-64.526264638",
+  "activo": "true"
+}, {
+  "id_geo": "427",
+  "departamento": "PUNILLA",
+  "localidad": "VILLA INDEPENDENCIA",
+  "lat_centro": "-31.453057458",
+  "lon_centro": "-64.509550478",
+  "activo": "true"
+}, {
+  "id_geo": "154",
+  "departamento": "PUNILLA",
+  "localidad": "VALLE HERMOSO",
+  "lat_centro": "-31.117285786",
+  "lon_centro": "-64.48425162",
+  "activo": "true"
+}, {
+  "id_geo": "430",
+  "departamento": "PUNILLA",
+  "localidad": "COPINA",
+  "lat_centro": "-31.552077462",
+  "lon_centro": "-64.694999525",
+  "activo": "true"
+}, {
+  "id_geo": "522",
+  "departamento": "PUNILLA",
+  "localidad": "CUESTA BLANCA",
+  "lat_centro": "-31.478777919",
+  "lon_centro": "-64.57734554",
+  "activo": "true"
+}, {
+  "id_geo": "426",
+  "departamento": "PUNILLA",
+  "localidad": "EL DURAZNO",
+  "lat_centro": "-31.351911171",
+  "lon_centro": "-64.657336939",
+  "activo": "true"
+}, {
+  "id_geo": "428",
+  "departamento": "PUNILLA",
+  "localidad": "LOS PAREDONES (Santa Isabel)",
+  "lat_centro": "-30.789103756",
+  "lon_centro": "-64.543550563",
+  "activo": "true"
+}, {
+  "id_geo": "157",
+  "departamento": "PUNILLA",
+  "localidad": "VILLA PARQUE SIQUIMAN",
+  "lat_centro": "-31.345718753",
+  "lon_centro": "-64.480262208",
+  "activo": "true"
+}, {
+  "id_geo": "152",
+  "departamento": "PUNILLA",
+  "localidad": "SANTA MARIA DE PUNILLA",
+  "lat_centro": "-31.270329747",
+  "lon_centro": "-64.465340599",
+  "activo": "true"
+}, {
+  "id_geo": "144",
+  "departamento": "PUNILLA",
+  "localidad": "VILLA SANTA CRUZ DEL LAGO",
+  "lat_centro": "-31.369778334",
+  "lon_centro": "-64.514724418",
+  "activo": "true"
+}, {
+  "id_geo": "150",
+  "departamento": "PUNILLA",
+  "localidad": "SAN ESTEBAN",
+  "lat_centro": "-30.919977229",
+  "lon_centro": "-64.536007676",
+  "activo": "true"
+}, {
+  "id_geo": "523",
+  "departamento": "PUNILLA",
+  "localidad": "ESTANCIA VIEJA",
+  "lat_centro": "-31.385644325",
+  "lon_centro": "-64.525799631",
+  "activo": "true"
+}, {
+  "id_geo": "429",
+  "departamento": "PUNILLA",
+  "localidad": "QUEBRADA DE LUNA",
+  "lat_centro": "-30.77736266",
+  "lon_centro": "-64.495895778",
+  "activo": "true"
+}, {
+  "id_geo": "524",
+  "departamento": "PUNILLA",
+  "localidad": "CABALANGO",
+  "lat_centro": "-31.400507175",
+  "lon_centro": "-64.56402385",
+  "activo": "true"
+}, {
+  "id_geo": "424",
+  "departamento": "PUNILLA",
+  "localidad": "MOLINARI",
+  "lat_centro": "-31.193886308",
+  "lon_centro": "-64.471795896",
+  "activo": "true"
+}, {
+  "id_geo": "140",
+  "departamento": "PUNILLA",
+  "localidad": "CASA GRANDE",
+  "lat_centro": "-31.161576472",
+  "lon_centro": "-64.478335418",
+  "activo": "true"
+}, {
+  "id_geo": "431",
+  "departamento": "PUNILLA",
+  "localidad": "PIEDRAS GRANDES",
+  "lat_centro": "-31.079849812",
+  "lon_centro": "-64.510287334",
+  "activo": "true"
+}, {
+  "id_geo": "148",
+  "departamento": "PUNILLA",
+  "localidad": "LOS COCOS",
+  "lat_centro": "-30.926970973",
+  "lon_centro": "-64.50261281",
+  "activo": "true"
+}, {
+  "id_geo": "432",
+  "departamento": "PUNILLA",
+  "localidad": "SAN JOSE",
+  "lat_centro": "-31.275767623",
+  "lon_centro": "-64.57257406",
+  "activo": "true"
+}, {
+  "id_geo": "142",
+  "departamento": "PUNILLA",
+  "localidad": "COSQUIN",
+  "lat_centro": "-31.240577561",
+  "lon_centro": "-64.465531727",
+  "activo": "true"
+}, {
+  "id_geo": "506",
+  "departamento": "PUNILLA",
+  "localidad": "TALA HUASI",
+  "lat_centro": "-31.467413567",
+  "lon_centro": "-64.571744018",
+  "activo": "true"
+}, {
+  "id_geo": "425",
+  "departamento": "PUNILLA",
+  "localidad": "LOS GIGANTES",
+  "lat_centro": "-31.395635694",
+  "lon_centro": "-64.772167988",
+  "activo": "true"
+}, {
+  "id_geo": "156",
+  "departamento": "PUNILLA",
+  "localidad": "VILLA GIARDINO",
+  "lat_centro": "-31.050395701",
+  "lon_centro": "-64.499063931",
+  "activo": "true"
+}, {
+  "id_geo": "146",
+  "departamento": "PUNILLA",
+  "localidad": "LA CUMBRE",
+  "lat_centro": "-30.979240945",
+  "lon_centro": "-64.490902574",
+  "activo": "true"
+}, {
+  "id_geo": "213",
+  "departamento": "RIO SECO",
+  "localidad": "SAN PEDRO (Gutemberg)",
+  "lat_centro": "-29.698092664",
+  "lon_centro": "-63.55714494",
+  "activo": "true"
+}, {
+  "id_geo": "211",
+  "departamento": "RIO SECO",
+  "localidad": "CHAÑAR VIEJO",
+  "lat_centro": "-30.013962585",
+  "lon_centro": "-63.850369318",
+  "activo": "true"
+}, {
+  "id_geo": "221",
+  "departamento": "RIO SECO",
+  "localidad": "VILLA DE MARIA DE RIO SECO",
+  "lat_centro": "-29.904359511",
+  "lon_centro": "-63.722313394",
+  "activo": "true"
+}, {
+  "id_geo": "215",
+  "departamento": "RIO SECO",
+  "localidad": "LOS HOYOS",
+  "lat_centro": "-29.802439748",
+  "lon_centro": "-63.627362196",
+  "activo": "true"
+}, {
+  "id_geo": "470",
+  "departamento": "RIO SECO",
+  "localidad": "LA ESTANCIA",
+  "lat_centro": "-29.851798651",
+  "lon_centro": "-63.087660701",
+  "activo": "true"
+}, {
+  "id_geo": "220",
+  "departamento": "RIO SECO",
+  "localidad": "VILLA CANDELARIA",
+  "lat_centro": "-29.816298467",
+  "lon_centro": "-63.354838086",
+  "activo": "true"
+}, {
+  "id_geo": "218",
+  "departamento": "RIO SECO",
+  "localidad": "SANTA ELENA",
+  "lat_centro": "-30.117469055",
+  "lon_centro": "-63.843804809",
+  "activo": "true"
+}, {
+  "id_geo": "558",
+  "departamento": "RIO SECO",
+  "localidad": "Eufrasio Loza",
+  "lat_centro": "-29.925084844",
+  "lon_centro": "-63.589051674",
+  "activo": "true"
+}, {
+  "id_geo": "214",
+  "departamento": "RIO SECO",
+  "localidad": "LA RINCONADA",
+  "lat_centro": "-30.181858405",
+  "lon_centro": "-62.94444273",
+  "activo": "true"
+}, {
+  "id_geo": "210",
+  "departamento": "RIO SECO",
+  "localidad": "CERRO COLORADO",
+  "lat_centro": "-30.094232879",
+  "lon_centro": "-63.929322477",
+  "activo": "true"
+}, {
+  "id_geo": "212",
+  "departamento": "RIO SECO",
+  "localidad": "EUFRASIO LOZA - CAND. NORTE",
+  "lat_centro": "-29.924724144",
+  "lon_centro": "-63.588919557",
+  "activo": "true"
+}, {
+  "id_geo": "469",
+  "departamento": "RIO SECO",
+  "localidad": "GUTEMBERG",
+  "lat_centro": "-29.721545574",
+  "lon_centro": "-63.514482516",
+  "activo": "true"
+}, {
+  "id_geo": "219",
+  "departamento": "RIO SECO",
+  "localidad": "SEBASTIAN ELCANO",
+  "lat_centro": "-30.16145204",
+  "lon_centro": "-63.593456452",
+  "activo": "true"
+}, {
+  "id_geo": "217",
+  "departamento": "RIO SECO",
+  "localidad": "RAYO CORTADO",
+  "lat_centro": "-30.074263619",
+  "lon_centro": "-63.8249873",
+  "activo": "true"
+}, {
+  "id_geo": "216",
+  "departamento": "RIO SECO",
+  "localidad": "PUESTO DE CASTRO",
+  "lat_centro": "-30.270516497",
+  "lon_centro": "-63.425295656",
+  "activo": "true"
+}, {
+  "id_geo": "165",
+  "departamento": "RÍO CUARTO",
+  "localidad": "CHAJAN",
+  "lat_centro": "-33.556335767",
+  "lon_centro": "-65.00527103",
+  "activo": "true"
+}, {
+  "id_geo": "178",
+  "departamento": "RÍO CUARTO",
+  "localidad": "MONTE DE LOS GAUCHOS",
+  "lat_centro": "-33.636888805",
+  "lon_centro": "-63.890000519",
+  "activo": "true"
+}, {
+  "id_geo": "453",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LA BRIANZA",
+  "lat_centro": "-33.232863081",
+  "lon_centro": "-64.168634425",
+  "activo": "true"
+}, {
+  "id_geo": "175",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LAS PEÑAS SUR",
+  "lat_centro": "-32.534853269",
+  "lon_centro": "-64.105223699",
+  "activo": "true"
+}, {
+  "id_geo": "176",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LAS VERTIENTES",
+  "lat_centro": "-33.283944132",
+  "lon_centro": "-64.578145442",
+  "activo": "true"
+}, {
+  "id_geo": "448",
+  "departamento": "RÍO CUARTO",
+  "localidad": "CUATRO VIENTOS",
+  "lat_centro": "-33.072502773",
+  "lon_centro": "-64.577700392",
+  "activo": "true"
+}, {
+  "id_geo": "173",
+  "departamento": "RÍO CUARTO",
+  "localidad": "VILLA EL CHACAY",
+  "lat_centro": "-32.889656805",
+  "lon_centro": "-64.866445211",
+  "activo": "true"
+}, {
+  "id_geo": "452",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LA AGUADA",
+  "lat_centro": "-32.96889036",
+  "lon_centro": "-64.650596819",
+  "activo": "true"
+}, {
+  "id_geo": "181",
+  "departamento": "RÍO CUARTO",
+  "localidad": "SAN BASILIO",
+  "lat_centro": "-33.497854085",
+  "lon_centro": "-64.315178761",
+  "activo": "true"
+}, {
+  "id_geo": "182",
+  "departamento": "RÍO CUARTO",
+  "localidad": "SANTA CATALINA (EST. HOLMBERG)",
+  "lat_centro": "-33.205941396",
+  "lon_centro": "-64.434822116",
+  "activo": "true"
+}, {
+  "id_geo": "166",
+  "departamento": "RÍO CUARTO",
+  "localidad": "CHUCUL",
+  "lat_centro": "-33.00895552",
+  "lon_centro": "-64.171248482",
+  "activo": "true"
+}, {
+  "id_geo": "186",
+  "departamento": "RÍO CUARTO",
+  "localidad": "WASHINGTON",
+  "lat_centro": "-33.873367801",
+  "lon_centro": "-64.688624938",
+  "activo": "true"
+}, {
+  "id_geo": "461",
+  "departamento": "RÍO CUARTO",
+  "localidad": "TRES POZOS",
+  "lat_centro": "-32.409568448",
+  "lon_centro": "-64.105835344",
+  "activo": "true"
+}, {
+  "id_geo": "162",
+  "departamento": "RÍO CUARTO",
+  "localidad": "ALPA CORRAL",
+  "lat_centro": "-32.690401158",
+  "lon_centro": "-64.721175551",
+  "activo": "true"
+}, {
+  "id_geo": "161",
+  "departamento": "RÍO CUARTO",
+  "localidad": "ALCIRA - EST. GIGENA",
+  "lat_centro": "-32.757070815",
+  "lon_centro": "-64.337864464",
+  "activo": "true"
+}, {
+  "id_geo": "444",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LA GILDA",
+  "lat_centro": "-33.210382144",
+  "lon_centro": "-64.256110223",
+  "activo": "true"
+}, {
+  "id_geo": "163",
+  "departamento": "RÍO CUARTO",
+  "localidad": "BERROTARAN",
+  "lat_centro": "-32.452860297",
+  "lon_centro": "-64.385435076",
+  "activo": "true"
+}, {
+  "id_geo": "159",
+  "departamento": "RÍO CUARTO",
+  "localidad": "ACHIRAS",
+  "lat_centro": "-33.17701819",
+  "lon_centro": "-64.994472909",
+  "activo": "true"
+}, {
+  "id_geo": "177",
+  "departamento": "RÍO CUARTO",
+  "localidad": "MALENA",
+  "lat_centro": "-33.48933786",
+  "lon_centro": "-64.432001545",
+  "activo": "true"
+}, {
+  "id_geo": "457",
+  "departamento": "RÍO CUARTO",
+  "localidad": "PUEYRREDON",
+  "lat_centro": "-33.975878218",
+  "lon_centro": "-64.347300066",
+  "activo": "true"
+}, {
+  "id_geo": "183",
+  "departamento": "RÍO CUARTO",
+  "localidad": "SUCO",
+  "lat_centro": "-33.439471251",
+  "lon_centro": "-64.831666966",
+  "activo": "true"
+}, {
+  "id_geo": "458",
+  "departamento": "RÍO CUARTO",
+  "localidad": "PUNTA DEL AGUA",
+  "lat_centro": "-33.574258898",
+  "lon_centro": "-64.104611276",
+  "activo": "true"
+}, {
+  "id_geo": "454",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LAS GAMAS",
+  "lat_centro": "-32.477962164",
+  "lon_centro": "-64.113662325",
+  "activo": "true"
+}, {
+  "id_geo": "459",
+  "departamento": "RÍO CUARTO",
+  "localidad": "SAN AMBROSIO",
+  "lat_centro": "-33.239509284",
+  "lon_centro": "-64.145307507",
+  "activo": "true"
+}, {
+  "id_geo": "185",
+  "departamento": "RÍO CUARTO",
+  "localidad": "VICUÑA MACKENNA (Est. Torres)",
+  "lat_centro": "-33.917237527",
+  "lon_centro": "-64.390226475",
+  "activo": "true"
+}, {
+  "id_geo": "169",
+  "departamento": "RÍO CUARTO",
+  "localidad": "ELENA - MARIA ELENA",
+  "lat_centro": "-32.572072545",
+  "lon_centro": "-64.392951269",
+  "activo": "true"
+}, {
+  "id_geo": "449",
+  "departamento": "RÍO CUARTO",
+  "localidad": "ESPINILLOS",
+  "lat_centro": "-33.007418696",
+  "lon_centro": "-64.352796277",
+  "activo": "true"
+}, {
+  "id_geo": "160",
+  "departamento": "RÍO CUARTO",
+  "localidad": "ADELIA MARIA",
+  "lat_centro": "-33.631613608",
+  "lon_centro": "-64.020837845",
+  "activo": "true"
+}, {
+  "id_geo": "174",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LAS HIGUERAS",
+  "lat_centro": "-33.089238808",
+  "lon_centro": "-64.286826742",
+  "activo": "true"
+}, {
+  "id_geo": "451",
+  "departamento": "RÍO CUARTO",
+  "localidad": "GENERAL SOLER",
+  "lat_centro": "-33.949041221",
+  "lon_centro": "-64.246956639",
+  "activo": "true"
+}, {
+  "id_geo": "512",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LAS ALBAHACAS",
+  "lat_centro": "-32.89249332",
+  "lon_centro": "-64.843596823",
+  "activo": "true"
+}, {
+  "id_geo": "179",
+  "departamento": "RÍO CUARTO",
+  "localidad": "RIO CUARTO",
+  "lat_centro": "-33.124268003",
+  "lon_centro": "-64.348741951",
+  "activo": "true"
+}, {
+  "id_geo": "180",
+  "departamento": "RÍO CUARTO",
+  "localidad": "SAMPACHO",
+  "lat_centro": "-33.384539963",
+  "lon_centro": "-64.721985852",
+  "activo": "true"
+}, {
+  "id_geo": "446",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LA BARRANQUITA",
+  "lat_centro": "-33.365452903",
+  "lon_centro": "-64.678595642",
+  "activo": "true"
+}, {
+  "id_geo": "450",
+  "departamento": "RÍO CUARTO",
+  "localidad": "GENERAL PAUNERO",
+  "lat_centro": "-33.87559407",
+  "lon_centro": "-65.021840233",
+  "activo": "true"
+}, {
+  "id_geo": "455",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LOS JOTES",
+  "lat_centro": "-33.249940011",
+  "lon_centro": "-65.137579997",
+  "activo": "true"
+}, {
+  "id_geo": "167",
+  "departamento": "RÍO CUARTO",
+  "localidad": "CORONEL BAIGORRIA",
+  "lat_centro": "-32.849545465",
+  "lon_centro": "-64.359865341",
+  "activo": "true"
+}, {
+  "id_geo": "172",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LAS ACEQUIAS",
+  "lat_centro": "-33.282243868",
+  "lon_centro": "-63.975875641",
+  "activo": "true"
+}, {
+  "id_geo": "184",
+  "departamento": "RÍO CUARTO",
+  "localidad": "TOSQUITA",
+  "lat_centro": "-33.818822455",
+  "lon_centro": "-64.456931856",
+  "activo": "true"
+}, {
+  "id_geo": "164",
+  "departamento": "RÍO CUARTO",
+  "localidad": "BULNES",
+  "lat_centro": "-33.503284737",
+  "lon_centro": "-64.675569079",
+  "activo": "true"
+}, {
+  "id_geo": "171",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LA CAUTIVA",
+  "lat_centro": "-33.978591846",
+  "lon_centro": "-64.08429773",
+  "activo": "true"
+}, {
+  "id_geo": "456",
+  "departamento": "RÍO CUARTO",
+  "localidad": "PASO DE RIO SECO",
+  "lat_centro": "-32.907617382",
+  "lon_centro": "-64.585124274",
+  "activo": "true"
+}, {
+  "id_geo": "460",
+  "departamento": "RÍO CUARTO",
+  "localidad": "SANTA RITA",
+  "lat_centro": "-32.901556883",
+  "lon_centro": "-64.611404946",
+  "activo": "true"
+}, {
+  "id_geo": "168",
+  "departamento": "RÍO CUARTO",
+  "localidad": "CORONEL MOLDES",
+  "lat_centro": "-33.623088389",
+  "lon_centro": "-64.597103269",
+  "activo": "true"
+}, {
+  "id_geo": "443",
+  "departamento": "RÍO CUARTO",
+  "localidad": "PASO DEL DURAZNO",
+  "lat_centro": "-33.169538342",
+  "lon_centro": "-64.048077033",
+  "activo": "true"
+}, {
+  "id_geo": "170",
+  "departamento": "RÍO CUARTO",
+  "localidad": "LA CAROLINA (El PotosI)",
+  "lat_centro": "-33.18683989",
+  "lon_centro": "-64.725107432",
+  "activo": "true"
+}, {
+  "id_geo": "528",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "LAS GRAMILLAS",
+  "lat_centro": "-31.132775458",
+  "lon_centro": "-63.228292875",
+  "activo": "true"
+}, {
+  "id_geo": "462",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "CAÑADA HONDA",
+  "lat_centro": "-30.547315713",
+  "lon_centro": "-63.481381397",
+  "activo": "true"
+}, {
+  "id_geo": "464",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "MONTE DEL ROSARIO",
+  "lat_centro": "-30.985747898",
+  "lon_centro": "-63.604348231",
+  "activo": "true"
+}, {
+  "id_geo": "196",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "LA PARA",
+  "lat_centro": "-30.892534036",
+  "lon_centro": "-63.001066821",
+  "activo": "true"
+}, {
+  "id_geo": "193",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "EL CRISPIN",
+  "lat_centro": "-31.017977367",
+  "lon_centro": "-63.605170243",
+  "activo": "true"
+}, {
+  "id_geo": "465",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "KILOMETRO 691",
+  "lat_centro": "-31.292239352",
+  "lon_centro": "-63.727982485",
+  "activo": "true"
+}, {
+  "id_geo": "201",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "LAS SALADAS",
+  "lat_centro": "-30.759466799",
+  "lon_centro": "-63.203502626",
+  "activo": "true"
+}, {
+  "id_geo": "203",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "OBISPO TREJO",
+  "lat_centro": "-30.781193674",
+  "lon_centro": "-63.413050165",
+  "activo": "true"
+}, {
+  "id_geo": "204",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "PIQUILLIN",
+  "lat_centro": "-31.299585691",
+  "lon_centro": "-63.759103893",
+  "activo": "true"
+}, {
+  "id_geo": "205",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "ESTACION MERCEDES",
+  "lat_centro": "-30.978050603",
+  "lon_centro": "-63.259614408",
+  "activo": "true"
+}, {
+  "id_geo": "206",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "RIO PRIMERO",
+  "lat_centro": "-31.329184103",
+  "lon_centro": "-63.62186184",
+  "activo": "true"
+}, {
+  "id_geo": "463",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "TALA NORTE (El Alcalde)",
+  "lat_centro": "-31.115454597",
+  "lon_centro": "-63.601917157",
+  "activo": "true"
+}, {
+  "id_geo": "209",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "VILLA FONTANA",
+  "lat_centro": "-30.894015478",
+  "lon_centro": "-63.115919133",
+  "activo": "true"
+}, {
+  "id_geo": "467",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "POZO DE LA LOMA",
+  "lat_centro": "-31.280835708",
+  "lon_centro": "-63.302118482",
+  "activo": "true"
+}, {
+  "id_geo": "199",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "LA QUINTA",
+  "lat_centro": "-31.06225959",
+  "lon_centro": "-63.15012226",
+  "activo": "true"
+}, {
+  "id_geo": "190",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "CHALACEA",
+  "lat_centro": "-30.760942712",
+  "lon_centro": "-63.560117498",
+  "activo": "true"
+}, {
+  "id_geo": "197",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "LA POSTA",
+  "lat_centro": "-30.565356401",
+  "lon_centro": "-63.516306224",
+  "activo": "true"
+}, {
+  "id_geo": "208",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "VILLA SANTA ROSA",
+  "lat_centro": "-31.151473503",
+  "lon_centro": "-63.401590576",
+  "activo": "true"
+}, {
+  "id_geo": "468",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "RANGEL",
+  "lat_centro": "-31.122454195",
+  "lon_centro": "-63.788923567",
+  "activo": "true"
+}, {
+  "id_geo": "529",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "DIEGO DE ROJAS",
+  "lat_centro": "-31.028643329",
+  "lon_centro": "-63.340274106",
+  "activo": "true"
+}, {
+  "id_geo": "466",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "NUEVA ANDALUCIA",
+  "lat_centro": "-31.200818283",
+  "lon_centro": "-63.744168958",
+  "activo": "true"
+}, {
+  "id_geo": "189",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "CAPILLA DE LOS REMEDIOS",
+  "lat_centro": "-31.430201448",
+  "lon_centro": "-63.832148618",
+  "activo": "true"
+}, {
+  "id_geo": "200",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "COLONIA LAS CUATRO ESQUINAS",
+  "lat_centro": "-31.207042306",
+  "lon_centro": "-63.228028976",
+  "activo": "true"
+}, {
+  "id_geo": "188",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "CAÑADA DE MACHADO",
+  "lat_centro": "-31.428925404",
+  "lon_centro": "-63.587032038",
+  "activo": "true"
+}, {
+  "id_geo": "191",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "COMECHINGONES",
+  "lat_centro": "-31.169950461",
+  "lon_centro": "-63.60351208",
+  "activo": "true"
+}, {
+  "id_geo": "187",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "ATAHONA",
+  "lat_centro": "-30.903526294",
+  "lon_centro": "-63.705564799",
+  "activo": "true"
+}, {
+  "id_geo": "207",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "SAGRADA FAMILIA",
+  "lat_centro": "-31.289728524",
+  "lon_centro": "-63.445466748",
+  "activo": "true"
+}, {
+  "id_geo": "202",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "MAQUINISTA GALLINI",
+  "lat_centro": "-30.907440674",
+  "lon_centro": "-63.532118997",
+  "activo": "true"
+}, {
+  "id_geo": "192",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "PLAZA DE MERCEDES",
+  "lat_centro": "-30.977225064",
+  "lon_centro": "-63.261176081",
+  "activo": "true"
+}, {
+  "id_geo": "195",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "PEDRO E. VIVAS (KM. 658)",
+  "lat_centro": "-31.370179776",
+  "lon_centro": "-63.532596265",
+  "activo": "true"
+}, {
+  "id_geo": "198",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "LA PUERTA",
+  "lat_centro": "-30.892610904",
+  "lon_centro": "-63.253265126",
+  "activo": "true"
+}, {
+  "id_geo": "194",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "ESQUINA",
+  "lat_centro": "-31.077294794",
+  "lon_centro": "-63.793567309",
+  "activo": "true"
+}, {
+  "id_geo": "239",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "RINCON",
+  "lat_centro": "-31.595384285",
+  "lon_centro": "-63.615542188",
+  "activo": "true"
+}, {
+  "id_geo": "234",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "MANFREDI",
+  "lat_centro": "-31.844061604",
+  "lon_centro": "-63.746075867",
+  "activo": "true"
+}, {
+  "id_geo": "236",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "ONCATIVO",
+  "lat_centro": "-31.912841515",
+  "lon_centro": "-63.683682209",
+  "activo": "true"
+}, {
+  "id_geo": "471",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "PLAZA COLAZO",
+  "lat_centro": "-31.944609954",
+  "lon_centro": "-63.367052719",
+  "activo": "true"
+}, {
+  "id_geo": "230",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "LAGUNA LARGA",
+  "lat_centro": "-31.778398747",
+  "lon_centro": "-63.802735668",
+  "activo": "true"
+}, {
+  "id_geo": "223",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "CALCHIN OESTE",
+  "lat_centro": "-31.863386805",
+  "lon_centro": "-63.278168921",
+  "activo": "true"
+}, {
+  "id_geo": "241",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "Agua de Oro",
+  "lat_centro": "-31.387126459",
+  "lon_centro": "-63.418212765",
+  "activo": "true"
+}, {
+  "id_geo": "240",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "RIO SEGUNDO",
+  "lat_centro": "-31.650157268",
+  "lon_centro": "-63.911862887",
+  "activo": "true"
+}, {
+  "id_geo": "235",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "MATORRALES",
+  "lat_centro": "-31.714471542",
+  "lon_centro": "-63.511851169",
+  "activo": "true"
+}, {
+  "id_geo": "229",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "IMPIRA",
+  "lat_centro": "-31.796597199",
+  "lon_centro": "-63.651126253",
+  "activo": "true"
+}, {
+  "id_geo": "242",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "VILLA DEL ROSARIO",
+  "lat_centro": "-31.554012306",
+  "lon_centro": "-63.534143359",
+  "activo": "true"
+}, {
+  "id_geo": "231",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "LAS JUNTURAS",
+  "lat_centro": "-31.831391703",
+  "lon_centro": "-63.450636554",
+  "activo": "true"
+}, {
+  "id_geo": "224",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "CAPILLA DEL CARMEN",
+  "lat_centro": "-31.508169364",
+  "lon_centro": "-63.342136251",
+  "activo": "true"
+}, {
+  "id_geo": "225",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "CARRILOBO",
+  "lat_centro": "-31.871645978",
+  "lon_centro": "-63.116513079",
+  "activo": "true"
+}, {
+  "id_geo": "232",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "LOS CHAÑARITOS",
+  "lat_centro": "-31.40213343",
+  "lon_centro": "-63.33210873",
+  "activo": "true"
+}, {
+  "id_geo": "228",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "COSTA SACATE",
+  "lat_centro": "-31.647103236",
+  "lon_centro": "-63.759900473",
+  "activo": "true"
+}, {
+  "id_geo": "227",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "COLONIA VIDELA",
+  "lat_centro": "-31.917511167",
+  "lon_centro": "-63.504714693",
+  "activo": "true"
+}, {
+  "id_geo": "226",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "COLAZO",
+  "lat_centro": "-31.964288703",
+  "lon_centro": "-63.383401849",
+  "activo": "true"
+}, {
+  "id_geo": "233",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "LUQUE",
+  "lat_centro": "-31.646879287",
+  "lon_centro": "-63.344804486",
+  "activo": "true"
+}, {
+  "id_geo": "237",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "PILAR",
+  "lat_centro": "-31.680455342",
+  "lon_centro": "-63.881491786",
+  "activo": "true"
+}, {
+  "id_geo": "238",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "POZO DEL MOLLE",
+  "lat_centro": "-32.019438641",
+  "lon_centro": "-62.919924393",
+  "activo": "true"
+}, {
+  "id_geo": "222",
+  "departamento": "RÍO SEGUNDO",
+  "localidad": "CALCHIN",
+  "lat_centro": "-31.667939177",
+  "lon_centro": "-63.200680798",
+  "activo": "true"
+}, {
+  "id_geo": "472",
+  "departamento": "SAN ALBERTO",
+  "localidad": "SAN HUBERTO",
+  "lat_centro": "-31.835778614",
+  "lon_centro": "-64.992087074",
+  "activo": "true"
+}, {
+  "id_geo": "244",
+  "departamento": "SAN ALBERTO",
+  "localidad": "SAUCE ARRIBA",
+  "lat_centro": "-31.919122904",
+  "lon_centro": "-65.168929147",
+  "activo": "true"
+}, {
+  "id_geo": "473",
+  "departamento": "SAN ALBERTO",
+  "localidad": "LAS MARAVILLAS",
+  "lat_centro": "-31.659565429",
+  "lon_centro": "-65.030667247",
+  "activo": "true"
+}, {
+  "id_geo": "248",
+  "departamento": "SAN ALBERTO",
+  "localidad": "PANAHOLMA",
+  "lat_centro": "-31.633066449",
+  "lon_centro": "-65.054621856",
+  "activo": "true"
+}, {
+  "id_geo": "250",
+  "departamento": "SAN ALBERTO",
+  "localidad": "SAN PEDRO",
+  "lat_centro": "-31.935933519",
+  "lon_centro": "-65.219940923",
+  "activo": "true"
+}, {
+  "id_geo": "474",
+  "departamento": "SAN ALBERTO",
+  "localidad": "VILLA INTICO",
+  "lat_centro": "-31.756784482",
+  "lon_centro": "-65.001194961",
+  "activo": "true"
+}, {
+  "id_geo": "521",
+  "departamento": "SAN ALBERTO",
+  "localidad": "LAS CALLES",
+  "lat_centro": "-31.832791293",
+  "lon_centro": "-64.973346741",
+  "activo": "true"
+}, {
+  "id_geo": "243",
+  "departamento": "SAN ALBERTO",
+  "localidad": "AMBUL",
+  "lat_centro": "-31.489681723",
+  "lon_centro": "-65.056647997",
+  "activo": "true"
+}, {
+  "id_geo": "245",
+  "departamento": "SAN ALBERTO",
+  "localidad": "LAS RABONAS",
+  "lat_centro": "-31.872903384",
+  "lon_centro": "-64.949712549",
+  "activo": "true"
+}, {
+  "id_geo": "251",
+  "departamento": "SAN ALBERTO",
+  "localidad": "SAN VICENTE",
+  "lat_centro": "-31.85139741",
+  "lon_centro": "-65.429909765",
+  "activo": "true"
+}, {
+  "id_geo": "249",
+  "departamento": "SAN ALBERTO",
+  "localidad": "SAN LORENZO",
+  "lat_centro": "-31.673071641",
+  "lon_centro": "-65.018715953",
+  "activo": "true"
+}, {
+  "id_geo": "246",
+  "departamento": "SAN ALBERTO",
+  "localidad": "MINA CLAVERO",
+  "lat_centro": "-31.726791128",
+  "lon_centro": "-65.005529002",
+  "activo": "true"
+}, {
+  "id_geo": "252",
+  "departamento": "SAN ALBERTO",
+  "localidad": "VILLA CURA BROCHERO",
+  "lat_centro": "-31.706362664",
+  "lon_centro": "-65.019105216",
+  "activo": "true"
+}, {
+  "id_geo": "511",
+  "departamento": "SAN ALBERTO",
+  "localidad": "ARROYO DE LOS PATOS",
+  "lat_centro": "-31.764706709",
+  "lon_centro": "-64.999942175",
+  "activo": "true"
+}, {
+  "id_geo": "253",
+  "departamento": "SAN ALBERTO",
+  "localidad": "VILLA SARMIENTO",
+  "lat_centro": "-31.934282725",
+  "lon_centro": "-65.18800567",
+  "activo": "true"
+}, {
+  "id_geo": "247",
+  "departamento": "SAN ALBERTO",
+  "localidad": "NONO",
+  "lat_centro": "-31.79557209",
+  "lon_centro": "-65.003403092",
+  "activo": "true"
+}, {
+  "id_geo": "262",
+  "departamento": "SAN JAVIER",
+  "localidad": "SAN JOSE",
+  "lat_centro": "-31.957846695",
+  "lon_centro": "-65.313835567",
+  "activo": "true"
+}, {
+  "id_geo": "264",
+  "departamento": "SAN JAVIER",
+  "localidad": "VILLA DOLORES",
+  "lat_centro": "-31.94405003",
+  "lon_centro": "-65.196133255",
+  "activo": "true"
+}, {
+  "id_geo": "476",
+  "departamento": "SAN JAVIER",
+  "localidad": "QUEBRADA DE LOS POZOS",
+  "lat_centro": "-31.919315948",
+  "lon_centro": "-65.038988545",
+  "activo": "true"
+}, {
+  "id_geo": "259",
+  "departamento": "SAN JAVIER",
+  "localidad": "LOS HORNILLOS",
+  "lat_centro": "-31.895505934",
+  "lon_centro": "-64.988733564",
+  "activo": "true"
+}, {
+  "id_geo": "257",
+  "departamento": "SAN JAVIER",
+  "localidad": "LAS TAPIAS",
+  "lat_centro": "-31.960425794",
+  "lon_centro": "-65.096375562",
+  "activo": "true"
+}, {
+  "id_geo": "260",
+  "departamento": "SAN JAVIER",
+  "localidad": "LUYABA",
+  "lat_centro": "-32.148345094",
+  "lon_centro": "-65.05661837",
+  "activo": "true"
+}, {
+  "id_geo": "254",
+  "departamento": "SAN JAVIER",
+  "localidad": "CONLARA",
+  "lat_centro": "-32.078854252",
+  "lon_centro": "-65.231265143",
+  "activo": "true"
+}, {
+  "id_geo": "263",
+  "departamento": "SAN JAVIER",
+  "localidad": "VILLA DE LAS ROSAS",
+  "lat_centro": "-31.949283336",
+  "lon_centro": "-65.053611285",
+  "activo": "true"
+}, {
+  "id_geo": "475",
+  "departamento": "SAN JAVIER",
+  "localidad": "EL CARRIZAL",
+  "lat_centro": "-32.113905329",
+  "lon_centro": "-65.043484453",
+  "activo": "true"
+}, {
+  "id_geo": "261",
+  "departamento": "SAN JAVIER",
+  "localidad": "SAN JAVIER",
+  "lat_centro": "-32.026842229",
+  "lon_centro": "-65.032054522",
+  "activo": "true"
+}, {
+  "id_geo": "258",
+  "departamento": "SAN JAVIER",
+  "localidad": "LOS CERRILLOS",
+  "lat_centro": "-31.972479556",
+  "lon_centro": "-65.441497895",
+  "activo": "true"
+}, {
+  "id_geo": "256",
+  "departamento": "SAN JAVIER",
+  "localidad": "LA POBLACION",
+  "lat_centro": "-32.066006522",
+  "lon_centro": "-65.030908779",
+  "activo": "true"
+}, {
+  "id_geo": "255",
+  "departamento": "SAN JAVIER",
+  "localidad": "LA PAZ",
+  "lat_centro": "-32.217452501",
+  "lon_centro": "-65.047565359",
+  "activo": "true"
+}, {
+  "id_geo": "300",
+  "departamento": "SAN JUSTO",
+  "localidad": "VILLA CONCEPCION DEL TIO",
+  "lat_centro": "-31.322466147",
+  "lon_centro": "-62.814480662",
+  "activo": "true"
+}, {
+  "id_geo": "284",
+  "departamento": "SAN JUSTO",
+  "localidad": "LA PAQUITA",
+  "lat_centro": "-30.907048842",
+  "lon_centro": "-62.215434981",
+  "activo": "true"
+}, {
+  "id_geo": "294",
+  "departamento": "SAN JUSTO",
+  "localidad": "SACANTA",
+  "lat_centro": "-31.663300013",
+  "lon_centro": "-63.04531995",
+  "activo": "true"
+}, {
+  "id_geo": "270",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA ANITA",
+  "lat_centro": "-31.119460496",
+  "lon_centro": "-62.235458238",
+  "activo": "true"
+}, {
+  "id_geo": "290",
+  "departamento": "SAN JUSTO",
+  "localidad": "MORTEROS",
+  "lat_centro": "-30.710700511",
+  "lon_centro": "-62.004443798",
+  "activo": "true"
+}, {
+  "id_geo": "488",
+  "departamento": "SAN JUSTO",
+  "localidad": "PLAZA SAN FRANCISCO",
+  "lat_centro": "-31.370707615",
+  "lon_centro": "-62.097644781",
+  "activo": "true"
+}, {
+  "id_geo": "486",
+  "departamento": "SAN JUSTO",
+  "localidad": "PLAZA GENERAL DEHEZA",
+  "lat_centro": "-31.629517978",
+  "lon_centro": "-63.037882016",
+  "activo": "true"
+}, {
+  "id_geo": "286",
+  "departamento": "SAN JUSTO",
+  "localidad": "LAS VARAS",
+  "lat_centro": "-31.801293798",
+  "lon_centro": "-62.617103774",
+  "activo": "true"
+}, {
+  "id_geo": "269",
+  "departamento": "SAN JUSTO",
+  "localidad": "BRINCKMANN",
+  "lat_centro": "-30.866527938",
+  "lon_centro": "-62.035646255",
+  "activo": "true"
+}, {
+  "id_geo": "525",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA ITURRASPE",
+  "lat_centro": "-31.207941874",
+  "lon_centro": "-62.111104449",
+  "activo": "true"
+}, {
+  "id_geo": "480",
+  "departamento": "SAN JUSTO",
+  "localidad": "MONTE REDONDO",
+  "lat_centro": "-31.489240105",
+  "lon_centro": "-62.164209366",
+  "activo": "true"
+}, {
+  "id_geo": "268",
+  "departamento": "SAN JUSTO",
+  "localidad": "BALNEARIA",
+  "lat_centro": "-31.010704698",
+  "lon_centro": "-62.667098968",
+  "activo": "true"
+}, {
+  "id_geo": "282",
+  "departamento": "SAN JUSTO",
+  "localidad": "FREYRE",
+  "lat_centro": "-31.164730291",
+  "lon_centro": "-62.097633615",
+  "activo": "true"
+}, {
+  "id_geo": "297",
+  "departamento": "SAN JUSTO",
+  "localidad": "SEEBER (Est. Seeber)",
+  "lat_centro": "-30.9239724",
+  "lon_centro": "-61.973733429",
+  "activo": "true"
+}, {
+  "id_geo": "298",
+  "departamento": "SAN JUSTO",
+  "localidad": "LA TORDILLA",
+  "lat_centro": "-31.24315082",
+  "lon_centro": "-63.062211978",
+  "activo": "true"
+}, {
+  "id_geo": "492",
+  "departamento": "SAN JUSTO",
+  "localidad": "SAN ANTONIO",
+  "lat_centro": "-31.510546191",
+  "lon_centro": "-62.785173554",
+  "activo": "true"
+}, {
+  "id_geo": "280",
+  "departamento": "SAN JUSTO",
+  "localidad": "EL FORTIN",
+  "lat_centro": "-31.967244819",
+  "lon_centro": "-62.302628086",
+  "activo": "true"
+}, {
+  "id_geo": "291",
+  "departamento": "SAN JUSTO",
+  "localidad": "PLAZA LUXARDO",
+  "lat_centro": "-31.301752498",
+  "lon_centro": "-62.229167307",
+  "activo": "true"
+}, {
+  "id_geo": "273",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA PROSPERIDAD",
+  "lat_centro": "-31.630495035",
+  "lon_centro": "-62.366360666",
+  "activo": "true"
+}, {
+  "id_geo": "265",
+  "departamento": "SAN JUSTO",
+  "localidad": "ALICIA",
+  "lat_centro": "-31.938745517",
+  "lon_centro": "-62.465790389",
+  "activo": "true"
+}, {
+  "id_geo": "277",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA VIGNAUD",
+  "lat_centro": "-30.841620351",
+  "lon_centro": "-61.955837977",
+  "activo": "true"
+}, {
+  "id_geo": "527",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA LAS PICHANAS",
+  "lat_centro": "-31.303982135",
+  "lon_centro": "-62.936681849",
+  "activo": "true"
+}, {
+  "id_geo": "483",
+  "departamento": "SAN JUSTO",
+  "localidad": "LA CURVA",
+  "lat_centro": "-31.439092095",
+  "lon_centro": "-63.115270535",
+  "activo": "true"
+}, {
+  "id_geo": "275",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA SAN PEDRO",
+  "lat_centro": "-30.783601859",
+  "lon_centro": "-61.917563118",
+  "activo": "true"
+}, {
+  "id_geo": "482",
+  "departamento": "SAN JUSTO",
+  "localidad": "JERONIMO CORTES",
+  "lat_centro": "-30.985177364",
+  "lon_centro": "-62.542985287",
+  "activo": "true"
+}, {
+  "id_geo": "484",
+  "departamento": "SAN JUSTO",
+  "localidad": "VILLA DEL TRANSITO",
+  "lat_centro": "-31.450525994",
+  "lon_centro": "-63.193975526",
+  "activo": "true"
+}, {
+  "id_geo": "266",
+  "departamento": "SAN JUSTO",
+  "localidad": "ALTOS DE CHIPION",
+  "lat_centro": "-30.956348266",
+  "lon_centro": "-62.337887712",
+  "activo": "true"
+}, {
+  "id_geo": "281",
+  "departamento": "SAN JUSTO",
+  "localidad": "EL TIO",
+  "lat_centro": "-31.384555067",
+  "lon_centro": "-62.828477875",
+  "activo": "true"
+}, {
+  "id_geo": "279",
+  "departamento": "SAN JUSTO",
+  "localidad": "EL ARAÑADO",
+  "lat_centro": "-31.741229464",
+  "lon_centro": "-62.893338359",
+  "activo": "true"
+}, {
+  "id_geo": "477",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA 10 DE JULIO",
+  "lat_centro": "-30.52120801",
+  "lon_centro": "-62.116906335",
+  "activo": "true"
+}, {
+  "id_geo": "295",
+  "departamento": "SAN JUSTO",
+  "localidad": "SAN FRANCISCO",
+  "lat_centro": "-31.427610015",
+  "lon_centro": "-62.086627342",
+  "activo": "true"
+}, {
+  "id_geo": "283",
+  "departamento": "SAN JUSTO",
+  "localidad": "LA FRANCIA",
+  "lat_centro": "-31.406443416",
+  "lon_centro": "-62.63435264",
+  "activo": "true"
+}, {
+  "id_geo": "288",
+  "departamento": "SAN JUSTO",
+  "localidad": "MARULL",
+  "lat_centro": "-30.994528583",
+  "lon_centro": "-62.825839833",
+  "activo": "true"
+}, {
+  "id_geo": "289",
+  "departamento": "SAN JUSTO",
+  "localidad": "MIRAMAR",
+  "lat_centro": "-30.914521559",
+  "lon_centro": "-62.674912297",
+  "activo": "true"
+}, {
+  "id_geo": "267",
+  "departamento": "SAN JUSTO",
+  "localidad": "ARROYITO",
+  "lat_centro": "-31.419392249",
+  "lon_centro": "-63.050345097",
+  "activo": "true"
+}, {
+  "id_geo": "287",
+  "departamento": "SAN JUSTO",
+  "localidad": "LAS VARILLAS",
+  "lat_centro": "-31.873119951",
+  "lon_centro": "-62.718800475",
+  "activo": "true"
+}, {
+  "id_geo": "489",
+  "departamento": "SAN JUSTO",
+  "localidad": "LUXARDO",
+  "lat_centro": "-31.304857978",
+  "lon_centro": "-62.133513867",
+  "activo": "true"
+}, {
+  "id_geo": "296",
+  "departamento": "SAN JUSTO",
+  "localidad": "SATURNINO M. LASPIUR",
+  "lat_centro": "-31.702938351",
+  "lon_centro": "-62.484024334",
+  "activo": "true"
+}, {
+  "id_geo": "276",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA VALTELINA",
+  "lat_centro": "-31.052955963",
+  "lon_centro": "-62.23543348",
+  "activo": "true"
+}, {
+  "id_geo": "301",
+  "departamento": "SAN JUSTO",
+  "localidad": "VILLA SAN ESTEBAN",
+  "lat_centro": "-31.633549701",
+  "lon_centro": "-62.896771324",
+  "activo": "true"
+}, {
+  "id_geo": "487",
+  "departamento": "SAN JUSTO",
+  "localidad": "TRINCHERA",
+  "lat_centro": "-31.945491522",
+  "lon_centro": "-62.820262457",
+  "activo": "true"
+}, {
+  "id_geo": "272",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA MARINA",
+  "lat_centro": "-31.248503232",
+  "lon_centro": "-62.363960164",
+  "activo": "true"
+}, {
+  "id_geo": "292",
+  "departamento": "SAN JUSTO",
+  "localidad": "PORTEÑA",
+  "lat_centro": "-31.013923351",
+  "lon_centro": "-62.063328539",
+  "activo": "true"
+}, {
+  "id_geo": "526",
+  "departamento": "SAN JUSTO",
+  "localidad": "TORO PUJIO",
+  "lat_centro": "-31.109040285",
+  "lon_centro": "-62.987651399",
+  "activo": "true"
+}, {
+  "id_geo": "481",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA MALBERTINA",
+  "lat_centro": "-31.362366616",
+  "lon_centro": "-62.324034722",
+  "activo": "true"
+}, {
+  "id_geo": "491",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA SANTA MARIA",
+  "lat_centro": "-31.60332789",
+  "lon_centro": "-62.428797708",
+  "activo": "true"
+}, {
+  "id_geo": "478",
+  "departamento": "SAN JUSTO",
+  "localidad": "EL FUERTECITO",
+  "lat_centro": "-31.402906429",
+  "lon_centro": "-62.976376273",
+  "activo": "true"
+}, {
+  "id_geo": "293",
+  "departamento": "SAN JUSTO",
+  "localidad": "QUEBRACHO HERRADO",
+  "lat_centro": "-31.549600093",
+  "lon_centro": "-62.225725882",
+  "activo": "true"
+}, {
+  "id_geo": "490",
+  "departamento": "SAN JUSTO",
+  "localidad": "PLAYA GRANDE",
+  "lat_centro": "-30.904045261",
+  "lon_centro": "-62.767972917",
+  "activo": "true"
+}, {
+  "id_geo": "274",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA SAN BARTOLOME",
+  "lat_centro": "-31.528315915",
+  "lon_centro": "-62.724492572",
+  "activo": "true"
+}, {
+  "id_geo": "485",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA GENERAL DEHEZA",
+  "lat_centro": "-31.629679877",
+  "lon_centro": "-63.043396185",
+  "activo": "true"
+}, {
+  "id_geo": "278",
+  "departamento": "SAN JUSTO",
+  "localidad": "DEVOTO",
+  "lat_centro": "-31.403977737",
+  "lon_centro": "-62.306132942",
+  "activo": "true"
+}, {
+  "id_geo": "479",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA LUIS A. SAUZE",
+  "lat_centro": "-31.460309343",
+  "lon_centro": "-62.134090591",
+  "activo": "true"
+}, {
+  "id_geo": "285",
+  "departamento": "SAN JUSTO",
+  "localidad": "LA TORDILLA (Colonia la Tordilla)",
+  "lat_centro": "-31.235244056",
+  "lon_centro": "-63.05990405",
+  "activo": "true"
+}, {
+  "id_geo": "271",
+  "departamento": "SAN JUSTO",
+  "localidad": "COLONIA LA COYUNDA",
+  "lat_centro": "-31.245401248",
+  "lon_centro": "-62.925665682",
+  "activo": "true"
+}, {
+  "id_geo": "299",
+  "departamento": "SAN JUSTO",
+  "localidad": "TRANSITO",
+  "lat_centro": "-31.425106503",
+  "lon_centro": "-63.195407873",
+  "activo": "true"
+}, {
+  "id_geo": "303",
+  "departamento": "SANTA MARÍA",
+  "localidad": "BOWER",
+  "lat_centro": "-31.557673639",
+  "lon_centro": "-64.19446523",
+  "activo": "true"
+}, {
+  "id_geo": "497",
+  "departamento": "SANTA MARÍA",
+  "localidad": "JOSE DE LA QUINTANA",
+  "lat_centro": "-31.805827502",
+  "lon_centro": "-64.414611902",
+  "activo": "true"
+}, {
+  "id_geo": "309",
+  "departamento": "SANTA MARÍA",
+  "localidad": "MALAGUEÑO",
+  "lat_centro": "-31.464804015",
+  "lon_centro": "-64.358420845",
+  "activo": "true"
+}, {
+  "id_geo": "513",
+  "departamento": "SANTA MARÍA",
+  "localidad": "VILLA LA BOLSA",
+  "lat_centro": "-31.732442314",
+  "lon_centro": "-64.428890516",
+  "activo": "true"
+}, {
+  "id_geo": "315",
+  "departamento": "SANTA MARÍA",
+  "localidad": "VILLA SAN ISIDRO",
+  "lat_centro": "-31.823279068",
+  "lon_centro": "-64.387665455",
+  "activo": "true"
+}, {
+  "id_geo": "495",
+  "departamento": "SANTA MARÍA",
+  "localidad": "SIERRAS DE ORO",
+  "lat_centro": "-31.461978751",
+  "lon_centro": "-64.413252374",
+  "activo": "true"
+}, {
+  "id_geo": "494",
+  "departamento": "SANTA MARÍA",
+  "localidad": "YOCSINA",
+  "lat_centro": "-31.445498785",
+  "lon_centro": "-64.367161522",
+  "activo": "true"
+}, {
+  "id_geo": "305",
+  "departamento": "SANTA MARÍA",
+  "localidad": "LOS CEDROS",
+  "lat_centro": "-31.537744911",
+  "lon_centro": "-64.315295344",
+  "activo": "true"
+}, {
+  "id_geo": "312",
+  "departamento": "SANTA MARÍA",
+  "localidad": "SAN CLEMENTE",
+  "lat_centro": "-31.71665549",
+  "lon_centro": "-64.626592921",
+  "activo": "true"
+}, {
+  "id_geo": "515",
+  "departamento": "SANTA MARÍA",
+  "localidad": "VILLA LOS AROMOS",
+  "lat_centro": "-31.719833972",
+  "lon_centro": "-64.438355978",
+  "activo": "true"
+}, {
+  "id_geo": "514",
+  "departamento": "SANTA MARÍA",
+  "localidad": "VALLE DE ANISACATE",
+  "lat_centro": "-31.735327252",
+  "lon_centro": "-64.419352257",
+  "activo": "true"
+}, {
+  "id_geo": "304",
+  "departamento": "SANTA MARÍA",
+  "localidad": "DESPEÑADEROS (EstaciOn Lucas A. de Olmos)",
+  "lat_centro": "-31.817049081",
+  "lon_centro": "-64.288984153",
+  "activo": "true"
+}, {
+  "id_geo": "496",
+  "departamento": "SANTA MARÍA",
+  "localidad": "COSME",
+  "lat_centro": "-31.718397445",
+  "lon_centro": "-64.095018233",
+  "activo": "true"
+}, {
+  "id_geo": "516",
+  "departamento": "SANTA MARÍA",
+  "localidad": "FALDA DEL CARMEN",
+  "lat_centro": "-31.585463176",
+  "lon_centro": "-64.454881572",
+  "activo": "true"
+}, {
+  "id_geo": "518",
+  "departamento": "SANTA MARÍA",
+  "localidad": "POTRERO DE GARAY",
+  "lat_centro": "-31.800997657",
+  "lon_centro": "-64.545405884",
+  "activo": "true"
+}, {
+  "id_geo": "316",
+  "departamento": "SANTA MARÍA",
+  "localidad": "LA PAISANITA",
+  "lat_centro": "-31.698403159",
+  "lon_centro": "-64.478601846",
+  "activo": "true"
+}, {
+  "id_geo": "493",
+  "departamento": "SANTA MARÍA",
+  "localidad": "VILLA SAN NICOLAS",
+  "lat_centro": "-31.426939134",
+  "lon_centro": "-64.453562856",
+  "activo": "true"
+}, {
+  "id_geo": "306",
+  "departamento": "SANTA MARÍA",
+  "localidad": "LA RANCHERITA",
+  "lat_centro": "-31.757064962",
+  "lon_centro": "-64.460435599",
+  "activo": "true"
+}, {
+  "id_geo": "307",
+  "departamento": "SANTA MARÍA",
+  "localidad": "LA SERRANITA",
+  "lat_centro": "-31.736698939",
+  "lon_centro": "-64.457451098",
+  "activo": "true"
+}, {
+  "id_geo": "311",
+  "departamento": "SANTA MARÍA",
+  "localidad": "RAFAEL GARCIA",
+  "lat_centro": "-31.646606959",
+  "lon_centro": "-64.261126713",
+  "activo": "true"
+}, {
+  "id_geo": "517",
+  "departamento": "SANTA MARÍA",
+  "localidad": "VILLA DEL PRADO",
+  "lat_centro": "-31.62068511",
+  "lon_centro": "-64.391292387",
+  "activo": "true"
+}, {
+  "id_geo": "520",
+  "departamento": "SANTA MARÍA",
+  "localidad": "DIQUE CHICO",
+  "lat_centro": "-31.741894424",
+  "lon_centro": "-64.367135015",
+  "activo": "true"
+}, {
+  "id_geo": "310",
+  "departamento": "SANTA MARÍA",
+  "localidad": "MONTE RALO",
+  "lat_centro": "-31.910690191",
+  "lon_centro": "-64.239777396",
+  "activo": "true"
+}, {
+  "id_geo": "519",
+  "departamento": "SANTA MARÍA",
+  "localidad": "VILLA CIUDAD DE AMERICA",
+  "lat_centro": "-31.790443252",
+  "lon_centro": "-64.52153688",
+  "activo": "true"
+}, {
+  "id_geo": "313",
+  "departamento": "SANTA MARÍA",
+  "localidad": "TOLEDO",
+  "lat_centro": "-31.51599594",
+  "lon_centro": "-64.027084095",
+  "activo": "true"
+}, {
+  "id_geo": "314",
+  "departamento": "SANTA MARÍA",
+  "localidad": "ANISACATE",
+  "lat_centro": "-31.717568456",
+  "lon_centro": "-64.404442097",
+  "activo": "true"
+}, {
+  "id_geo": "308",
+  "departamento": "SANTA MARÍA",
+  "localidad": "LOZADA",
+  "lat_centro": "-31.648453877",
+  "lon_centro": "-64.089974793",
+  "activo": "true"
+}, {
+  "id_geo": "302",
+  "departamento": "SANTA MARÍA",
+  "localidad": "ALTA GRACIA",
+  "lat_centro": "-31.657680543",
+  "lon_centro": "-64.428827857",
+  "activo": "true"
+}, {
+  "id_geo": "317",
+  "departamento": "SANTA MARÍA",
+  "localidad": "VILLA PARQUE SANTA ANA",
+  "lat_centro": "-31.589307729",
+  "lon_centro": "-64.353692833",
+  "activo": "true"
+}, {
+  "id_geo": "556",
+  "departamento": "SOBREMONTE",
+  "localidad": "Chuña Huasi",
+  "lat_centro": "-29.935112719",
+  "lon_centro": "-64.113111037",
+  "activo": "true"
+}, {
+  "id_geo": "557",
+  "departamento": "SOBREMONTE",
+  "localidad": "Pozo Nuevo",
+  "lat_centro": "-29.577406855",
+  "lon_centro": "-64.104760597",
+  "activo": "true"
+}, {
+  "id_geo": "319",
+  "departamento": "SOBREMONTE",
+  "localidad": "CAMINIAGA",
+  "lat_centro": "-30.069997537",
+  "lon_centro": "-64.054549964",
+  "activo": "true"
+}, {
+  "id_geo": "320",
+  "departamento": "SOBREMONTE",
+  "localidad": "SAN FRANCISCO DEL CHAÑAR",
+  "lat_centro": "-29.788260018",
+  "lon_centro": "-63.94307036",
+  "activo": "true"
+}, {
+  "id_geo": "327",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "JAMES CRAICK",
+  "lat_centro": "-32.161310812",
+  "lon_centro": "-63.465196979",
+  "activo": "true"
+}, {
+  "id_geo": "331",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "OLIVA",
+  "lat_centro": "-32.041317001",
+  "lon_centro": "-63.569382601",
+  "activo": "true"
+}, {
+  "id_geo": "337",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "VILLA ASCASUBI",
+  "lat_centro": "-32.164356294",
+  "lon_centro": "-63.892554816",
+  "activo": "true"
+}, {
+  "id_geo": "329",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "LAS PERDICES",
+  "lat_centro": "-32.698191453",
+  "lon_centro": "-63.708309968",
+  "activo": "true"
+}, {
+  "id_geo": "328",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "LAS ISLETILLAS",
+  "lat_centro": "-32.510093276",
+  "lon_centro": "-63.92901824",
+  "activo": "true"
+}, {
+  "id_geo": "336",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "TANCACHA",
+  "lat_centro": "-32.240212723",
+  "lon_centro": "-63.979947035",
+  "activo": "true"
+}, {
+  "id_geo": "332",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "PAMPAYASTA NORTE",
+  "lat_centro": "-32.241677344",
+  "lon_centro": "-63.64218587",
+  "activo": "true"
+}, {
+  "id_geo": "335",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "RIO TERCERO",
+  "lat_centro": "-32.173104613",
+  "lon_centro": "-64.113056455",
+  "activo": "true"
+}, {
+  "id_geo": "325",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "GENERAL FOTHERINGHAM",
+  "lat_centro": "-32.323424179",
+  "lon_centro": "-63.870430015",
+  "activo": "true"
+}, {
+  "id_geo": "333",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "PAMPAYASTA SUD",
+  "lat_centro": "-32.250757979",
+  "lon_centro": "-63.651014848",
+  "activo": "true"
+}, {
+  "id_geo": "323",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "CORRALITO",
+  "lat_centro": "-32.025258687",
+  "lon_centro": "-64.193158828",
+  "activo": "true"
+}, {
+  "id_geo": "322",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "COLONIA ALMADA",
+  "lat_centro": "-32.033346841",
+  "lon_centro": "-63.862879192",
+  "activo": "true"
+}, {
+  "id_geo": "324",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "DALMACIO VELEZ SARSFIELD",
+  "lat_centro": "-32.610871353",
+  "lon_centro": "-63.57988347",
+  "activo": "true"
+}, {
+  "id_geo": "330",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "LOS ZORROS",
+  "lat_centro": "-32.045933939",
+  "lon_centro": "-63.201797663",
+  "activo": "true"
+}, {
+  "id_geo": "334",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "PUNTA DEL AGUA",
+  "lat_centro": "-32.575422782",
+  "lon_centro": "-63.810163462",
+  "activo": "true"
+}, {
+  "id_geo": "500",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "SALTO NORTE",
+  "lat_centro": "-32.126418087",
+  "lon_centro": "-64.218156793",
+  "activo": "true"
+}, {
+  "id_geo": "321",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "ALMAFUERTE",
+  "lat_centro": "-32.19345899",
+  "lon_centro": "-64.254381364",
+  "activo": "true"
+}, {
+  "id_geo": "326",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "HERNANDO",
+  "lat_centro": "-32.427609042",
+  "lon_centro": "-63.733011721",
+  "activo": "true"
+}, {
+  "id_geo": "342",
+  "departamento": "TOTORAL",
+  "localidad": "CANDELARIA SUD",
+  "lat_centro": "-30.843315966",
+  "lon_centro": "-63.803256835",
+  "activo": "true"
+}, {
+  "id_geo": "501",
+  "departamento": "TOTORAL",
+  "localidad": "TOTORAL GRANDE",
+  "lat_centro": "-30.7040084",
+  "lon_centro": "-64.075335208",
+  "activo": "true"
+}, {
+  "id_geo": "343",
+  "departamento": "TOTORAL",
+  "localidad": "SARMIENTO (Gral. Alvear)",
+  "lat_centro": "-30.774196009",
+  "lon_centro": "-64.10898793",
+  "activo": "true"
+}, {
+  "id_geo": "530",
+  "departamento": "TOTORAL",
+  "localidad": "LOS MISTOLES",
+  "lat_centro": "-30.625975047",
+  "lon_centro": "-63.886720932",
+  "activo": "true"
+}, {
+  "id_geo": "345",
+  "departamento": "TOTORAL",
+  "localidad": "SINSACATE",
+  "lat_centro": "-30.943088045",
+  "lon_centro": "-64.094986939",
+  "activo": "true"
+}, {
+  "id_geo": "346",
+  "departamento": "TOTORAL",
+  "localidad": "VILLA DEL TOTORAL",
+  "lat_centro": "-30.703844911",
+  "lon_centro": "-64.068299888",
+  "activo": "true"
+}, {
+  "id_geo": "340",
+  "departamento": "TOTORAL",
+  "localidad": "LA PAMPA",
+  "lat_centro": "-30.93485074",
+  "lon_centro": "-64.280661074",
+  "activo": "true"
+}, {
+  "id_geo": "338",
+  "departamento": "TOTORAL",
+  "localidad": "CAÑADA DE LUQUE",
+  "lat_centro": "-30.737088326",
+  "lon_centro": "-63.72365595",
+  "activo": "true"
+}, {
+  "id_geo": "341",
+  "departamento": "TOTORAL",
+  "localidad": "LAS PEÑAS",
+  "lat_centro": "-30.561748877",
+  "lon_centro": "-64.001984437",
+  "activo": "true"
+}, {
+  "id_geo": "344",
+  "departamento": "TOTORAL",
+  "localidad": "SIMBOLAR",
+  "lat_centro": "-30.475262612",
+  "lon_centro": "-63.985040169",
+  "activo": "true"
+}, {
+  "id_geo": "339",
+  "departamento": "TOTORAL",
+  "localidad": "CAPILLA DE SITON",
+  "lat_centro": "-30.572966017",
+  "lon_centro": "-63.651747865",
+  "activo": "true"
+}, {
+  "id_geo": "502",
+  "departamento": "TOTORAL",
+  "localidad": "EL TALITA (Villa Gutierrez)",
+  "lat_centro": "-30.677906593",
+  "lon_centro": "-64.161782523",
+  "activo": "true"
+}, {
+  "id_geo": "351",
+  "departamento": "TULUMBA",
+  "localidad": "V. ROSARIO DEL SALADILLO",
+  "lat_centro": "-30.431487468",
+  "lon_centro": "-63.473785514",
+  "activo": "true"
+}, {
+  "id_geo": "349",
+  "departamento": "TULUMBA",
+  "localidad": "LAS ARRIAS",
+  "lat_centro": "-30.381282332",
+  "lon_centro": "-63.596663451",
+  "activo": "true"
+}, {
+  "id_geo": "348",
+  "departamento": "TULUMBA",
+  "localidad": "EL RODEO",
+  "lat_centro": "-30.175606861",
+  "lon_centro": "-63.86572492",
+  "activo": "true"
+}, {
+  "id_geo": "354",
+  "departamento": "TULUMBA",
+  "localidad": "SAN PEDRO NORTE",
+  "lat_centro": "-30.088754371",
+  "lon_centro": "-64.155952884",
+  "activo": "true"
+}, {
+  "id_geo": "347",
+  "departamento": "TULUMBA",
+  "localidad": "CHURQUI CAÑADA",
+  "lat_centro": "-30.174475197",
+  "lon_centro": "-63.930582512",
+  "activo": "true"
+}, {
+  "id_geo": "559",
+  "departamento": "TULUMBA",
+  "localidad": "Rosario del Saladillo",
+  "lat_centro": "-30.4313571",
+  "lon_centro": "-63.473810507",
+  "activo": "true"
+}, {
+  "id_geo": "355",
+  "departamento": "TULUMBA",
+  "localidad": "VILLA TULUMBA",
+  "lat_centro": "-30.397479918",
+  "lon_centro": "-64.12317604",
+  "activo": "true"
+}, {
+  "id_geo": "353",
+  "departamento": "TULUMBA",
+  "localidad": "SAN JOSE DE LAS SALINAS",
+  "lat_centro": "-30.009083974",
+  "lon_centro": "-64.625129475",
+  "activo": "true"
+}, {
+  "id_geo": "350",
+  "departamento": "TULUMBA",
+  "localidad": "LUCIO V. MANSILLA",
+  "lat_centro": "-29.806368232",
+  "lon_centro": "-64.706541598",
+  "activo": "true"
+}, {
+  "id_geo": "352",
+  "departamento": "TULUMBA",
+  "localidad": "SAN JOSE DE LA DORMIDA",
+  "lat_centro": "-30.354600118",
+  "lon_centro": "-63.946646855",
+  "activo": "true"
+}, {
+  "id_geo": "380",
+  "departamento": "UNIÓN",
+  "localidad": "VIAMONTE",
+  "lat_centro": "-33.747069237",
+  "lon_centro": "-63.098901637",
+  "activo": "true"
+}, {
+  "id_geo": "377",
+  "departamento": "UNIÓN",
+  "localidad": "PUEBLO ITALIANO",
+  "lat_centro": "-33.880716067",
+  "lon_centro": "-62.840726404",
+  "activo": "true"
+}, {
+  "id_geo": "361",
+  "departamento": "UNIÓN",
+  "localidad": "BELL VILLE",
+  "lat_centro": "-32.628561234",
+  "lon_centro": "-62.689119133",
+  "activo": "true"
+}, {
+  "id_geo": "378",
+  "departamento": "UNIÓN",
+  "localidad": "SAN ANTONIO DE LITIN",
+  "lat_centro": "-32.212864198",
+  "lon_centro": "-62.633007718",
+  "activo": "true"
+}, {
+  "id_geo": "360",
+  "departamento": "UNIÓN",
+  "localidad": "BALLESTEROS SUD",
+  "lat_centro": "-32.588599591",
+  "lon_centro": "-63.027043865",
+  "activo": "true"
+}, {
+  "id_geo": "368",
+  "departamento": "UNIÓN",
+  "localidad": "IDIAZABAL",
+  "lat_centro": "-32.813144536",
+  "lon_centro": "-63.032909873",
+  "activo": "true"
+}, {
+  "id_geo": "358",
+  "departamento": "UNIÓN",
+  "localidad": "ANA ZUMARAN",
+  "lat_centro": "-32.390826485",
+  "lon_centro": "-63.057487432",
+  "activo": "true"
+}, {
+  "id_geo": "372",
+  "departamento": "UNIÓN",
+  "localidad": "MONTE MAIZ",
+  "lat_centro": "-33.204558655",
+  "lon_centro": "-62.60125388",
+  "activo": "true"
+}, {
+  "id_geo": "359",
+  "departamento": "UNIÓN",
+  "localidad": "BALLESTEROS",
+  "lat_centro": "-32.545381021",
+  "lon_centro": "-62.983295989",
+  "activo": "true"
+}, {
+  "id_geo": "371",
+  "departamento": "UNIÓN",
+  "localidad": "MONTE LEÑA (General Bustos)",
+  "lat_centro": "-32.611289398",
+  "lon_centro": "-62.59034185",
+  "activo": "true"
+}, {
+  "id_geo": "376",
+  "departamento": "UNIÓN",
+  "localidad": "PASCANAS",
+  "lat_centro": "-33.124988087",
+  "lon_centro": "-63.042691251",
+  "activo": "true"
+}, {
+  "id_geo": "374",
+  "departamento": "UNIÓN",
+  "localidad": "NOETINGER",
+  "lat_centro": "-32.366743649",
+  "lon_centro": "-62.312072754",
+  "activo": "true"
+}, {
+  "id_geo": "504",
+  "departamento": "UNIÓN",
+  "localidad": "RAMON J. CARCANO",
+  "lat_centro": "-32.489328003",
+  "lon_centro": "-63.104360451",
+  "activo": "true"
+}, {
+  "id_geo": "375",
+  "departamento": "UNIÓN",
+  "localidad": "ORDOÑEZ",
+  "lat_centro": "-32.841273404",
+  "lon_centro": "-62.866054584",
+  "activo": "true"
+}, {
+  "id_geo": "357",
+  "departamento": "UNIÓN",
+  "localidad": "ALTO ALEGRE",
+  "lat_centro": "-32.346095874",
+  "lon_centro": "-62.88534734",
+  "activo": "true"
+}, {
+  "id_geo": "381",
+  "departamento": "UNIÓN",
+  "localidad": "WENCESLAO ESCALANTE",
+  "lat_centro": "-33.172020698",
+  "lon_centro": "-62.769994162",
+  "activo": "true"
+}, {
+  "id_geo": "370",
+  "departamento": "UNIÓN",
+  "localidad": "LABORDE",
+  "lat_centro": "-33.15298984",
+  "lon_centro": "-62.856074984",
+  "activo": "true"
+}, {
+  "id_geo": "364",
+  "departamento": "UNIÓN",
+  "localidad": "CHILIBROSTE - SANTA CECILIA",
+  "lat_centro": "-32.332594664",
+  "lon_centro": "-62.513600171",
+  "activo": "true"
+}, {
+  "id_geo": "362",
+  "departamento": "UNIÓN",
+  "localidad": "BENJAMIN GOULD",
+  "lat_centro": "-33.590120569",
+  "lon_centro": "-62.730388834",
+  "activo": "true"
+}, {
+  "id_geo": "356",
+  "departamento": "UNIÓN",
+  "localidad": "ALDEA SANTA MARIA",
+  "lat_centro": "-33.694876113",
+  "lon_centro": "-62.911480282",
+  "activo": "true"
+}, {
+  "id_geo": "367",
+  "departamento": "UNIÓN",
+  "localidad": "COLONIA BREMEN",
+  "lat_centro": "-33.463495653",
+  "lon_centro": "-62.7323843",
+  "activo": "true"
+}, {
+  "id_geo": "366",
+  "departamento": "UNIÓN",
+  "localidad": "COLONIA BISMARCK",
+  "lat_centro": "-33.300305368",
+  "lon_centro": "-62.713299427",
+  "activo": "true"
+}, {
+  "id_geo": "505",
+  "departamento": "UNIÓN",
+  "localidad": "SAN SEVERO",
+  "lat_centro": "-33.541301529",
+  "lon_centro": "-63.043106196",
+  "activo": "true"
+}, {
+  "id_geo": "373",
+  "departamento": "UNIÓN",
+  "localidad": "MORRISON",
+  "lat_centro": "-32.593644399",
+  "lon_centro": "-62.836012845",
+  "activo": "true"
+}, {
+  "id_geo": "365",
+  "departamento": "UNIÓN",
+  "localidad": "CINTRA",
+  "lat_centro": "-32.308148539",
+  "lon_centro": "-62.653117549",
+  "activo": "true"
+}, {
+  "id_geo": "369",
+  "departamento": "UNIÓN",
+  "localidad": "VILLA LOS PATOS",
+  "lat_centro": "-32.767565236",
+  "lon_centro": "-62.727498344",
+  "activo": "true"
+}, {
+  "id_geo": "363",
+  "departamento": "UNIÓN",
+  "localidad": "CANALS",
+  "lat_centro": "-33.562384982",
+  "lon_centro": "-62.885596879",
+  "activo": "true"
+}, {
+  "id_geo": "507",
+  "departamento": "UNIÓN",
+  "localidad": "JUSTINIANO POSSE",
+  "lat_centro": "-32.88358666",
+  "lon_centro": "-62.680270407",
+  "activo": "true"
+}, {
+  "id_geo": "379",
+  "departamento": "UNIÓN",
+  "localidad": "SAN MARCOS SUD",
+  "lat_centro": "-32.630330189",
+  "lon_centro": "-62.481967049",
+  "activo": "true"
+}]

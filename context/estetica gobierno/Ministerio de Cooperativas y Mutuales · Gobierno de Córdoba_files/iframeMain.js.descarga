@@ -1,0 +1,127 @@
+var initialHeight;
+
+window.onload = function () {
+	initialHeight = window.screen.height;
+    var origin = "https://webchat.cba.gov.ar"
+	CreateOverlayDiv();
+    var iframe = document.getElementById("webchatService");
+
+    if (iframe) { 
+	iframe.style.height = "150px";
+	iframe.style.width = "300px";
+		iframe.contentWindow.postMessage('hello', '*');
+        iframe.addEventListener('load', function () {
+           iframe.contentWindow.postMessage('hello', '*');
+        });
+    }
+
+	
+    window.addEventListener("message", function (event) {
+		
+        if (event.origin != origin) return;
+		var iframe = document.getElementById("webchatService");
+		var data;
+		var height;
+		var width;
+		try
+		{
+		 data = JSON.parse(event.data);
+		 height = data['height'];
+		 width = data['width'];
+		}
+		catch{
+			var height = event.data.height;
+			var width = event.data.width;
+		}
+		 
+		if(height == 520) return;
+		 iframe.style.display = "none";
+		 
+		 var style = "";
+        if (height) {
+			style += 'height:' + height +  'px !important;';			         		   
+        }
+        if (width) {
+			style += 'width:' + width +  'px !important;';			                 
+        }		
+			
+		var scale = GetScale(height,width);
+		
+		if(scale < 1) {
+		style += "transform:  translate(-50%,50%) scale(" + scale.toFixed(1) + "); max-width:none!important;";
+		style += "position: fixed!important; left: 50%; bottom: 50%!important;";
+		}
+		
+		if(style)
+		{
+			iframe.setAttribute('style', style); 
+		}	
+		
+		iframe.style.display = "block";
+		
+		if(height > 150){
+			EnableOverlay();
+		}
+		else{
+			DisableOverlay();
+		}
+		
+        //console.info(event.data);
+    }, false);
+	
+	
+	 window.addEventListener("resize", function (event) {
+		 var iframe = document.getElementById("webchatService");
+		 var pb;
+		 
+		 if(initialHeight > window.innerHeight)
+		 {
+		 		 pb = 100 -(window.innerHeight/initialHeight)*100 + "%";				 
+		 }
+		 else{
+			 pb = "0";
+			 
+		 }
+		 initialHeight = window.innerHeight;
+		 iframe.style.paddingBottom = pb;
+	 },false)
+}
+
+function GetScale(height,width)
+{
+	var windowWidth = window.screen.width;
+	var windowHeight = window.screen.height;
+		
+	var scale = Math.min(windowWidth/width,windowHeight/height) * 0.8;	
+	return scale;	
+}
+
+function EnableOverlay()
+{
+	var div = document.getElementById("webchatOverlay");
+	div.style.display = "block";
+}
+
+function DisableOverlay()
+{
+	var div = document.getElementById("webchatOverlay");
+	div.style.display = "none";
+}
+
+function CreateOverlayDiv()
+{
+	var div = document.createElement("div");
+	div.setAttribute("id","webchatOverlay");
+	div.style.width = "100%";
+	div.style.height = "100%";
+	div.style.backgroundColor = "#00000099";
+	div.style.zIndex = "99999";
+	div.style.display = "none";
+	div.style.position = "fixed";
+	div.style.top = "0";
+	div.style.left = "0";
+	div.style.bottom = "0";
+	div.style.right = "0";
+	
+	document.getElementById("page").appendChild(div);
+}

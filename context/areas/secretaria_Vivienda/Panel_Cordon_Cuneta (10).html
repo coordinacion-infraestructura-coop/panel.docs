@@ -1,0 +1,1257 @@
+<html lang="es"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel — Cordón Cuneta y Adoquinado</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; background: #F1F8E9; color: #1C2833; font-size: 14px; }
+
+  .header { background: #1B5E20; color: #fff; padding: 0 24px; display: flex; align-items: center; gap: 14px; height: 62px; border-left: 6px solid #43A047; }
+  .header-logo  { font-size: 13px; font-weight: 700; color: #FFF9C4; letter-spacing: 1px; line-height: 1.3; }
+  .header-title { font-size: 16px; font-weight: 700; color: #fff; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink:0; }
+  .header-ts    { font-size: 11px; color: #A5D6A7; }
+  .btn-hdr { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 13px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 600; display:flex; align-items:center; gap:5px; white-space:nowrap; }
+  .btn-hdr:hover { background: rgba(255,255,255,0.25); }
+  .btn-hdr.save-btn { background: #43A047; border-color: #43A047; color: #1C2833; }
+  .btn-hdr.save-btn:hover { background: #388E3C; }
+
+  .save-hint { background: #43A047; color: #1C2833; text-align: center; padding: 7px 16px; font-size: 12px; font-weight: 700; display: none; }
+  .save-hint.visible { display: block; }
+
+  .summary { display: flex; gap: 12px; padding: 16px 24px 8px; flex-wrap: wrap; }
+  .scard { background: #fff; border-radius: 6px; padding: 12px 18px; min-width: 150px; box-shadow: 0 1px 5px rgba(27,94,32,.12); border-top: 4px solid #388E3C; }
+  .scard.monto { border-color: #1565C0; } .scard.ok { border-color: #2E7D32; } .scard.nodoc { border-color: #C62828; }
+  .scard .num { font-size: 28px; font-weight: 700; line-height: 1; color: #388E3C; }
+  .scard.monto .num { color: #1565C0; font-size: 20px; } .scard.ok .num { color: #2E7D32; } .scard.nodoc .num { color: #C62828; }
+
+  .scard.pres   { border-color: #E65100; cursor:pointer; }
+  .scard.saldo  { border-color: #6A1B9A; }
+  .scard.pres  .num { color: #E65100; font-size: 18px; }
+  .scard.saldo .num { color: #6A1B9A; font-size: 18px; }
+  .scard-edit { font-size: 10px; color: #aaa; margin-top:2px; }
+  .scard .lbl { font-size: 10px; color: #7F8C8D; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .filterbar { display: flex; gap: 10px; padding: 10px 24px; background: #fff; border-bottom: 1px solid #C8E6C9; align-items: center; flex-wrap: wrap; }
+  .filterbar label { font-size: 11px; font-weight: 700; color: #1B5E20; text-transform: uppercase; }
+  .filterbar input, .filterbar select { border: 1px solid #C8E6C9; border-radius: 4px; padding: 6px 10px; font-size: 13px; font-family: inherit; outline: none; }
+  .filterbar input:focus, .filterbar select:focus { border-color: #1B5E20; }
+  .filterbar input { width: 220px; }
+  .filter-count { margin-left: auto; font-size: 12px; color: #7F8C8D; }
+  .btn-clear { background: none; border: 1px solid #C8E6C9; color: #1B5E20; padding: 5px 11px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; }
+
+  .panel-wrap { background: #fff; margin: 0 24px 24px; border-radius: 6px; box-shadow: 0 2px 8px rgba(27,94,32,.10); border: 1px solid #C8E6C9; overflow: hidden; }
+  .panel-toolbar { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #F1F8E9; background: #E8F5E9; }
+  .panel-toolbar h2 { font-size: 12px; color: #1B5E20; flex: 1; font-weight: 700; }
+  .legend-wrap { display: flex; flex-wrap: wrap; gap: 8px; padding: 7px 14px; background: #E8F5E9; border-bottom: 1px solid #C8E6C9; }
+  .legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #4A5568; }
+  .legend-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead tr { background: #1B5E20; color: #fff; }
+  thead th { padding: 9px 10px; text-align: left; font-weight: 600; font-size: 11px; white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid #F1F8E9; }
+  tbody tr:hover { background: #FFF8F5; }
+  tbody tr.hidden-row { display: none; }
+  tbody td { padding: 7px 10px; vertical-align: middle; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .ok-si { background: #E8F5E9; color: #2E7D32; } .ok-no { background: #FFEBEE; color: #C62828; } .ok-tr { background: #FFF9C4; color: #F57F17; }
+  .doc-si { background: #E3F2FD; color: #1565C0; font-size: 10px; }
+  .avance-wrap { display: flex; align-items: center; gap: 6px; min-width: 80px; }
+  .avance-bar  { flex: 1; height: 6px; background: #E0E0E0; border-radius: 3px; overflow: hidden; }
+  .avance-fill { height: 100%; border-radius: 3px; }
+  .avance-pct  { font-size: 11px; color: #7F8C8D; min-width: 26px; }
+  .monto-cell { font-size: 11px; color: #1565C0; font-weight: 600; white-space: nowrap; }
+  .depto-tag  { background: #E8EAF6; color: #283593; padding: 2px 7px; border-radius: 10px; font-size: 10px; white-space: nowrap; }
+  .btn-icon { background: none; border: none; cursor: pointer; font-size: 13px; padding: 2px 4px; border-radius: 3px; opacity: 0.55; }
+  .btn-icon:hover { opacity: 1; background: #F1F8E9; }
+  .empty-state { text-align: center; padding: 44px 20px; color: #9E9E9E; font-size: 13px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(27,94,32,0.45); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #fff; border-radius: 8px; width: 740px; max-width: 97vw; max-height: 92vh; overflow-y: auto; box-shadow: 0 8px 30px rgba(0,0,0,0.22); }
+  .modal-sm { width: 500px; }
+  .modal-header { background: #1B5E20; color: #fff; padding: 14px 18px; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 1; }
+  .modal-header h3 { flex: 1; font-size: 14px; }
+  .modal-close { background: none; border: none; color: #A5D6A7; cursor: pointer; font-size: 20px; line-height: 1; }
+  .modal-close:hover { color: #fff; }
+  .modal-body { padding: 18px; }
+  .modal-footer { padding: 13px 18px; border-top: 1px solid #F1F8E9; display: flex; justify-content: flex-end; gap: 10px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 11px; font-weight: 700; color: #4A5568; text-transform: uppercase; letter-spacing: 0.4px; }
+  .form-group input, .form-group select, .form-group textarea { border: 1px solid #C8E6C9; border-radius: 4px; padding: 7px 9px; font-size: 13px; font-family: inherit; outline: none; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1B5E20; }
+  .sec-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #1B5E20; margin: 14px 0 8px; }
+  .estado-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+  .estado-section { background: #E8F5E9; border: 1px solid #C8E6C9; border-radius: 6px; padding: 10px; }
+  .estado-section h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #1B5E20; margin-bottom: 7px; font-weight: 700; }
+  .btn-cancel { background: #F1F8E9; color: #1B5E20; border: 1px solid #C8E6C9; padding: 7px 16px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-save   { background: #1B5E20; color: #fff; border: none; padding: 7px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .btn-save:hover { background: #388E3C; }
+  .btn-danger { background: #C62828; color: #fff; border: none; padding: 7px 18px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; }
+
+  .estado-list { display: flex; flex-direction: column; gap: 7px; }
+  .estado-row { display: flex; align-items: center; gap: 9px; background: #E8F5E9; border: 1px solid #C8E6C9; border-radius: 6px; padding: 9px 11px; }
+  .estado-row .swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.12); flex-shrink: 0; cursor: pointer; }
+  .estado-row input.nombre-estado { flex: 1; border: 1px solid #C8E6C9; border-radius: 4px; padding: 6px 9px; font-size: 13px; font-family: inherit; outline: none; }
+  .btn-del-estado { background: none; border: none; cursor: pointer; font-size: 15px; color: #C62828; opacity: 0.6; padding: 3px; }
+  .color-picker-wrap { position: relative; }
+  .color-grid { display: none; position: absolute; top: 34px; left: 0; z-index: 200; background: #fff; border: 1px solid #C8E6C9; border-radius: 8px; padding: 9px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); grid-template-columns: repeat(5,28px); gap: 5px; }
+  .color-grid.open { display: grid; }
+  .color-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; }
+  .color-dot:hover { transform: scale(1.15); } .color-dot.selected { border-color: #1B5E20; }
+  .add-estado-row { display: flex; align-items: center; gap: 9px; padding: 10px; background: #F1F8E9; border: 2px dashed #C8E6C9; border-radius: 6px; margin-top: 6px; }
+  .add-estado-row input { flex: 1; border: 1px solid #C8E6C9; border-radius: 4px; padding: 6px 9px; font-size: 13px; font-family: inherit; outline: none; }
+  .btn-add-estado { background: #1B5E20; color: #fff; border: none; padding: 6px 13px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .confirm-overlay { display: none; position: fixed; inset: 0; background: rgba(27,94,32,0.45); z-index: 200; align-items: center; justify-content: center; }
+  .confirm-overlay.open { display: flex; }
+  .confirm-box { background: #fff; border-radius: 8px; padding: 26px 30px; max-width: 370px; text-align: center; box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+  .confirm-box p { margin-bottom: 18px; color: #4A5568; font-size: 14px; }
+  footer { text-align: center; padding: 14px; color: #A5D6A7; font-size: 11px; background: #1B5E20; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-logo">PROGRAMA PROVINCIAL</div>
+    <div class="header-title">Cordón Cuneta y Adoquinado</div>
+  </div>
+  <div class="header-right">
+    <span class="header-ts" id="last-update">Guardado: 1/7/2026, 10:45:50</span>
+    <button class="btn-hdr save-btn" onclick="guardarArchivo()">💾 Guardar y compartir</button>
+    <button class="btn-hdr" onclick="openEstadosModal()">⚙ Estados</button>
+    <button class="btn-hdr" onclick="openModal(null)">+ Agregar</button>
+  </div>
+</div>
+<div class="save-hint visible" id="save-hint">✏️ Cambios sin guardar — hacé clic en <strong>💾 Guardar y compartir</strong></div>
+
+<div class="summary">
+  <div class="scard"><div class="num" id="cnt-total">46</div><div class="lbl">Municipios</div></div>
+  <div class="scard monto"><div class="num" id="cnt-monto">$7.09B</div><div class="lbl">Monto Total</div></div>
+  <div class="scard pres" onclick="editPresupuesto()" title="Clic para editar el crédito asignado">
+    <div class="num" id="cnt-pres" style="font-size: 13px;">— (clic para ingresar)</div>
+    <div class="lbl">Crédito Asignado</div>
+    <div class="scard-edit">✏️ clic para editar</div>
+  </div>
+  <div class="scard saldo"><div class="num" id="cnt-saldo">—</div><div class="lbl">Saldo</div></div>
+  <div class="scard ok"><div class="num" id="cnt-ok">45</div><div class="lbl">OK Min. de Gobierno</div></div>
+  <div class="scard nodoc"><div class="num" id="cnt-nodoc">0</div><div class="lbl">Sin Documentación</div></div>
+  <div class="scard" style="border-color:#B03A2E;">
+    <div class="num" id="cnt-cc-ml" style="color:#B03A2E;">6.308</div>
+    <div class="lbl">Total Cordón-Cuneta (ml)</div>
+  </div>
+  <div class="scard" style="border-color:#B03A2E;">
+    <div class="num" id="cnt-ad-m2" style="color:#B03A2E;">25.370</div>
+    <div class="lbl">Total Adoquinado (m²)</div>
+  </div>
+</div>
+
+<div class="filterbar">
+  <label>Buscar:</label>
+  <input type="text" id="search-input" placeholder="Municipio, expediente, observaciones..." oninput="applyFilters()">
+  <label>Departamento:</label>
+  <select id="depto-filter" onchange="applyFilters()">
+    <option value="">— Todos —</option>
+    <option>Calamuchita</option><option>Cruz del Eje</option><option>General Roca</option>
+    <option>Juarez Cleman</option><option>Marcos Juárez</option><option>Pdte R. Sáenz Peña</option>
+    <option>Rio Segundo</option><option>San Javier</option><option>San Justo</option>
+    <option>Santa María</option><option>Tercero Arriba</option>
+  </select>
+  <label>OK Gob.:</label>
+  <select id="ok-filter" onchange="applyFilters()">
+    <option value="">— Todos —</option>
+    <option value="SI">SI</option><option value="NO">NO</option>
+  </select>
+  <button class="btn-clear" onclick="clearFilters()">✕ Limpiar</button>
+  <span class="filter-count" id="filter-count">46 proyectos</span>
+</div>
+
+<div class="panel-wrap">
+  <div class="panel-toolbar"><h2>Convenios con Municipios — Provincia de Córdoba</h2></div>
+  <div class="legend-wrap" id="legend-main"><span style="font-size:11px;font-weight:700;color:#1B5E20;margin-right:5px;">ESTADOS:</span><span class="legend-item"><span class="legend-dot" style="background:#ECEFF1;border:1px solid #455A64;"></span>Sin Iniciar</span><span class="legend-item"><span class="legend-dot" style="background:#FFF3CD;border:1px solid #856404;"></span>Sin Exp de Gobierno</span><span class="legend-item"><span class="legend-dot" style="background:#DBEAFE;border:1px solid #1E40AF;"></span>Notificado</span><span class="legend-item"><span class="legend-dot" style="background:#FFE5D0;border:1px solid #8B3A00;"></span>A la espera de Documentacion</span><span class="legend-item"><span class="legend-dot" style="background:#C8E6C9;border:1px solid #1B5E20;"></span>En revision tecnica</span><span class="legend-item"><span class="legend-dot" style="background:#EDE7F6;border:1px solid #4527A0;"></span>En Correccion</span><span class="legend-item"><span class="legend-dot" style="background:#E0F2F1;border:1px solid #00695C;"></span>Documentacion Completada</span><span class="legend-item"><span class="legend-dot" style="background:#D4EDDA;border:1px solid #155724;"></span>Legales para convenio</span><span class="legend-item"><span class="legend-dot" style="background:#FCE4EC;border:1px solid #880E4F;"></span>Administracion para NP</span><span class="legend-item"><span class="legend-dot" style="background:#E0F7FA;border:1px solid #006064;"></span>Convenio Firmado</span><span class="legend-item"><span class="legend-dot" style="background:#E8EAF6;border:1px solid #1A237E;"></span>Legales para  Proyecto de Dictamen y Resolucion</span><span class="legend-item"><span class="legend-dot" style="background:#ECEFF1;border:1px solid #455A64;"></span>Legales del MCyM</span><span class="legend-item"><span class="legend-dot" style="background:#ECEFF1;border:1px solid #455A64;"></span>Administracion OC</span><span class="legend-item"><span class="legend-dot" style="background:#ECEFF1;border:1px solid #455A64;"></span>TC</span></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Municipio</th><th>Departamento</th><th>Expediente N°</th>
+        <th>Monto</th><th style="white-space:nowrap;">Cordón-Cuneta (ml)</th><th style="white-space:nowrap;">Adoquinado (m²)</th>
+        <th>OK Gob.</th><th>Exp. Documentación</th>
+        <th>Est. Jurídico-Adm.</th><th>Est. Técnico</th><th>Est. Presup./Fin.</th>
+        <th>Avance</th><th></th>
+      </tr></thead>
+      <tbody id="tbody-main"><tr id="tr-1">
+      <td style="color:#9E9E9E;font-size:11px;">1</td>
+      <td style="font-weight:700;font-size:12px;">LOS REARTES</td>
+      <td><span class="depto-tag">Calamuchita</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080115/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA  a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(1)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(1)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-2">
+      <td style="color:#9E9E9E;font-size:11px;">2</td>
+      <td style="font-weight:700;font-size:12px;">EMBALSE</td>
+      <td><span class="depto-tag">Calamuchita</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079932/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 26/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Correccion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:18%;background:#F39C12;"></div></div><span class="avance-pct">18%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(2)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(2)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-3">
+      <td style="color:#9E9E9E;font-size:11px;">3</td>
+      <td style="font-weight:700;font-size:12px;">GUANACO MUERTO</td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079111/2026</td>
+      <td class="monto-cell">$50.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(3)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(3)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-4">
+      <td style="color:#9E9E9E;font-size:11px;">4</td>
+      <td style="font-weight:700;font-size:12px;">LA BATEA</td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079110/2026</td>
+      <td class="monto-cell">$50.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#C8E6C9;color:#1B5E20;">En revision tecnica</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:15%;background:#F39C12;"></div></div><span class="avance-pct">15%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(4)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(4)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-5">
+      <td style="color:#9E9E9E;font-size:11px;">5</td>
+      <td style="font-weight:700;font-size:12px;">LA HIGUERA</td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079115/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#C8E6C9;color:#1B5E20;">En revision tecnica</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:15%;background:#F39C12;"></div></div><span class="avance-pct">15%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(5)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(5)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-6">
+      <td style="color:#9E9E9E;font-size:11px;">6</td>
+      <td style="font-weight:700;font-size:12px;">LAS PLAYAS</td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079112/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">3.922</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Correccion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:18%;background:#F39C12;"></div></div><span class="avance-pct">18%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(6)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(6)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-7">
+      <td style="color:#9E9E9E;font-size:11px;">7</td>
+      <td style="font-weight:700;font-size:12px;">TUCLAME<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">Se solicito geolocalizacion a la Muni (pedido del TC)</span></td>
+      <td><span class="depto-tag">Cruz del Eje</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079113/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 Ya cuenta con NP</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Legales del MCyM</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#FCE4EC;color:#880E4F;">Administracion para NP</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:64%;background:#2196F3;"></div></div><span class="avance-pct">64%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(7)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(7)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-8">
+      <td style="color:#9E9E9E;font-size:11px;">8</td>
+      <td style="font-weight:700;font-size:12px;">DEL CAMPILLO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">0135-044669/2026 dejar SIN EFECTO la RESO antes de ARCHIVAR</span></td>
+      <td><span class="depto-tag">General Roca</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079098/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">7.440</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 Rehacer Exp - Utilizar el de GOB 0423-079098/2026</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Correccion</span></td>
+      <td><span class="badge" style="background:#FCE4EC;color:#880E4F;">Administracion para NP</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:38%;background:#F39C12;"></div></div><span class="avance-pct">38%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(8)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(8)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-9">
+      <td style="color:#9E9E9E;font-size:11px;">9</td>
+      <td style="font-weight:700;font-size:12px;">GENERAL ROCA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">0135-044668/2026 antes de ARCHIVAR, dejar SIN EFECTO la RESO</span></td>
+      <td><span class="depto-tag">General Roca</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079133/2026</td>
+      <td class="monto-cell">$240.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 22/6 TC</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:82%;background:#27AE60;"></div></div><span class="avance-pct">82%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(9)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(9)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-10">
+      <td style="color:#9E9E9E;font-size:11px;">10</td>
+      <td style="font-weight:700;font-size:12px;">VILLA HUIDOBRO</td>
+      <td><span class="depto-tag">General Roca</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079097/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">1.100</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Correccion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:18%;background:#F39C12;"></div></div><span class="avance-pct">18%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(10)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(10)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-11">
+      <td style="color:#9E9E9E;font-size:11px;">11</td>
+      <td style="font-weight:700;font-size:12px;">VILLA SARMIENTO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">GOBDIGI-0526923111-226</span></td>
+      <td><span class="depto-tag">General Roca</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079096/2026</td>
+      <td class="monto-cell">$210.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">1.530</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">1.575</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 19/ se Firma CONVENIO</span></td>
+      <td><span class="badge" style="background:#C8E6C9;color:#1B5E20;">En revision tecnica</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Correccion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:23%;background:#F39C12;"></div></div><span class="avance-pct">23%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(11)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(11)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-12">
+      <td style="color:#9E9E9E;font-size:11px;">12</td>
+      <td style="font-weight:700;font-size:12px;">VILLA VALERIA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">Antes de ARCHIVAR el exp 0135-044666/2026, dejar SIN EFECTO la RESO</span></td>
+      <td><span class="depto-tag">General Roca</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079095/2026</td>
+      <td class="monto-cell">$350.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 22/6 TC</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:82%;background:#27AE60;"></div></div><span class="avance-pct">82%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(12)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(12)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-13">
+      <td style="color:#9E9E9E;font-size:11px;">13</td>
+      <td style="font-weight:700;font-size:12px;">OLAETA</td>
+      <td><span class="depto-tag">Juarez Cleman</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080117/2026</td>
+      <td class="monto-cell">$180.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(13)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(13)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-14">
+      <td style="color:#9E9E9E;font-size:11px;">14</td>
+      <td style="font-weight:700;font-size:12px;">CHARRAS</td>
+      <td><span class="depto-tag">Juarez Cleman</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080116/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Correccion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:18%;background:#F39C12;"></div></div><span class="avance-pct">18%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(14)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(14)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-15">
+      <td style="color:#9E9E9E;font-size:11px;">15</td>
+      <td style="font-weight:700;font-size:12px;">EL ARAÑADO</td>
+      <td><span class="depto-tag">Juarez Cleman</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080121/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(15)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(15)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-16">
+      <td style="color:#9E9E9E;font-size:11px;">16</td>
+      <td style="font-weight:700;font-size:12px;">SANTA EUFEMIA</td>
+      <td><span class="depto-tag">Juarez Cleman</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080118/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(16)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(16)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-17">
+      <td style="color:#9E9E9E;font-size:11px;">17</td>
+      <td style="font-weight:700;font-size:12px;">ARIAS</td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079785/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">921</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 8/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#C8E6C9;color:#1B5E20;">En revision tecnica</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:15%;background:#F39C12;"></div></div><span class="avance-pct">15%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(17)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(17)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-18">
+      <td style="color:#9E9E9E;font-size:11px;">18</td>
+      <td style="font-weight:700;font-size:12px;">CAMILO ALDAO<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">30/6 PARA NP</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079782/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 8/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#D4EDDA;color:#155724;">Legales para convenio</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#FCE4EC;color:#880E4F;">Administracion para NP</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:54%;background:#2196F3;"></div></div><span class="avance-pct">54%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(18)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(18)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-19">
+      <td style="color:#9E9E9E;font-size:11px;">19</td>
+      <td style="font-weight:700;font-size:12px;">CAP. GRAL. B. O'HIGGINS</td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079103/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(19)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(19)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-20">
+      <td style="color:#9E9E9E;font-size:11px;">20</td>
+      <td style="font-weight:700;font-size:12px;">CAVANAGH</td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079101/2026</td>
+      <td class="monto-cell">$300.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Correccion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:18%;background:#F39C12;"></div></div><span class="avance-pct">18%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(20)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(20)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-21">
+      <td style="color:#9E9E9E;font-size:11px;">21</td>
+      <td style="font-weight:700;font-size:12px;">COLONIA ITALIANA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">30/6 PARA NP</span></td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079102/2026</td>
+      <td class="monto-cell">$80.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">889</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 19/6 Se FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#D4EDDA;color:#155724;">Legales para convenio</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#FCE4EC;color:#880E4F;">Administracion para NP</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:54%;background:#2196F3;"></div></div><span class="avance-pct">54%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(21)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(21)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-22">
+      <td style="color:#9E9E9E;font-size:11px;">22</td>
+      <td style="font-weight:700;font-size:12px;">COMUNA COLONIA BARGE</td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079784/2026</td>
+      <td class="monto-cell">$50.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 8/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(22)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(22)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-23">
+      <td style="color:#9E9E9E;font-size:11px;">23</td>
+      <td style="font-weight:700;font-size:12px;">CRUZ ALTA</td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079100/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(23)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(23)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-24">
+      <td style="color:#9E9E9E;font-size:11px;">24</td>
+      <td style="font-weight:700;font-size:12px;">GENERAL BALDISSERA</td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079783/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 8/5 se NOTIFICA  a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(24)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(24)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-25">
+      <td style="color:#9E9E9E;font-size:11px;">25</td>
+      <td style="font-weight:700;font-size:12px;">SAIRA</td>
+      <td><span class="depto-tag">Marcos Juárez</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079781/2026</td>
+      <td class="monto-cell">$150.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 8/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(25)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(25)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-26">
+      <td style="color:#9E9E9E;font-size:11px;">26</td>
+      <td style="font-weight:700;font-size:12px;">LABOULAYE</td>
+      <td><span class="depto-tag">Pdte R. Sáenz Peña</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080119/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(26)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(26)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-27">
+      <td style="color:#9E9E9E;font-size:11px;">27</td>
+      <td style="font-weight:700;font-size:12px;">LA CESIRA<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">0135-044777/2026 dejar SIN EFECTO LA RESO</span></td>
+      <td><span class="depto-tag">Pdte R. Sáenz Peña</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079809/2026</td>
+      <td class="monto-cell">$200.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">3.440</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 TC 17/6</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:82%;background:#27AE60;"></div></div><span class="avance-pct">82%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(27)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(27)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-28">
+      <td style="color:#9E9E9E;font-size:11px;">28</td>
+      <td style="font-weight:700;font-size:12px;">ROSALES</td>
+      <td><span class="depto-tag">Pdte R. Sáenz Peña</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079114/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 10/4 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:5%;background:#F39C12;"></div></div><span class="avance-pct">5%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(28)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(28)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-29">
+      <td style="color:#9E9E9E;font-size:11px;">29</td>
+      <td style="font-weight:700;font-size:12px;">SAN JOAQUIN</td>
+      <td><span class="depto-tag">Pdte R. Sáenz Peña</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079116/2026</td>
+      <td class="monto-cell">$30.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">206</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 19/6 Se FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#C8E6C9;color:#1B5E20;">En revision tecnica</span></td>
+      <td><span class="badge" style="background:#EDE7F6;color:#4527A0;">En Correccion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:23%;background:#F39C12;"></div></div><span class="avance-pct">23%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(29)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(29)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-30">
+      <td style="color:#9E9E9E;font-size:11px;">30</td>
+      <td style="font-weight:700;font-size:12px;">CALCHÍN</td>
+      <td><span class="depto-tag">Rio Segundo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079943/2026</td>
+      <td class="monto-cell">$50.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 26/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(30)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(30)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-31">
+      <td style="color:#9E9E9E;font-size:11px;">31</td>
+      <td style="font-weight:700;font-size:12px;">CAPILLA DEL CARMEN</td>
+      <td><span class="depto-tag">Rio Segundo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079942/2026</td>
+      <td class="monto-cell">$100.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 26/5 se NOTIFICA  a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(31)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(31)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-32">
+      <td style="color:#9E9E9E;font-size:11px;">32</td>
+      <td style="font-weight:700;font-size:12px;">MATORRALES</td>
+      <td><span class="depto-tag">Rio Segundo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079944/2026</td>
+      <td class="monto-cell">$80.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 26/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(32)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(32)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-33">
+      <td style="color:#9E9E9E;font-size:11px;">33</td>
+      <td style="font-weight:700;font-size:12px;">POZO DEL MOLLE</td>
+      <td><span class="depto-tag">Rio Segundo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079948/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 26/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(33)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(33)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-34">
+      <td style="color:#9E9E9E;font-size:11px;">34</td>
+      <td style="font-weight:700;font-size:12px;">LA PAZ<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">30/6 PARA NP</span></td>
+      <td><span class="depto-tag">San Javier</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079119/2026</td>
+      <td class="monto-cell">$300.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">930</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">2.795</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 19/6 se FIRMA CONVENIO</span></td>
+      <td><span class="badge" style="background:#D4EDDA;color:#155724;">Legales para convenio</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#FCE4EC;color:#880E4F;">Administracion para NP</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:54%;background:#2196F3;"></div></div><span class="avance-pct">54%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(34)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(34)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-35">
+      <td style="color:#9E9E9E;font-size:11px;">35</td>
+      <td style="font-weight:700;font-size:12px;">LA POBLACIÓN</td>
+      <td><span class="depto-tag">San Javier</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079121/2026</td>
+      <td class="monto-cell">$75.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">440</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">870</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 Vuelve el 26/6 para GEOLOCALIZACION - 17/6 TC</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:56%;background:#2196F3;"></div></div><span class="avance-pct">56%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(35)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(35)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-36">
+      <td style="color:#9E9E9E;font-size:11px;">36</td>
+      <td style="font-weight:700;font-size:12px;">LOS HORNILLOS</td>
+      <td><span class="depto-tag">San Javier</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079117/2026</td>
+      <td class="monto-cell">$150.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">913</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">534</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 17/6 TC</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:82%;background:#27AE60;"></div></div><span class="avance-pct">82%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(36)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(36)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-37">
+      <td style="color:#9E9E9E;font-size:11px;">37</td>
+      <td style="font-weight:700;font-size:12px;">LUYABA</td>
+      <td><span class="depto-tag">San Javier</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079120/2026</td>
+      <td class="monto-cell">$150.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">300</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">2.050</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 17/6 TC</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">TC</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:82%;background:#27AE60;"></div></div><span class="avance-pct">82%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(37)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(37)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-38">
+      <td style="color:#9E9E9E;font-size:11px;">38</td>
+      <td style="font-weight:700;font-size:12px;">SAN JAVIER Y YACANTO</td>
+      <td><span class="depto-tag">San Javier</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079118/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">1.823</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 29/6 vuelve para GEOLOCALIZACION - 18/6 TC</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#E0F2F1;color:#00695C;">Documentacion Completada</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:23%;background:#F39C12;"></div></div><span class="avance-pct">23%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(38)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(38)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-39">
+      <td style="color:#9E9E9E;font-size:11px;">39</td>
+      <td style="font-weight:700;font-size:12px;">EL FORTIN</td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080122/2026</td>
+      <td class="monto-cell">$300.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFCA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(39)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(39)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-40">
+      <td style="color:#9E9E9E;font-size:11px;">40</td>
+      <td style="font-weight:700;font-size:12px;">LAS VARAS</td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080123/2026</td>
+      <td class="monto-cell">$150.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:5%;background:#F39C12;"></div></div><span class="avance-pct">5%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(40)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(40)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-41">
+      <td style="color:#9E9E9E;font-size:11px;">41</td>
+      <td style="font-weight:700;font-size:12px;">SACANTA</td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080124/2026</td>
+      <td class="monto-cell">$70.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:5%;background:#F39C12;"></div></div><span class="avance-pct">5%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(41)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(41)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-42">
+      <td style="color:#9E9E9E;font-size:11px;">42</td>
+      <td style="font-weight:700;font-size:12px;">ALICIA</td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080120/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:0%;background:#9E9E9E;"></div></div><span class="avance-pct">0%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(42)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(42)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-43">
+      <td style="color:#9E9E9E;font-size:11px;">43</td>
+      <td style="font-weight:700;font-size:12px;">LAS VARILLAS</td>
+      <td><span class="depto-tag">San Justo</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079946/2026</td>
+      <td class="monto-cell">$400.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 26/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(43)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(43)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-44">
+      <td style="color:#9E9E9E;font-size:11px;">44</td>
+      <td style="font-weight:700;font-size:12px;">VILLA DEL PRADO</td>
+      <td><span class="depto-tag">Santa María</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-080125/2026</td>
+      <td class="monto-cell">$50.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 4/6 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:5%;background:#F39C12;"></div></div><span class="avance-pct">5%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(44)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(44)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-45">
+      <td style="color:#9E9E9E;font-size:11px;">45</td>
+      <td style="font-weight:700;font-size:12px;">VILLA PARQUE SANTA ANA</td>
+      <td><span class="depto-tag">Santa María</span></td>
+      <td style="font-size:11px;color:#4A5568;">0423-079945/2026</td>
+      <td class="monto-cell">$200.000.000</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-si">SI</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 26/5 se NOTIFICA a la Municipalidad</span></td>
+      <td><span class="badge" style="background:#DBEAFE;color:#1E40AF;">Notificado</span></td>
+      <td><span class="badge" style="background:#FFE5D0;color:#8B3A00;">A la espera de Documentacion</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:13%;background:#F39C12;"></div></div><span class="avance-pct">13%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(45)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(45)" title="Eliminar">🗑️</button>
+      </td>
+    </tr><tr id="tr-46">
+      <td style="color:#9E9E9E;font-size:11px;">46</td>
+      <td style="font-weight:700;font-size:12px;">LAS PERDICES</td>
+      <td><span class="depto-tag">Tercero Arriba</span></td>
+      <td style="font-size:11px;color:#4A5568;">GOBDIGI-0541650111-426</td>
+      <td class="monto-cell">$124.126.724</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">—</td>
+      <td><span class="badge ok-no">NO</span></td>
+      <td style="font-size:10px;"><span class="badge doc-si">📄 27/4 Privada de VIVIENDA</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><span class="badge" style="background:#ECEFF1;color:#455A64;">Sin Iniciar</span></td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:0%;background:#9E9E9E;"></div></div><span class="avance-pct">0%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(46)" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(46)" title="Eliminar">🗑️</button>
+      </td>
+    </tr></tbody>
+    </table>
+    <div class="empty-state" id="empty-main" style="display: none;">Sin resultados para los filtros aplicados.</div>
+  </div>
+</div>
+
+<!-- MODAL PROYECTO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modal-title">Editar Proyecto</h3><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="f-id" value="7">
+      <div class="form-grid">
+        <div class="form-group full"><label>Municipio *</label><input type="text" id="f-municipio" placeholder="Nombre del municipio"></div>
+        <div class="form-group"><label>Departamento</label>
+          <select id="f-departamento"><option value="">—</option>
+            <option>Calamuchita</option><option>Cruz del Eje</option><option>General Roca</option>
+            <option>Juarez Cleman</option><option>Marcos Juárez</option><option>Pdte R. Sáenz Peña</option>
+            <option>Rio Segundo</option><option>San Javier</option><option>San Justo</option>
+            <option>Santa María</option><option>Tercero Arriba</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Expediente N°</label><input type="text" id="f-expediente" placeholder="0423-XXXXXX/2026"></div>
+        <div class="form-group"><label>Monto ($)</label><input type="number" id="f-monto" placeholder="100000000"></div>
+        <div class="form-group"><label>Cordón-Cuneta (ml)</label><input type="number" id="f-cordon_cuneta_ml" min="0" step="1" placeholder="Ej: 1100"></div>
+        <div class="form-group"><label>Adoquinado (m²)</label><input type="number" id="f-adoquinado_m2" min="0" step="1" placeholder="Ej: 3922"></div>
+        <div class="form-group"><label>OK Gobernación</label>
+          <select id="f-ok_gob"><option value="SI">SI</option><option value="NO">NO</option><option value="En trámite">En trámite</option></select>
+        </div>
+        <div class="form-group full"><label>Expediente de Documentación</label><input type="text" id="f-doc_exp" placeholder="Nº expediente de documentación presentada"></div>
+        <div class="form-group full"><label>Observaciones</label><textarea id="f-obs" rows="2" placeholder="Notas adicionales..."></textarea></div>
+      </div>
+      <div class="sec-title">Estados por Dimensión</div>
+      <div class="estado-grid">
+        <div class="estado-section"><h4>⚖️ Jurídico / Administrativo</h4><select id="f-ejuridico"><option value="1">Sin Iniciar</option><option value="2">Sin Exp de Gobierno</option><option value="3">Notificado</option><option value="4">A la espera de Documentacion</option><option value="1780930869659">En revision tecnica</option><option value="1780942780772">En Correccion</option><option value="1780942808606">Documentacion Completada</option><option value="1780942815469">Legales para convenio</option><option value="1780942828789">Administracion para NP</option><option value="1780942838431">Convenio Firmado</option><option value="1780942843788" selected="">Legales para  Proyecto de Dictamen y Resolucion</option><option value="1781710357683">Legales del MCyM</option><option value="1781710640727">Administracion OC</option><option value="1781737487934">TC</option></select></div>
+        <div class="estado-section"><h4>🔧 Técnico</h4><select id="f-etecnico"><option value="1">Sin Iniciar</option><option value="2">Sin Exp de Gobierno</option><option value="3">Notificado</option><option value="4">A la espera de Documentacion</option><option value="1780930869659">En revision tecnica</option><option value="1780942780772">En Correccion</option><option value="1780942808606" selected="">Documentacion Completada</option><option value="1780942815469">Legales para convenio</option><option value="1780942828789">Administracion para NP</option><option value="1780942838431">Convenio Firmado</option><option value="1780942843788">Legales para  Proyecto de Dictamen y Resolucion</option><option value="1781710357683">Legales del MCyM</option><option value="1781710640727">Administracion OC</option><option value="1781737487934">TC</option></select></div>
+        <div class="estado-section"><h4>💰 Presup. / Financiero</h4><select id="f-efinanciero"><option value="1">Sin Iniciar</option><option value="2">Sin Exp de Gobierno</option><option value="3">Notificado</option><option value="4">A la espera de Documentacion</option><option value="1780930869659">En revision tecnica</option><option value="1780942780772">En Correccion</option><option value="1780942808606">Documentacion Completada</option><option value="1780942815469">Legales para convenio</option><option value="1780942828789" selected="">Administracion para NP</option><option value="1780942838431">Convenio Firmado</option><option value="1780942843788">Legales para  Proyecto de Dictamen y Resolucion</option><option value="1781710357683">Legales del MCyM</option><option value="1781710640727">Administracion OC</option><option value="1781737487934">TC</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal()">Cancelar</button><button class="btn-save" onclick="saveProject()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- MODAL ESTADOS -->
+<div class="modal-overlay" id="modal-estados-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-header"><h3>⚙ Gestionar Estados</h3><button class="modal-close" onclick="closeEstadosModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#7F8C8D;margin-bottom:12px;">El orden de arriba a abajo define el nivel de avance.</p>
+      <div class="estado-list" id="estados-list"><div class="estado-row" id="erow-1"><div class="color-picker-wrap"><div class="swatch" style="background:#ECEFF1;" onclick="toggleColorPicker('cgrid-1')"></div><div class="color-grid" id="cgrid-1"><div class="color-dot selected" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1',1)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1',1)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1',1)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1',1)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1',1)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1',1)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1',1)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1',1)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1',1)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1',1)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1',1)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1',1)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1',1)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1',1)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1',1)"></div></div></div><input class="nombre-estado" type="text" value="Sin Iniciar" onchange="updEstLabel(1,this.value)"><button class="btn-del-estado" onclick="removeEst(1)">✕</button></div><div class="estado-row" id="erow-2"><div class="color-picker-wrap"><div class="swatch" style="background:#FFF3CD;" onclick="toggleColorPicker('cgrid-2')"></div><div class="color-grid" id="cgrid-2"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-2',2)"></div><div class="color-dot selected" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-2',2)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-2',2)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-2',2)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-2',2)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-2',2)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-2',2)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-2',2)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-2',2)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-2',2)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-2',2)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-2',2)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-2',2)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-2',2)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-2',2)"></div></div></div><input class="nombre-estado" type="text" value="Sin Exp de Gobierno" onchange="updEstLabel(2,this.value)"><button class="btn-del-estado" onclick="removeEst(2)">✕</button></div><div class="estado-row" id="erow-3"><div class="color-picker-wrap"><div class="swatch" style="background:#DBEAFE;" onclick="toggleColorPicker('cgrid-3')"></div><div class="color-grid" id="cgrid-3"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-3',3)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-3',3)"></div><div class="color-dot selected" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-3',3)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-3',3)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-3',3)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-3',3)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-3',3)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-3',3)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-3',3)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-3',3)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-3',3)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-3',3)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-3',3)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-3',3)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-3',3)"></div></div></div><input class="nombre-estado" type="text" value="Notificado" onchange="updEstLabel(3,this.value)"><button class="btn-del-estado" onclick="removeEst(3)">✕</button></div><div class="estado-row" id="erow-4"><div class="color-picker-wrap"><div class="swatch" style="background:#FFE5D0;" onclick="toggleColorPicker('cgrid-4')"></div><div class="color-grid" id="cgrid-4"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-4',4)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-4',4)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-4',4)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-4',4)"></div><div class="color-dot selected" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-4',4)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-4',4)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-4',4)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-4',4)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-4',4)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-4',4)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-4',4)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-4',4)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-4',4)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-4',4)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-4',4)"></div></div></div><input class="nombre-estado" type="text" value="A la espera de Documentacion" onchange="updEstLabel(4,this.value)"><button class="btn-del-estado" onclick="removeEst(4)">✕</button></div><div class="estado-row" id="erow-1780930869659"><div class="color-picker-wrap"><div class="swatch" style="background:#C8E6C9;" onclick="toggleColorPicker('cgrid-1780930869659')"></div><div class="color-grid" id="cgrid-1780930869659"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot selected" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1780930869659',1780930869659)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1780930869659',1780930869659)"></div></div></div><input class="nombre-estado" type="text" value="En revision tecnica" onchange="updEstLabel(1780930869659,this.value)"><button class="btn-del-estado" onclick="removeEst(1780930869659)">✕</button></div><div class="estado-row" id="erow-1780942780772"><div class="color-picker-wrap"><div class="swatch" style="background:#EDE7F6;" onclick="toggleColorPicker('cgrid-1780942780772')"></div><div class="color-grid" id="cgrid-1780942780772"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1780942780772',1780942780772)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1780942780772',1780942780772)"></div></div></div><input class="nombre-estado" type="text" value="En Correccion" onchange="updEstLabel(1780942780772,this.value)"><button class="btn-del-estado" onclick="removeEst(1780942780772)">✕</button></div><div class="estado-row" id="erow-1780942808606"><div class="color-picker-wrap"><div class="swatch" style="background:#E0F2F1;" onclick="toggleColorPicker('cgrid-1780942808606')"></div><div class="color-grid" id="cgrid-1780942808606"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1780942808606',1780942808606)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1780942808606',1780942808606)"></div></div></div><input class="nombre-estado" type="text" value="Documentacion Completa" onchange="updEstLabel(1780942808606,this.value)"><button class="btn-del-estado" onclick="removeEst(1780942808606)">✕</button></div><div class="estado-row" id="erow-1780942815469"><div class="color-picker-wrap"><div class="swatch" style="background:#D4EDDA;" onclick="toggleColorPicker('cgrid-1780942815469')"></div><div class="color-grid" id="cgrid-1780942815469"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot selected" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1780942815469',1780942815469)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1780942815469',1780942815469)"></div></div></div><input class="nombre-estado" type="text" value="Legales para convenio" onchange="updEstLabel(1780942815469,this.value)"><button class="btn-del-estado" onclick="removeEst(1780942815469)">✕</button></div><div class="estado-row" id="erow-1780942828789"><div class="color-picker-wrap"><div class="swatch" style="background:#FCE4EC;" onclick="toggleColorPicker('cgrid-1780942828789')"></div><div class="color-grid" id="cgrid-1780942828789"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot selected" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1780942828789',1780942828789)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1780942828789',1780942828789)"></div></div></div><input class="nombre-estado" type="text" value="Administracion DGV para NP" onchange="updEstLabel(1780942828789,this.value)"><button class="btn-del-estado" onclick="removeEst(1780942828789)">✕</button></div><div class="estado-row" id="erow-1780942838431"><div class="color-picker-wrap"><div class="swatch" style="background:#E0F7FA;" onclick="toggleColorPicker('cgrid-1780942838431')"></div><div class="color-grid" id="cgrid-1780942838431"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot selected" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1780942838431',1780942838431)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1780942838431',1780942838431)"></div></div></div><input class="nombre-estado" type="text" value="Convenio Firmado" onchange="updEstLabel(1780942838431,this.value)"><button class="btn-del-estado" onclick="removeEst(1780942838431)">✕</button></div><div class="estado-row" id="erow-1780942843788"><div class="color-picker-wrap"><div class="swatch" style="background:#E8EAF6;" onclick="toggleColorPicker('cgrid-1780942843788')"></div><div class="color-grid" id="cgrid-1780942843788"><div class="color-dot" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1780942843788',1780942843788)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1780942843788',1780942843788)"></div></div></div><input class="nombre-estado" type="text" value="Legales DGV para  Proyecto de Dictamen y Resolucion" onchange="updEstLabel(1780942843788,this.value)"><button class="btn-del-estado" onclick="removeEst(1780942843788)">✕</button></div><div class="estado-row" id="erow-1781710357683"><div class="color-picker-wrap"><div class="swatch" style="background:#ECEFF1;" onclick="toggleColorPicker('cgrid-1781710357683')"></div><div class="color-grid" id="cgrid-1781710357683"><div class="color-dot selected" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1781710357683',1781710357683)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1781710357683',1781710357683)"></div></div></div><input class="nombre-estado" type="text" value="Legales del MCyM" onchange="updEstLabel(1781710357683,this.value)"><button class="btn-del-estado" onclick="removeEst(1781710357683)">✕</button></div><div class="estado-row" id="erow-1781710640727"><div class="color-picker-wrap"><div class="swatch" style="background:#ECEFF1;" onclick="toggleColorPicker('cgrid-1781710640727')"></div><div class="color-grid" id="cgrid-1781710640727"><div class="color-dot selected" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1781710640727',1781710640727)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1781710640727',1781710640727)"></div></div></div><input class="nombre-estado" type="text" value="Administracion DGV OC" onchange="updEstLabel(1781710640727,this.value)"><button class="btn-del-estado" onclick="removeEst(1781710640727)">✕</button></div><div class="estado-row" id="erow-1781737487934"><div class="color-picker-wrap"><div class="swatch" style="background:#ECEFF1;" onclick="toggleColorPicker('cgrid-1781737487934')"></div><div class="color-grid" id="cgrid-1781737487934"><div class="color-dot selected" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1781737487934',1781737487934)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1781737487934',1781737487934)"></div></div></div><input class="nombre-estado" type="text" value="TC" onchange="updEstLabel(1781737487934,this.value)"><button class="btn-del-estado" onclick="removeEst(1781737487934)">✕</button></div><div class="estado-row" id="erow-1782480246307"><div class="color-picker-wrap"><div class="swatch" style="background:#ECEFF1;" onclick="toggleColorPicker('cgrid-1782480246307')"></div><div class="color-grid" id="cgrid-1782480246307"><div class="color-dot selected" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'cgrid-1782480246307',1782480246307)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'cgrid-1782480246307',1782480246307)"></div></div></div><input class="nombre-estado" type="text" value="VISADO TC" onchange="updEstLabel(1782480246307,this.value)"><button class="btn-del-estado" onclick="removeEst(1782480246307)">✕</button></div></div>
+      <div class="add-estado-row" style="margin-top:12px;">
+        <div class="color-picker-wrap" id="new-color-wrap">
+          <div class="swatch" id="new-swatch" style="background: rgb(236, 239, 241);" onclick="toggleColorPicker('new-color-grid')"></div>
+          <div class="color-grid" id="new-color-grid"><div class="color-dot selected" style="background:#ECEFF1;border-color:#455A64;" onclick="selectColor(0,'new-color-grid',null)"></div><div class="color-dot" style="background:#FFF3CD;border-color:#856404;" onclick="selectColor(1,'new-color-grid',null)"></div><div class="color-dot" style="background:#DBEAFE;border-color:#1E40AF;" onclick="selectColor(2,'new-color-grid',null)"></div><div class="color-dot" style="background:#D4EDDA;border-color:#155724;" onclick="selectColor(3,'new-color-grid',null)"></div><div class="color-dot" style="background:#FFE5D0;border-color:#8B3A00;" onclick="selectColor(4,'new-color-grid',null)"></div><div class="color-dot" style="background:#E8D5F5;border-color:#6B21A8;" onclick="selectColor(5,'new-color-grid',null)"></div><div class="color-dot" style="background:#FCE4EC;border-color:#880E4F;" onclick="selectColor(6,'new-color-grid',null)"></div><div class="color-dot" style="background:#E0F7FA;border-color:#006064;" onclick="selectColor(7,'new-color-grid',null)"></div><div class="color-dot" style="background:#FFF8E1;border-color:#F57F17;" onclick="selectColor(8,'new-color-grid',null)"></div><div class="color-dot" style="background:#E8F5E9;border-color:#1B5E20;" onclick="selectColor(9,'new-color-grid',null)"></div><div class="color-dot" style="background:#E3F2FD;border-color:#0D47A1;" onclick="selectColor(10,'new-color-grid',null)"></div><div class="color-dot" style="background:#C8E6C9;border-color:#1B5E20;" onclick="selectColor(11,'new-color-grid',null)"></div><div class="color-dot" style="background:#B2DFDB;border-color:#004D40;" onclick="selectColor(12,'new-color-grid',null)"></div><div class="color-dot" style="background:#F8BBD0;border-color:#880E4F;" onclick="selectColor(13,'new-color-grid',null)"></div><div class="color-dot" style="background:#CFD8DC;border-color:#263238;" onclick="selectColor(14,'new-color-grid',null)"></div></div>
+        </div>
+        <input type="text" id="new-estado-nombre" placeholder="Nombre del nuevo estado...">
+        <button class="btn-add-estado" onclick="addEstado()">+ Agregar</button>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeEstadosModal()">Cancelar</button><button class="btn-save" onclick="saveEstados()">Guardar estados</button></div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <p id="confirm-msg">¿Estás seguro?</p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn-danger" onclick="runConfirm()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<footer>Programa Provincial de Cordón Cuneta y Adoquinado — Provincia de Córdoba &nbsp;|&nbsp; Panel de Seguimiento</footer>
+
+<script>
+const EMBEDDED_DATA = /*DATA_START*/{"version":1,"updated":"2/7/2026, 11:40:32","proyectos":[{"id":1,"municipio":"LOS REARTES","departamento":"Calamuchita","expediente":"0423-080115/2026","monto":100000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA  a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":2,"municipio":"EMBALSE","departamento":"Calamuchita","expediente":"0423-079932/2026","monto":200000000,"ok_gob":"SI","doc_exp":"26/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1780942780772,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":3,"municipio":"GUANACO MUERTO","departamento":"Cruz del Eje","expediente":"0423-079111/2026","monto":50000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":4,"municipio":"LA BATEA","departamento":"Cruz del Eje","expediente":"0423-079110/2026","monto":50000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1780930869659,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":5,"municipio":"LA HIGUERA","departamento":"Cruz del Eje","expediente":"0423-079115/2026","monto":100000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1780930869659,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":6,"municipio":"LAS PLAYAS","departamento":"Cruz del Eje","expediente":"0423-079112/2026","monto":200000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1780942780772,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":3922},{"id":7,"municipio":"TUCLAME","departamento":"Cruz del Eje","expediente":"0423-079113/2026","monto":200000000,"cordon_cuneta_ml":null,"adoquinado_m2":null,"ok_gob":"SI","doc_exp":"Ya cuenta con NP","ejuridico":1781710357683,"etecnico":1780942808606,"efinanciero":1780942828789,"obs":"Se solicito geolocalizacion a la Muni (pedido del TC)"},{"id":8,"municipio":"DEL CAMPILLO","departamento":"General Roca","expediente":"0423-079098/2026","monto":200000000,"cordon_cuneta_ml":null,"adoquinado_m2":7440,"ok_gob":"SI","doc_exp":"Rehacer Exp - Utilizar el de GOB 0423-079098/2026","ejuridico":3,"etecnico":1780942780772,"efinanciero":1780942828789,"obs":"0135-044669/2026 dejar SIN EFECTO la RESO antes de ARCHIVAR"},{"id":9,"municipio":"GENERAL ROCA","departamento":"General Roca","expediente":"0423-079133/2026","monto":240000000,"cordon_cuneta_ml":null,"adoquinado_m2":null,"ok_gob":"SI","doc_exp":"22/6 TC","ejuridico":1781737487934,"etecnico":1780942808606,"efinanciero":1781737487934,"obs":"0135-044668/2026 antes de ARCHIVAR, dejar SIN EFECTO la RESO"},{"id":10,"municipio":"VILLA HUIDOBRO","departamento":"General Roca","expediente":"0423-079097/2026","monto":200000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1780942780772,"efinanciero":1,"obs":"","cordon_cuneta_ml":1100,"adoquinado_m2":null},{"id":11,"municipio":"VILLA SARMIENTO","departamento":"General Roca","expediente":"0423-079096/2026","monto":210000000,"cordon_cuneta_ml":1530,"adoquinado_m2":1575,"ok_gob":"SI","doc_exp":"19/ se Firma CONVENIO","ejuridico":1780930869659,"etecnico":1780942780772,"efinanciero":1,"obs":"GOBDIGI-0526923111-226"},{"id":12,"municipio":"VILLA VALERIA","departamento":"General Roca","expediente":"0423-079095/2026","monto":350000000,"cordon_cuneta_ml":null,"adoquinado_m2":null,"ok_gob":"SI","doc_exp":"22/6 TC","ejuridico":1781737487934,"etecnico":1780942808606,"efinanciero":1781737487934,"obs":"Antes de ARCHIVAR el exp 0135-044666/2026, dejar SIN EFECTO la RESO"},{"id":13,"municipio":"OLAETA","departamento":"Juarez Cleman","expediente":"0423-080117/2026","monto":180000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":14,"municipio":"CHARRAS","departamento":"Juarez Cleman","expediente":"0423-080116/2026","monto":100000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1780942780772,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":15,"municipio":"EL ARAÑADO","departamento":"Juarez Cleman","expediente":"0423-080121/2026","monto":200000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":16,"municipio":"SANTA EUFEMIA","departamento":"Juarez Cleman","expediente":"0423-080118/2026","monto":200000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":17,"municipio":"ARIAS","departamento":"Marcos Juárez","expediente":"0423-079785/2026","monto":100000000,"ok_gob":"SI","doc_exp":"8/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1780930869659,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":921},{"id":18,"municipio":"CAMILO ALDAO","departamento":"Marcos Juárez","expediente":"0423-079782/2026","monto":100000000,"cordon_cuneta_ml":null,"adoquinado_m2":null,"ok_gob":"SI","doc_exp":"8/5 se NOTIFICA a la Municipalidad","ejuridico":1780942815469,"etecnico":1780942808606,"efinanciero":1780942828789,"obs":"30/6 PARA NP"},{"id":19,"municipio":"CAP. GRAL. B. O'HIGGINS","departamento":"Marcos Juárez","expediente":"0423-079103/2026","monto":200000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":20,"municipio":"CAVANAGH","departamento":"Marcos Juárez","expediente":"0423-079101/2026","monto":300000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1780942780772,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":21,"municipio":"COLONIA ITALIANA","departamento":"Marcos Juárez","expediente":"0423-079102/2026","monto":80000000,"cordon_cuneta_ml":889,"adoquinado_m2":null,"ok_gob":"SI","doc_exp":"19/6 Se FIRMA CONVENIO","ejuridico":1780942815469,"etecnico":1780942808606,"efinanciero":1780942828789,"obs":"30/6 PARA NP"},{"id":22,"municipio":"COMUNA COLONIA BARGE","departamento":"Marcos Juárez","expediente":"0423-079784/2026","monto":50000000,"ok_gob":"SI","doc_exp":"8/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":23,"municipio":"CRUZ ALTA","departamento":"Marcos Juárez","expediente":"0423-079100/2026","monto":100000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":24,"municipio":"GENERAL BALDISSERA","departamento":"Marcos Juárez","expediente":"0423-079783/2026","monto":100000000,"ok_gob":"SI","doc_exp":"8/5 se NOTIFICA  a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":25,"municipio":"SAIRA","departamento":"Marcos Juárez","expediente":"0423-079781/2026","monto":150000000,"ok_gob":"SI","doc_exp":"8/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":26,"municipio":"LABOULAYE","departamento":"Pdte R. Sáenz Peña","expediente":"0423-080119/2026","monto":200000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":27,"municipio":"LA CESIRA","departamento":"Pdte R. Sáenz Peña","expediente":"0423-079809/2026","monto":200000,"ok_gob":"SI","doc_exp":"TC 17/6","ejuridico":1781737487934,"etecnico":1780942808606,"efinanciero":1781737487934,"obs":"0135-044777/2026 dejar SIN EFECTO LA RESO","cordon_cuneta_ml":null,"adoquinado_m2":3440},{"id":28,"municipio":"ROSALES","departamento":"Pdte R. Sáenz Peña","expediente":"0423-079114/2026","monto":100000000,"ok_gob":"SI","doc_exp":"10/4 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":29,"municipio":"SAN JOAQUIN","departamento":"Pdte R. Sáenz Peña","expediente":"0423-079116/2026","monto":30000000,"cordon_cuneta_ml":206,"adoquinado_m2":null,"ok_gob":"SI","doc_exp":"19/6 Se FIRMA CONVENIO","ejuridico":1780930869659,"etecnico":1780942780772,"efinanciero":1,"obs":""},{"id":30,"municipio":"CALCHÍN","departamento":"Rio Segundo","expediente":"0423-079943/2026","monto":50000000,"ok_gob":"SI","doc_exp":"26/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":31,"municipio":"CAPILLA DEL CARMEN","departamento":"Rio Segundo","expediente":"0423-079942/2026","monto":100000000,"ok_gob":"SI","doc_exp":"26/5 se NOTIFICA  a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":32,"municipio":"MATORRALES","departamento":"Rio Segundo","expediente":"0423-079944/2026","monto":80000000,"ok_gob":"SI","doc_exp":"26/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":33,"municipio":"POZO DEL MOLLE","departamento":"Rio Segundo","expediente":"0423-079948/2026","monto":200000000,"ok_gob":"SI","doc_exp":"26/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":34,"municipio":"LA PAZ","departamento":"San Javier","expediente":"0423-079119/2026","monto":300000000,"cordon_cuneta_ml":930,"adoquinado_m2":2795,"ok_gob":"SI","doc_exp":"19/6 se FIRMA CONVENIO","ejuridico":1780942815469,"etecnico":1780942808606,"efinanciero":1780942828789,"obs":"30/6 PARA NP"},{"id":35,"municipio":"LA POBLACIÓN","departamento":"San Javier","expediente":"0423-079121/2026","monto":75000000,"cordon_cuneta_ml":440,"adoquinado_m2":870,"ok_gob":"SI","doc_exp":"Vuelve el 26/6 para GEOLOCALIZACION - 17/6 TC","ejuridico":4,"etecnico":1780942808606,"efinanciero":1781737487934,"obs":""},{"id":36,"municipio":"LOS HORNILLOS","departamento":"San Javier","expediente":"0423-079117/2026","monto":150000000,"ok_gob":"SI","doc_exp":"17/6 TC","ejuridico":1781737487934,"etecnico":1780942808606,"efinanciero":1781737487934,"obs":"","cordon_cuneta_ml":913,"adoquinado_m2":534},{"id":37,"municipio":"LUYABA","departamento":"San Javier","expediente":"0423-079120/2026","monto":150000000,"ok_gob":"SI","doc_exp":"17/6 TC","ejuridico":1781737487934,"etecnico":1780942808606,"efinanciero":1781737487934,"obs":"","cordon_cuneta_ml":300,"adoquinado_m2":2050},{"id":38,"municipio":"SAN JAVIER Y YACANTO","departamento":"San Javier","expediente":"0423-079118/2026","monto":200000000,"cordon_cuneta_ml":null,"adoquinado_m2":1823,"ok_gob":"SI","doc_exp":"29/6 vuelve para GEOLOCALIZACION - 18/6 TC","ejuridico":4,"etecnico":1780942808606,"efinanciero":1,"obs":""},{"id":39,"municipio":"EL FORTIN","departamento":"San Justo","expediente":"0423-080122/2026","monto":300000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFCA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":40,"municipio":"LAS VARAS","departamento":"San Justo","expediente":"0423-080123/2026","monto":150000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":41,"municipio":"SACANTA","departamento":"San Justo","expediente":"0423-080124/2026","monto":70000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":42,"municipio":"ALICIA","departamento":"San Justo","expediente":"0423-080120/2026","monto":200000000,"ok_gob":"SI","doc_exp":"se NOTIFICA a la Municipalidad","ejuridico":1,"etecnico":1,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":43,"municipio":"LAS VARILLAS","departamento":"San Justo","expediente":"0423-079946/2026","monto":400000000,"ok_gob":"SI","doc_exp":"26/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":44,"municipio":"VILLA DEL PRADO","departamento":"Santa María","expediente":"0423-080125/2026","monto":50000000,"ok_gob":"SI","doc_exp":"4/6 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":1,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":45,"municipio":"VILLA PARQUE SANTA ANA","departamento":"Santa María","expediente":"0423-079945/2026","monto":200000000,"ok_gob":"SI","doc_exp":"26/5 se NOTIFICA a la Municipalidad","ejuridico":3,"etecnico":4,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null},{"id":46,"municipio":"LAS PERDICES","departamento":"Tercero Arriba","expediente":"GOBDIGI-0541650111-426","monto":124126724,"ok_gob":"NO","doc_exp":"27/4 Privada de VIVIENDA","ejuridico":1,"etecnico":1,"efinanciero":1,"obs":"","cordon_cuneta_ml":null,"adoquinado_m2":null}],"estados":[{"id":1,"label":"Sin Iniciar","bg":"#ECEFF1","text":"#455A64"},{"id":2,"label":"Sin Exp de Gobierno","bg":"#FFF3CD","text":"#856404"},{"id":3,"label":"Notificado","bg":"#DBEAFE","text":"#1E40AF"},{"id":4,"label":"A la espera de Documentacion","bg":"#FFE5D0","text":"#8B3A00"},{"id":1780930869659,"label":"En revision tecnica","bg":"#C8E6C9","text":"#1B5E20"},{"id":1780942780772,"label":"En Correccion","bg":"#EDE7F6","text":"#4527A0"},{"id":1780942808606,"label":"Documentacion Completada","bg":"#E0F2F1","text":"#00695C"},{"id":1780942815469,"label":"Legales para convenio","bg":"#D4EDDA","text":"#155724"},{"id":1780942828789,"label":"Administracion para NP","bg":"#FCE4EC","text":"#880E4F"},{"id":1780942838431,"label":"Convenio Firmado","bg":"#E0F7FA","text":"#006064"},{"id":1780942843788,"label":"Legales para  Proyecto de Dictamen y Resolucion","bg":"#E8EAF6","text":"#1A237E"},{"id":1781710357683,"label":"Legales del MCyM","bg":"#ECEFF1","text":"#455A64"},{"id":1781710640727,"label":"Administracion OC","bg":"#ECEFF1","text":"#455A64"},{"id":1781737487934,"label":"TC","bg":"#ECEFF1","text":"#455A64"}],"presupuesto":0}/*DATA_END*/;
+
+let _proj=JSON.parse(JSON.stringify(EMBEDDED_DATA.proyectos));
+let _est=JSON.parse(JSON.stringify(EMBEDDED_DATA.estados));
+let _dirty=false;
+let _pres=EMBEDDED_DATA.presupuesto||0;
+
+function markDirty(){_dirty=true;document.getElementById('save-hint').classList.add('visible');}
+function markClean(){_dirty=false;document.getElementById('save-hint').classList.remove('visible');}
+
+function guardarArchivo(){
+  const ts=new Date().toLocaleString('es-AR');
+  const payload={version:1,updated:ts,proyectos:_proj,estados:_est,presupuesto:_pres};
+  const newJson=JSON.stringify(payload);
+  const html=document.documentElement.outerHTML;
+  const updated=html.replace(/\/\*DATA_START\*\/[\s\S]*?\/\*DATA_END\*\//,'/*DATA_START*/'+newJson+'/*DATA_END*/');
+  const blob=new Blob([updated],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='Panel_Cordon_Cuneta.html';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.getElementById('last-update').textContent='Guardado: '+ts;
+  markClean();
+}
+
+window.addEventListener('beforeunload',function(e){if(_dirty){e.preventDefault();e.returnValue='';}});
+
+const COLOR_PALETTE=[{bg:'#ECEFF1',text:'#455A64'},{bg:'#FFF3CD',text:'#856404'},{bg:'#DBEAFE',text:'#1E40AF'},{bg:'#D4EDDA',text:'#155724'},{bg:'#FFE5D0',text:'#8B3A00'},{bg:'#E8D5F5',text:'#6B21A8'},{bg:'#FCE4EC',text:'#880E4F'},{bg:'#E0F7FA',text:'#006064'},{bg:'#FFF8E1',text:'#F57F17'},{bg:'#E8F5E9',text:'#1B5E20'},{bg:'#E3F2FD',text:'#0D47A1'},{bg:'#C8E6C9',text:'#1B5E20'},{bg:'#B2DFDB',text:'#004D40'},{bg:'#F8BBD0',text:'#880E4F'},{bg:'#CFD8DC',text:'#263238'}];
+let _newColor=COLOR_PALETTE[0];
+
+function getEst(id){return _est.find(e=>e.id===id)||{label:'—',bg:'#EEE',text:'#999'};}
+function renderBadge(id){const e=getEst(id);return `<span class="badge" style="background:${e.bg};color:${e.text};">${esc(e.label)}</span>`;}
+function okBadge(v){const cls=v==='SI'?'ok-si':v==='NO'?'ok-no':'ok-tr';return `<span class="badge ${cls}">${esc(v||'—')}</span>`;}
+function fmtMonto(n){if(!n)return '—';return '$'+Number(n).toLocaleString('es-AR');}
+function avancePct(p){const maxPos=Math.max(_est.length-1,1);const pos=id=>{const i=_est.findIndex(e=>e.id===id);return i<0?0:i;};return Math.round(((pos(p.ejuridico)+pos(p.etecnico)+pos(p.efinanciero))/(maxPos*3))*100);}
+function avanceColor(pct){if(pct===0)return '#9E9E9E';if(pct<40)return '#F39C12';if(pct<80)return '#2196F3';return '#27AE60';}
+function populateSelects(vals){['f-ejuridico','f-etecnico','f-efinanciero'].forEach((sid,i)=>{document.getElementById(sid).innerHTML=_est.map(e=>`<option value="${e.id}"${vals&&vals[i]===e.id?' selected':''}>${esc(e.label)}</option>`).join('');});}
+
+function renderLegend(){document.getElementById('legend-main').innerHTML='<span style="font-size:11px;font-weight:700;color:#1B5E20;margin-right:5px;">ESTADOS:</span>'+_est.map(e=>`<span class="legend-item"><span class="legend-dot" style="background:${e.bg};border:1px solid ${e.text};"></span>${esc(e.label)}</span>`).join('');}
+
+function renderTable(){
+  const tbody=document.getElementById('tbody-main');
+  tbody.innerHTML=_proj.map((p,idx)=>{
+    const pct=avancePct(p),col=avanceColor(pct);
+    return `<tr id="tr-${p.id}">
+      <td style="color:#9E9E9E;font-size:11px;">${idx+1}</td>
+      <td style="font-weight:700;font-size:12px;">${esc(p.municipio)}${p.obs?`<br><span style="font-size:10px;color:#7F8C8D;font-weight:400;">${esc(p.obs)}</span>`:''}</td>
+      <td><span class="depto-tag">${esc(p.departamento)}</span></td>
+      <td style="font-size:11px;color:#4A5568;">${esc(p.expediente)}</td>
+      <td class="monto-cell">${fmtMonto(p.monto)}</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">${fmtMl(p.cordon_cuneta_ml)}</td>
+      <td style="font-size:12px;font-weight:600;text-align:right;">${fmtMl(p.adoquinado_m2)}</td>
+      <td>${okBadge(p.ok_gob)}</td>
+      <td style="font-size:10px;">${p.doc_exp?`<span class="badge doc-si">📄 ${esc(p.doc_exp)}</span>`:'<span style="color:#ccc;">—</span>'}</td>
+      <td>${renderBadge(p.ejuridico)}</td>
+      <td>${renderBadge(p.etecnico)}</td>
+      <td>${renderBadge(p.efinanciero)}</td>
+      <td><div class="avance-wrap"><div class="avance-bar"><div class="avance-fill" style="width:${pct}%;background:${col};"></div></div><span class="avance-pct">${pct}%</span></div></td>
+      <td style="white-space:nowrap;">
+        <button class="btn-icon" onclick="openModal(${p.id})" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="askDelete(${p.id})" title="Eliminar">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  renderLegend();updateSummary();applyFilters();
+}
+
+function fmtMl(n){ return (n!==undefined && n!==null && n!=='') ? Number(n).toLocaleString('es-AR') : '—'; }
+function fmtM(n){return n>=1e9?'$'+((n/1e9).toFixed(2))+'B':'$'+((n/1e6).toFixed(1))+'M';}
+function updateSummary(){
+  const monto=_proj.reduce((s,p)=>s+(p.monto||0),0);
+  const saldo=monto-(_pres||0);
+  const ok=_proj.filter(p=>p.ok_gob==='SI').length;
+  const nodoc=_proj.filter(p=>!p.doc_exp).length;
+  const totalCC=_proj.reduce((s,p)=>s+(p.cordon_cuneta_ml||0),0);
+  const totalAD=_proj.reduce((s,p)=>s+(p.adoquinado_m2||0),0);
+  document.getElementById('cnt-total').textContent=_proj.length;
+  document.getElementById('cnt-monto').textContent=fmtM(monto);
+  const presEl=document.getElementById('cnt-pres');
+  presEl.textContent=_pres?fmtM(_pres):'— (clic para ingresar)';
+  presEl.style.fontSize=_pres?'18px':'13px';
+  const salEl=document.getElementById('cnt-saldo');
+  salEl.textContent=_pres?fmtM(saldo):'—';
+  if(_pres) salEl.style.color=saldo>=0?'#2E7D32':'#C62828';
+  document.getElementById('cnt-ok').textContent=ok;
+  document.getElementById('cnt-nodoc').textContent=nodoc;
+  document.getElementById('cnt-cc-ml').textContent=totalCC>0?totalCC.toLocaleString('es-AR'):'—';
+  document.getElementById('cnt-ad-m2').textContent=totalAD>0?totalAD.toLocaleString('es-AR'):'—';
+}
+function editPresupuesto(){
+  const raw=_pres?String(_pres):'';
+  const val=prompt('Ingresá el Crédito Asignado (importe en $):\nEjemplo: 5000000000 para $5B', raw);
+  if(val===null)return;
+  const n=parseInt(val.replace(/[^0-9]/g,''))||0;
+  _pres=n;markDirty();updateSummary();
+}
+
+function applyFilters(){
+  const q=document.getElementById('search-input').value.toLowerCase().trim();
+  const depto=document.getElementById('depto-filter').value;
+  const okF=document.getElementById('ok-filter').value;
+  let visible=0;
+  _proj.forEach(p=>{
+    const tr=document.getElementById('tr-'+p.id); if(!tr)return;
+    const mQ=!q||[p.municipio,p.expediente,p.obs,p.departamento].some(v=>v&&v.toLowerCase().includes(q));
+    const mD=!depto||p.departamento===depto;
+    const mO=!okF||p.ok_gob===okF;
+    const show=mQ&&mD&&mO;
+    tr.classList.toggle('hidden-row',!show);
+    if(show)visible++;
+  });
+  document.getElementById('filter-count').textContent=visible<_proj.length?`Mostrando ${visible} de ${_proj.length}`:`${_proj.length} proyectos`;
+  document.getElementById('empty-main').style.display=visible===0?'block':'none';
+}
+
+function clearFilters(){document.getElementById('search-input').value='';document.getElementById('depto-filter').value='';document.getElementById('ok-filter').value='';applyFilters();}
+
+function openModal(id){
+  document.getElementById('f-id').value=id||'';
+  document.getElementById('modal-title').textContent=id?'Editar Proyecto':'Nuevo Proyecto';
+  let vals=null;
+  if(id){const p=_proj.find(x=>x.id===id);if(p){document.getElementById('f-municipio').value=p.municipio;document.getElementById('f-departamento').value=p.departamento;document.getElementById('f-expediente').value=p.expediente;document.getElementById('f-monto').value=p.monto||'';document.getElementById('f-cordon_cuneta_ml').value=(p.cordon_cuneta_ml!==undefined&&p.cordon_cuneta_ml!==null)?p.cordon_cuneta_ml:'';document.getElementById('f-adoquinado_m2').value=(p.adoquinado_m2!==undefined&&p.adoquinado_m2!==null)?p.adoquinado_m2:'';document.getElementById('f-ok_gob').value=p.ok_gob;document.getElementById('f-doc_exp').value=p.doc_exp;document.getElementById('f-obs').value=p.obs||'';vals=[p.ejuridico,p.etecnico,p.efinanciero];}}
+  else{['f-municipio','f-expediente','f-monto','f-cordon_cuneta_ml','f-adoquinado_m2','f-doc_exp','f-obs'].forEach(fid=>{document.getElementById(fid).value='';});document.getElementById('f-departamento').value='';document.getElementById('f-ok_gob').value='SI';const first=(_est[0]||{}).id;vals=[first,first,first];}
+  populateSelects(vals);
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('f-municipio').focus();
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');}
+function saveProject(){
+  const municipio=document.getElementById('f-municipio').value.trim();
+  if(!municipio){alert('El municipio es obligatorio.');return;}
+  const id=document.getElementById('f-id').value;
+  const proj={id:id?parseInt(id):Date.now(),municipio,departamento:document.getElementById('f-departamento').value,expediente:document.getElementById('f-expediente').value.trim(),monto:parseInt(document.getElementById('f-monto').value)||0,cordon_cuneta_ml:document.getElementById('f-cordon_cuneta_ml').value!==''?parseFloat(document.getElementById('f-cordon_cuneta_ml').value):null,adoquinado_m2:document.getElementById('f-adoquinado_m2').value!==''?parseFloat(document.getElementById('f-adoquinado_m2').value):null,ok_gob:document.getElementById('f-ok_gob').value,doc_exp:document.getElementById('f-doc_exp').value.trim(),ejuridico:parseInt(document.getElementById('f-ejuridico').value),etecnico:parseInt(document.getElementById('f-etecnico').value),efinanciero:parseInt(document.getElementById('f-efinanciero').value),obs:document.getElementById('f-obs').value.trim()};
+  if(id){const i=_proj.findIndex(x=>x.id===parseInt(id));if(i>=0)_proj[i]=proj;}else{_proj.push(proj);}
+  markDirty();closeModal();renderTable();
+}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+let _editEst=[];
+function openEstadosModal(){_editEst=JSON.parse(JSON.stringify(_est));_newColor=COLOR_PALETTE[0];renderEstList();buildColorGrid('new-color-grid',null);document.getElementById('new-swatch').style.background=_newColor.bg;document.getElementById('new-estado-nombre').value='';document.getElementById('modal-estados-overlay').classList.add('open');}
+function closeEstadosModal(){document.getElementById('modal-estados-overlay').classList.remove('open');closeAllGrids();}
+function renderEstList(){document.getElementById('estados-list').innerHTML=_editEst.map(e=>`<div class="estado-row" id="erow-${e.id}"><div class="color-picker-wrap"><div class="swatch" style="background:${e.bg};" onclick="toggleColorPicker('cgrid-${e.id}')"></div><div class="color-grid" id="cgrid-${e.id}"></div></div><input class="nombre-estado" type="text" value="${esc(e.label)}" onchange="updEstLabel(${e.id},this.value)"><button class="btn-del-estado" onclick="removeEst(${e.id})">✕</button></div>`).join('');_editEst.forEach(e=>buildColorGrid(`cgrid-${e.id}`,e.id));}
+function buildColorGrid(gid,estId){const g=document.getElementById(gid);if(!g)return;g.innerHTML=COLOR_PALETTE.map((c,i)=>{const sel=estId?(_editEst.find(e=>e.id===estId)||{}).bg===c.bg:_newColor.bg===c.bg;return `<div class="color-dot${sel?' selected':''}" style="background:${c.bg};border-color:${c.text};" onclick="selectColor(${i},'${gid}',${estId||'null'})"></div>`;}).join('');}
+function selectColor(idx,gid,estId){const c=COLOR_PALETTE[idx];if(estId){const e=_editEst.find(x=>x.id===estId);if(e){e.bg=c.bg;e.text=c.text;}const sw=document.querySelector(`#erow-${estId} .swatch`);if(sw)sw.style.background=c.bg;}else{_newColor=c;document.getElementById('new-swatch').style.background=c.bg;}buildColorGrid(gid,estId);closeAllGrids();}
+function toggleColorPicker(gid){const g=document.getElementById(gid);if(!g)return;const was=g.classList.contains('open');closeAllGrids();if(!was)g.classList.add('open');}
+function closeAllGrids(){document.querySelectorAll('.color-grid.open').forEach(g=>g.classList.remove('open'));}
+function updEstLabel(id,val){const e=_editEst.find(x=>x.id===id);if(e)e.label=val;}
+function removeEst(id){if(_editEst.length<=1){alert('Debe haber al menos un estado.');return;}_editEst=_editEst.filter(e=>e.id!==id);renderEstList();}
+function addEstado(){const n=document.getElementById('new-estado-nombre').value.trim();if(!n){document.getElementById('new-estado-nombre').focus();return;}_editEst.push({id:Date.now(),label:n,bg:_newColor.bg,text:_newColor.text});document.getElementById('new-estado-nombre').value='';renderEstList();}
+function saveEstados(){_editEst.forEach(e=>{const inp=document.querySelector(`#erow-${e.id} .nombre-estado`);if(inp)e.label=inp.value.trim()||e.label;});_est=_editEst;markDirty();closeEstadosModal();renderTable();}
+document.getElementById('modal-estados-overlay').addEventListener('click',function(e){if(e.target===this)closeEstadosModal();});
+document.addEventListener('click',function(e){if(!e.target.closest('.color-picker-wrap'))closeAllGrids();});
+document.getElementById('new-estado-nombre').addEventListener('keydown',function(e){if(e.key==='Enter')addEstado();});
+
+let _confirmFn=null;
+function askDelete(id){document.getElementById('confirm-msg').textContent='¿Eliminar este proyecto? No se puede deshacer.';_confirmFn=()=>{_proj=_proj.filter(x=>x.id!==id);markDirty();renderTable();};document.getElementById('confirm-overlay').classList.add('open');}
+function closeConfirm(){document.getElementById('confirm-overlay').classList.remove('open');_confirmFn=null;}
+function runConfirm(){if(_confirmFn)_confirmFn();closeConfirm();}
+
+function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+if(EMBEDDED_DATA.updated)document.getElementById('last-update').textContent='Guardado: '+EMBEDDED_DATA.updated;
+renderTable();
+</script>
+
+
+</body></html>

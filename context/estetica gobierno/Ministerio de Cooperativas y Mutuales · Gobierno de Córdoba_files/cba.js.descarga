@@ -1,0 +1,135 @@
+window.addEventListener("DOMContentLoaded", () => {
+    const foldables = new Foldable( '.barra-lateral .menu' );
+    const repartition = new Repartition();
+    repartition.init();
+    const programas = new Programas();
+    programas.init();
+    window.lazyload = new LazyLoad({
+        elements_selector: "img[data-src]"
+    });
+    Lightboxes.init();
+});
+
+class Foldable {
+
+    constructor( selector ) {
+
+        this.selector = selector;
+        this.element = document.querySelector( selector );
+        
+        if( this.element ) {
+
+            const current = this.element.querySelector( '.current_page_item' );
+            if( !current ) return;
+            const children = current.querySelector( '.children' );
+            
+            if( children !== null )
+                children.style.display = 'block';
+            
+            let closest = current.closest( '.children' );
+            while( closest !== null ) {
+
+                closest.style.display = 'block';
+                closest = closest.parentElement.closest( '.children' );
+
+            }
+
+        }
+
+    }
+
+}
+
+class Programas {
+
+    init() {
+
+        if( !this.isProgramaArchive() ) return;
+
+        const  options = {
+            valueNames: [ 'programa' ]
+        };
+        
+        const list = new List( 'programas' , options );
+
+    }
+
+    isProgramaArchive() {
+
+        const search = window.location.search;
+        return search.includes( 'view=planes_y_programas' ) ||
+                search.includes( 'view=tramites_y_servicios' );
+
+    }
+
+}
+
+class Lightboxes {
+    static init() {
+        this.update();
+    }
+
+    static update() {
+        let lb = Array.from(
+            document.querySelectorAll("[data-lb]:not([data-lb-processed])")
+        );
+
+        lb.forEach(l => {
+            const instance = basicLightbox.create(`
+                
+                <iframe src="${
+                    l.dataset.lb
+                }" width="100%" frameborder="0"></iframe>
+
+            `);
+
+            l.addEventListener("click", () => {
+                instance.show();
+            });
+
+            l.setAttribute("data-lb-proccessed", "true");
+        });
+    }
+}
+
+class Repartition {
+    init() {
+        if (!this.isRepartition()) return;
+
+        $(".otros-programas.owl-carousel").owlCarousel({
+            loop: true,
+            dots: true,
+            nav: true,
+            margin: 20,
+            responsive: {
+
+                0: {
+
+                    items: 2,
+                    loop: false
+
+                },
+                768: {
+
+                    items: 3
+
+                },
+                1200: {
+
+                    items: 5
+
+                },
+                1920: {
+
+                    items: 7
+
+                }
+
+            }
+        });
+    }
+
+    isRepartition() {
+        return document.body.classList.contains("single-reparticion");
+    }
+}
