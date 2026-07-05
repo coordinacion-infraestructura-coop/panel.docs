@@ -150,6 +150,16 @@ DATABASE_URL="postgresql+asyncpg://user_vivienda:TU_PASSWORD_ENCODEADO@127.0.0.1
 #pass completa y encodeada
 DATABASE_URL="postgresql+asyncpg://user_vivienda:PUgSJkQQMyFCl2BkJDThXwwG01w%2BCjSy22VRjFNWcq0%3D@127.0.0.1:5432/db_vivienda"
 
+
+pass= "PUgSJkQQMyFCl2BkJDThXwwG01w+CjSy22VRjFNWcq0" #-> requiere encoding 
+
+export DATABASE_URL=$(python3 -c "
+import urllib.parse
+pw = 'PUgSJkQQMyFCl2BkJDThXwwG01w+CjSy22VRjFNWcq0='
+print(f'postgresql+asyncpg://user_vivienda:{urllib.parse.quote(pw, safe=\"\")}@127.0.0.1:5433/db_vivienda')
+")
+
+
 # 6. Verificar
 python -m alembic current
 ```
@@ -170,6 +180,9 @@ python -m alembic current
 | 0004 | 2026-07-02 | portal_usuarios + portal_usuario_secretarias + seed admins |
 | 0005 | 2026-07-02 | update_cc_data — sincroniza datos CC con Panel_Cordon_Cuneta(10).html |
 | 0006 | 2026-07-02 | cordoba_hogar — viv_ch_estados, viv_cordoba_hogar, viv_ch_config, viv_ch_pedidos |
+| 0007 | 2026-07-04 | Schema: estado_general, deleted_at, historial CC/CH, geo_localidades, aplica_* flags |
+| 0008 | 2026-07-04 | Data: sync CC desde Panel(15).html, seed geo_localidades, computa estado_general |
+| 0009 | 2026-07-04 | Unifica catálogos CC y CH al workflow de 15 estados estándar |
 
 ---
 
@@ -233,4 +246,6 @@ DATABASE_URL="postgresql+asyncpg://user_vivienda:PASSWORD_ENCODEADO@127.0.0.1:54
 | ministerio-config-v20260701d | 2026-07-01 | APPEND_PATH_TO_ADDRESS en paths svc-privada | ✅ reemplazada |
 | ministerio-config-v20260702a | 2026-07-02 | Rutas portal (/api/v1/portal/*) | ✅ reemplazada |
 | ministerio-config-v20260702b | 2026-07-02 | Rutas portal + corrección CORS | ✅ reemplazada |
-| ministerio-config-v20260703a | 2026-07-02 | **✅ ACTIVA** — Rutas Córdoba Hogar (`/api/v1/vivienda/cordoba-hogar*`) + OPTIONS | ✅ ACTIVA |
+| ministerio-config-v20260703a | 2026-07-03 | Rutas Córdoba Hogar (`/api/v1/vivienda/cordoba-hogar*`) + OPTIONS | ✅ reemplazada |
+| ministerio-config-v20260704a | 2026-07-04 | Creada con YAML posiblemente desactualizado | ⚠ no usar |
+| ministerio-config-v20260704b | 2026-07-04 | **✅ ACTIVA** — Rutas CC/CH completas + historial + geo + gestión estados | ✅ ACTIVA |

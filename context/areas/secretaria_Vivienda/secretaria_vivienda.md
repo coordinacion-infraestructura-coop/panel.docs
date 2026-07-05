@@ -19,29 +19,33 @@ En una primera instancia nuestro desarrollo estará dirigido al área de gestió
 
 ### Programa de Cordón Cuneta
 Es el programa que está actualmente operativo. Es un ABM manejado desde un panel, que registra cambios de estado en cada una de las gestiones.
-El panel está en docs\context\areas\secretaria_Vivienda\Panel_Cordon_Cuneta.html 
 
-El significado de cada  valor de Estado es el siguiente:
-Sin iniciar -> No han tenido ningun contacto desde el área, o bien está iniciado pero el área no se contactó o bien ni siquiera presentó nada el municipio
-Sin expediente de gobierno -> hay una nota pero no el ok de gobierno, es necesario definir si lo tendremos o no
-Notificado -> se le envió la documentación de los requerimientos pulidos, por suac. Fecha en la que se notificó x cidi
-A la espera de documentación -> en algún momento se hizo contacto, hay certeza de que recibieron los instructivos nuevos y están trabajando en ello
-en revición técnina -> volvió esa documentación y lo estamos analizando (puede ser alguna de las veces q volvió la documentación
-En correción -> se le hicieron observaciones y lo tiene el municipio corrigiendolo
-Documentación completa -> está todo ok
-Legales para convenio -> una vez que la documentación está todo ok se envía a min coop para firma de convenio
-Administración para NP -> una vez que está firmado el convenio va al área financiera interna para reserva del gasto
-Convenio firmado -> en coop se firmó el convenio antes de finalizar la documentación técnica
-Legales para proyecto de dictamen y reso -> legales interna de vivienda
-legales del MCyM -> lo analiza legales del ministerio de coop
-Administración DGV OC -> vuelve a legales de vivienda para hacer la orden de compra
-TC -> Se envía al tribunal de cuentas
-Visado TC -> si vuelve visado por el tribunal de cuentas (aprobado) ahi pasa al director de infraestructura para el inicio de obra
+**Estado en producción (2026-07-05):**
+- 54 municipios activos (46 originales + 8 nuevos incorporados en Panel #25: ETRURIA, MANFREDI, LA LAGUNA, CHAZON, AUSONIA, TIO PUJIO, SAN ANTONIO DE LITIN, CRUZ ALTA Marcos Juárez)
+- Panel de referencia más reciente: `Panel_Cordon_Cuneta (25).html`
+- Historial de cambios de estado operativo — tabla `viv_cc_estado_historial`
+- Columnas en UI: orden, municipio, departamento, expediente, monto, CC ml, m² adoquinado, ok_gob, **Estado General**, Estado Jurídico, Estado Técnico, Estado Presup.
+
+**Catálogo de estados (15 estados, workflow unificado CC y CH, migración 0009):**
+1. Sin Iniciar — sin contacto ni documentación
+2. Para Notificar — listo para enviar notificación
+3. Notificado — se envió documentación de requerimientos por SUAC/CIDI
+4. Sin Expediente de Gobierno — nota presentada pero sin ok de gobierno
+5. A la espera de Documentación — contacto hecho, municipio trabajando en docs
+6. En Revisión Técnica — documentación recibida, en análisis
+7. En Corrección — se hicieron observaciones, municipio corrigiendo
+8. Documentación Completa — todo ok
+9. Administración para NP — va al área financiera interna para reserva del gasto
+10. Para Firma de Convenio — en camino a firma
+11. Convenio Firmado — firmado en coop antes de fin doc técnica
+12. Legales para Proyecto de Dictamen y Resolución — legales interna de vivienda
+13. Legales del MCyM — analiza legales del ministerio de coop
+14. Administración OC — vuelve a legales de vivienda para orden de compra
+15. TC — enviado al Tribunal de Cuentas
 
 La unidad de análisis es el municipio, cada alta baja o modificación se hace sobre el municipio como unidad de análisis.
-Además debemos permitir registrar una actualización de estados por pedidos realizados, al hacer click en un municipio se debe acceder a todo el detalle de las comunicaciones 
-que se han tenido con este municipio. Allí debe haber un botón de actualización de pedidos, en donde se registre en una caja de texto qué fue lo que se le pidió por última vez y la fecha
-la fecha por deffault debe cargarse la fecha de registro de esta actualización pero se debe poder modificar, ya que es probable que hoy cargue un pedido que hice ayer. 
+Al hacer click en un municipio se accede al detalle con dos pestañas: Comunicaciones (pedidos) e Historial de estados.
+La pestaña de historial muestra cada transición de estado (campo, estado anterior, estado nuevo, fecha, actor).
 
 
 ### Programa Córdoba Hogar
