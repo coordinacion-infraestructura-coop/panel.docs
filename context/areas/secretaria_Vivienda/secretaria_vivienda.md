@@ -42,6 +42,8 @@ Es el programa que está actualmente operativo. Es un ABM manejado desde un pane
 La unidad de análisis es el municipio. Al hacer click en el nombre del municipio (o en el ícono de historial) se accede al detalle con dos pestañas: Comunicaciones (pedidos) e Historial de estados.
 La pestaña de historial muestra cada transición de estado (campo, estado anterior, estado nuevo, fecha, actor).
 
+**En desarrollo (2026-07-13): Checklist Técnico sincronizado desde Google Sheet.** El área técnica de Cordón Cuneta lleva su seguimiento documental en un Google Sheet propio (pestaña "Base TOTAL"), no en nuestro panel. Se sincroniza periódicamente (Cloud Scheduler, solo lectura) hacia una tabla nueva vinculada al municipio, y se agrega una tercera pestaña "Checklist Técnico" al detalle. Ver spec completo: `docs/files/spec-sync-cc-checklist-tecnico.md`.
+
 
 ### Programa Córdoba Hogar
 **ABM implementado y en producción (2026-07-02, mejoras julio 2026).**
