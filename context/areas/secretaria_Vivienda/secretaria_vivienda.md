@@ -32,8 +32,9 @@ Es el programa que está actualmente operativo. Es un ABM manejado desde un pane
 - **Click en nombre del municipio**: abre directamente el panel lateral de historial y comunicaciones
 - **Filtros**: por departamento (desde catálogo geo oficial), por OK Gobernación, por Estado General, búsqueda libre
 - **Exportar a Excel**: botón "↓ Exportar (N)" descarga las filas filtradas/ordenadas como `.xlsx`
-- **Alta de municipio**: valida nombre+departamento contra catálogo geo oficial (desplegable Depto→Municipio). El backend rechaza con 409 si ya existe el municipio en ese departamento.
+- **Alta de municipio**: valida nombre+departamento contra catálogo geo oficial (desplegable Depto→Municipio). Si el municipio ya existe, el backend devuelve 409 y el frontend muestra banner amber "Este municipio ya existe" con botón **Ir a editar** que abre el modal de edición directamente.
 - **Edición**: mismo desplegable cascada para cambiar nombre/departamento
+- **Fecha del cambio de estado**: en el modal de edición, campo de fecha junto al título "Estados por Dimensión" (default: hoy, max: hoy). Permite registrar la fecha real del cambio en el historial.
 
 **Catálogo de estados (15 estados, workflow unificado CC y CH, migración 0009):**
 1. Sin Iniciar | 2. Para Notificar | 3. Notificado | 4. Sin Expediente de Gobierno | 5. A la espera de Documentación | 6. En Revisión Técnica | 7. En Corrección | 8. Documentación Completa | 9. Administración para NP | 10. Para Firma de Convenio | 11. Convenio Firmado | 12. Legales para Proyecto de Dictamen y Resolución | 13. Legales del MCyM | 14. Administración OC | 15. TC
