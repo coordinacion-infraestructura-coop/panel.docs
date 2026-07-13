@@ -1,9 +1,17 @@
 # Spec: Sincronización Google Sheet "Base TOTAL" → Checklist Técnico de Cordón Cuneta
 
-**Estado**: aprobado — pendiente de implementación
+**Estado**: ✅ implementado y en producción (2026-07-13)
 **Versión**: 1.0.0
 **Servicio**: `svc-vivienda` (módulo `cordon_cuneta`, sin servicio nuevo)
 **Última actualización**: 2026-07-13
+
+## 0. Resultado de la primera corrida en producción
+
+- Migración `0016` aplicada. Gateway: `ministerio-config-v20260713` (activa).
+- Cloud Scheduler `sync-cc-checklist-tecnico` corriendo cada 15 min (`southamerica-east1`).
+- Primera corrida real: `filas_leidas=48`, `filas_insertadas=46`, `filas_error=2`.
+- **100% de matching** (`municipio_id`) sobre las 46 filas válidas — supera el mínimo del 80% del criterio de aceptación.
+- Los 2 errores son esperados y persistentes hasta que el área técnica los corrija en el Sheet: "Deán Funes" y "La Laguna", altas nuevas sin `Departamento` cargado todavía (ver 3.2). **No indican una falla del sync** — si en `viv_cc_sync_log` aparecen siempre estos mismos dos, es correcto.
 
 ---
 
@@ -252,14 +260,14 @@ Sí se agrega a `openapi.yaml` (con su `options:` de CORS) — es de lectura, mi
 
 ## 12. Criterios de aceptación
 
-- [ ] Migración `0016` aplicada: 3 tablas nuevas + índice único.
-- [ ] `POST /internal/sync/...` no accesible sin identidad IAM válida (403/401 sin token OIDC).
-- [ ] `POST /internal/sync/...` no aparece en `openapi.yaml` ni es alcanzable vía Gateway.
-- [ ] Corridas repetidas del sync no duplican filas (UPSERT verificado).
-- [ ] Una fila con dato inválido (ej. expediente `"PEDIR BETI"`) no frena el procesamiento de las demás; queda reflejada en `filas_error` y en `errores` de `viv_cc_sync_log`.
-- [ ] Al menos el 80% de las localidades del Sheet quedan vinculadas a `municipio_id` (proxy de que el matching funciona razonablemente sobre los datos reales).
-- [ ] Tercera pestaña visible en el panel, sin afectar las dos existentes ni las mutaciones actuales de `viv_cordon_cuneta`.
-- [ ] Cloud Scheduler configurado y corriendo cada 15 min en producción.
+- [x] Migración `0016` aplicada: 3 tablas nuevas + índice único.
+- [x] `POST /internal/sync/...` no accesible sin identidad IAM válida (verificado: solo `api-gateway-sa` y `svc-vivienda@...` tienen `roles/run.invoker`; el path no está en `openapi.yaml`).
+- [x] `POST /internal/sync/...` no aparece en `openapi.yaml` ni es alcanzable vía Gateway.
+- [x] Corridas repetidas del sync no duplican filas (UPSERT verificado en tests y en producción).
+- [x] Una fila con dato inválido (expediente `"PEDIR BETI"` en tests; falta de departamento en producción) no frena el procesamiento de las demás; queda reflejada en `filas_error` y en `errores` de `viv_cc_sync_log`.
+- [x] Al menos el 80% de las localidades del Sheet quedan vinculadas a `municipio_id` — **100% real** (46/46).
+- [x] Tercera pestaña visible en el panel, sin afectar las dos existentes ni las mutaciones actuales de `viv_cordon_cuneta`.
+- [x] Cloud Scheduler configurado y corriendo cada 15 min en producción (`sync-cc-checklist-tecnico`, `southamerica-east1`).
 
 ## 13. Pendiente / fuera de esta entrega
 

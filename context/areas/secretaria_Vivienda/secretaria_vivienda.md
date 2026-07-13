@@ -42,7 +42,9 @@ Es el programa que está actualmente operativo. Es un ABM manejado desde un pane
 La unidad de análisis es el municipio. Al hacer click en el nombre del municipio (o en el ícono de historial) se accede al detalle con dos pestañas: Comunicaciones (pedidos) e Historial de estados.
 La pestaña de historial muestra cada transición de estado (campo, estado anterior, estado nuevo, fecha, actor).
 
-**En desarrollo (2026-07-13): Checklist Técnico sincronizado desde Google Sheet.** El área técnica de Cordón Cuneta lleva su seguimiento documental en un Google Sheet propio (pestaña "Base TOTAL"), no en nuestro panel. Se sincroniza periódicamente (Cloud Scheduler, solo lectura) hacia una tabla nueva vinculada al municipio, y se agrega una tercera pestaña "Checklist Técnico" al detalle. Ver spec completo: `docs/files/spec-sync-cc-checklist-tecnico.md`.
+**En producción (2026-07-13): Checklist Técnico sincronizado desde Google Sheet.** El área técnica de Cordón Cuneta lleva su seguimiento documental en un Google Sheet propio (pestaña "Base TOTAL"), no en nuestro panel. Se sincroniza cada 15 min (Cloud Scheduler → endpoint interno IAM-protegido, solo lectura del Sheet) hacia `viv_cc_checklist_tecnico` + `viv_cc_checklist_items`, vinculada al municipio existente (100% de matching en la primera corrida: 46/46). Tercera pestaña "Checklist Técnico" en el detalle de cada municipio, solo lectura. Ver spec completo: `docs/files/spec-sync-cc-checklist-tecnico.md`.
+
+Dos altas nuevas del Sheet ("Deán Funes", "La Laguna") aparecen como error persistente en `viv_cc_sync_log` porque todavía no tienen Departamento cargado por el área técnica — es esperado, no una falla del sync.
 
 
 ### Programa Córdoba Hogar

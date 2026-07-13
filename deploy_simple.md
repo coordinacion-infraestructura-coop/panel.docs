@@ -122,7 +122,8 @@ firebase deploy --only hosting --project gestorcooperativo
 | ministerio-config-v20260702b | 2026-07-02 | ✅ reemplazada |
 | ministerio-config-v20260703a | 2026-07-03 | ✅ reemplazada |
 | ministerio-config-v20260704a | 2026-07-04 | ⚠ posible YAML viejo |
-| ministerio-config-v20260704b | 2026-07-04 | ✅ **ACTIVA** |
+| ministerio-config-v20260704b | 2026-07-04 | ✅ reemplazada |
+| ministerio-config-v20260713 | 2026-07-13 | ✅ **ACTIVA** — agrega GET checklist-tecnico Cordón Cuneta |
 
 ---
 
@@ -142,6 +143,10 @@ firebase deploy --only hosting --project gestorcooperativo
 | 0010 | 2026-07-04 | Migra obs → pedidos historial, doc_exp fechado → estado historial |
 | 0011 | 2026-07-05 | Actualiza CC desde Panel #25: estados + métricas; inserta 8 nuevos municipios |
 | 0012 | 2026-07-05 | Backfill historial CC faltante de Panel #25 (estados sin cambio entre Panel 15 y 25) |
+| 0013 | 2026-07-08 | `monto_por_casa` configurable en `viv_ch_config` |
+| 0014 | 2026-07-13 | Índice único `(municipio, departamento)` activo en `viv_cordon_cuneta` |
+| 0015 | 2026-07-13 | Índice único `(localidad, departamento)` activo en `viv_cordoba_hogar` |
+| 0016 | 2026-07-13 | `viv_cc_checklist_tecnico` + `viv_cc_checklist_items` + `viv_cc_sync_log` — sync Google Sheet "Base TOTAL" |
 
 ---
 
@@ -153,3 +158,6 @@ firebase deploy --only hosting --project gestorcooperativo
 - **Password Cloud SQL**: `PUgSJkQQMyFCl2BkJDThXwwG01w+CjSy22VRjFNWcq0=` → URL-encodear con `urllib.parse.quote`
 - **Puerto 5433** para el proxy (evita conflicto con PG local que ocupa 5432)
 - **Errores CORS** después de deploy → verificar Health de Cloud Run primero, luego el preflight OPTIONS del gateway
+- **`gcloud run deploy --source .` corrido desde el directorio padre** (ej. `backend/` en vez de `backend/svc-vivienda/`) no encuentra el `Dockerfile` y cae a Buildpacks — el contenedor resultante falla el health check de arranque. Siempre `cd` al directorio del servicio antes de deployar; si un deploy fallido dejó un base-image residual, agregar `--clear-base-image` al reintentar.
+- **`curl` sin `Authorization` a un endpoint de Cloud Run privado devuelve 403 — es normal**, no indica error de deploy. Usar `-H "Authorization: Bearer $(gcloud auth print-identity-token)"` para probar.
+- **Endpoints internos disparados por Cloud Scheduler** (ej. `/internal/sync/...`, ver `spec-sync-cc-checklist-tecnico.md`): no se agregan a `openapi.yaml` ni pasan por el Gateway. Se protegen únicamente con `roles/run.invoker` de Cloud Run sobre una Service Account dedicada, y Cloud Scheduler llama directo a la URL de Cloud Run con token OIDC (`--oidc-service-account-email` + `--oidc-token-audience`). Patrón reutilizable para cualquier sync/batch futuro disparado por Scheduler.
