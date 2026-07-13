@@ -274,3 +274,18 @@ Sí se agrega a `openapi.yaml` (con su `options:` de CORS) — es de lectura, mi
 - Vista agregada por departamento (equivalente "REP Depart.") — derivable client-side, sin backend nuevo, si se pide más adelante.
 - Herramienta de resolución manual para filas con `municipio_id = NULL`.
 - Extender el patrón de sync a otras secretarías/pestañas si aparece la necesidad.
+
+## 14. Alertas (agregado 2026-07-13, post-entrega inicial)
+
+Una falla **total** del sync (no puede leerse el Sheet — API deshabilitada, credenciales revocadas, Sheet desvinculado de la SA, cuota excedida) es distinta de un error de fila individual (ver §3.2/§6): esta última nunca frena el batch ni genera alerta, es un estado esperado. Una falla total sí debe avisar a un humano.
+
+**Código** (`app/cordon_cuneta/checklist_sync.py`):
+- Excepción `SheetReadError`: si `google_sheets.get_values()` explota, se loguea igual una fila en `viv_cc_sync_log` (`filas_error=1`, motivo con el detalle de la excepción) y se re-lanza.
+- `app/internal/router.py` traduce `SheetReadError` a `HTTPException(502, {"code": "SHEET_SYNC_FALLIDO", ...})` — un error de fila individual nunca llega a este código, solo la falla total.
+
+**Infraestructura** (Cloud Monitoring, proyecto `gestorcooperativo`):
+- Métrica basada en logs `cc_checklist_sync_errors`: cuenta respuestas `httpRequest.status>=400` de Cloud Run en el path `/internal/sync/cordon-cuneta-checklist`.
+- Canales de notificación (email): `projects/gestorcooperativo/notificationChannels/16305525817428725684` (bonafepedro@gmail.com), `projects/gestorcooperativo/notificationChannels/5332100367370625933` (infraestructura.coop@gmail.com).
+- Política de alerta `projects/gestorcooperativo/alertPolicies/3550730852890842105` ("Sync checklist tecnico CC - fallo"): dispara con 1 sola respuesta de error en una ventana de 15 min (`COMPARISON_GT` sobre 0, `alignmentPeriod=900s`), auto-cierra a los 7 días si no vuelve a ocurrir.
+
+**Por qué log-based metric y no la métrica nativa de Cloud Scheduler** (`cloudscheduler.googleapis.com/job/...`): la métrica sobre logs de Cloud Run es más directa de verificar (se ve el filtro funcionando en Logs Explorer antes de crear la alerta) y no depende de conocer de memoria el schema exacto de labels de la métrica nativa de Scheduler.
