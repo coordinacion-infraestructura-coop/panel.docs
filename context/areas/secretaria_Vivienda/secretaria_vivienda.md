@@ -20,45 +20,52 @@ En una primera instancia nuestro desarrollo estará dirigido al área de gestió
 ### Programa de Cordón Cuneta
 Es el programa que está actualmente operativo. Es un ABM manejado desde un panel, que registra cambios de estado en cada una de las gestiones.
 
-**Estado en producción (2026-07-05):**
-- 54 municipios activos (46 originales + 8 nuevos incorporados en Panel #25: ETRURIA, MANFREDI, LA LAGUNA, CHAZON, AUSONIA, TIO PUJIO, SAN ANTONIO DE LITIN, CRUZ ALTA Marcos Juárez)
+**Estado en producción (2026-07-13):**
+- 54 municipios activos (46 originales + 8 nuevos incorporados en Panel #25; duplicados limpiados en julio 2026)
 - Panel de referencia más reciente: `Panel_Cordon_Cuneta (25).html`
 - Historial de cambios de estado operativo — tabla `viv_cc_estado_historial`
-- Columnas en UI: orden, municipio, departamento, expediente, monto, CC ml, m² adoquinado, ok_gob, **Estado General**, Estado Jurídico, Estado Técnico, Estado Presup.
+- Índice único activo: no pueden existir dos municipios con igual nombre y departamento (migración 0014)
+
+**Funcionalidades del panel (UI):**
+- Columnas: orden, municipio (clickeable), departamento, expediente, monto, CC ml, m² adoquinado, ok_gob, Última obs., **Últ. modif.**, Estado General, Estado Jurídico, Estado Técnico, Estado Presup., Avance, Acciones
+- **Columnas ordenables**: click en cabecera ordena asc/desc. Estados se ordenan por posición en el workflow, no por ID.
+- **Click en nombre del municipio**: abre directamente el panel lateral de historial y comunicaciones
+- **Filtros**: por departamento (desde catálogo geo oficial), por OK Gobernación, por Estado General, búsqueda libre
+- **Exportar a Excel**: botón "↓ Exportar (N)" descarga las filas filtradas/ordenadas como `.xlsx`
+- **Alta de municipio**: valida nombre+departamento contra catálogo geo oficial (desplegable Depto→Municipio). El backend rechaza con 409 si ya existe el municipio en ese departamento.
+- **Edición**: mismo desplegable cascada para cambiar nombre/departamento
 
 **Catálogo de estados (15 estados, workflow unificado CC y CH, migración 0009):**
-1. Sin Iniciar — sin contacto ni documentación
-2. Para Notificar — listo para enviar notificación
-3. Notificado — se envió documentación de requerimientos por SUAC/CIDI
-4. Sin Expediente de Gobierno — nota presentada pero sin ok de gobierno
-5. A la espera de Documentación — contacto hecho, municipio trabajando en docs
-6. En Revisión Técnica — documentación recibida, en análisis
-7. En Corrección — se hicieron observaciones, municipio corrigiendo
-8. Documentación Completa — todo ok
-9. Administración para NP — va al área financiera interna para reserva del gasto
-10. Para Firma de Convenio — en camino a firma
-11. Convenio Firmado — firmado en coop antes de fin doc técnica
-12. Legales para Proyecto de Dictamen y Resolución — legales interna de vivienda
-13. Legales del MCyM — analiza legales del ministerio de coop
-14. Administración OC — vuelve a legales de vivienda para orden de compra
-15. TC — enviado al Tribunal de Cuentas
+1. Sin Iniciar | 2. Para Notificar | 3. Notificado | 4. Sin Expediente de Gobierno | 5. A la espera de Documentación | 6. En Revisión Técnica | 7. En Corrección | 8. Documentación Completa | 9. Administración para NP | 10. Para Firma de Convenio | 11. Convenio Firmado | 12. Legales para Proyecto de Dictamen y Resolución | 13. Legales del MCyM | 14. Administración OC | 15. TC
 
-La unidad de análisis es el municipio, cada alta baja o modificación se hace sobre el municipio como unidad de análisis.
-Al hacer click en un municipio se accede al detalle con dos pestañas: Comunicaciones (pedidos) e Historial de estados.
+La unidad de análisis es el municipio. Al hacer click en el nombre del municipio (o en el ícono de historial) se accede al detalle con dos pestañas: Comunicaciones (pedidos) e Historial de estados.
 La pestaña de historial muestra cada transición de estado (campo, estado anterior, estado nuevo, fecha, actor).
 
 
 ### Programa Córdoba Hogar
-Se firmó convenio recientemente. **ABM provisorio implementado y en producción (2026-07-02).**
+**ABM implementado y en producción (2026-07-02, mejoras julio 2026).**
 
-**Estado actual:**
+**Estado actual (2026-07-13):**
 - Panel operativo en `https://gestorcooperativo.web.app/vivienda/cordoba-hogar`
-- Backend: módulo `app/cordoba_hogar/` en svc-vivienda (migración 0006)
-- 43 localidades seeded en producción
-- Unidad de análisis: localidad (igual que Cordón Cuneta con municipios)
-- Permite: ver localidades, registrar ok_gob, cantidad de casas, monto, expediente, pedidos
+- Backend: módulo `app/cordoba_hogar/` en svc-vivienda
+- 43 localidades en producción
+- Unidad de análisis: localidad
 
-**Pendiente:** Reunión con el área para definir procedimientos administrativos, estados definitivos y campos. La estructura actual es provisoria y puede cambiar.
+**Funcionalidades del panel (UI):**
+- Columnas: orden, localidad (clickeable), departamento, fecha anuncio, expediente, casas, monto, ok_gob, Última obs., **Últ. modif.**, Estado General, Estado Jurídico, Estado Técnico, Estado Presup., Avance, Acciones
+- **Columnas ordenables**: click en cabecera ordena asc/desc
+- **Click en nombre de localidad**: abre panel lateral de historial y comunicaciones
+- **Filtros**: por departamento (catálogo geo oficial), por OK Gobernación, por Estado General, búsqueda libre
+- **Exportar a Excel**: botón "↓ Exportar (N)" descarga filas filtradas/ordenadas como `.xlsx`
+- **Alta con monto automático**: al ingresar `cantidad de casas` se calcula automáticamente `monto = cantidad_casas × monto_por_casa`. Muestra hint cyan con la fórmula. Campo monto es de sólo lectura.
+- **Fecha del cambio de estado**: en el modal de edición, campo de fecha junto a "Estados por Dimensión" (default: hoy). Permite registrar la fecha real del cambio en el historial.
+- **Edición**: desplegable cascada Depto→Localidad con catálogo oficial geo
+
+**Parámetros configurables (botón ⚙ Parámetros, rol Supervisor/Admin):**
+- Tab *Estados*: gestión del catálogo de estados (crear, editar, eliminar)
+- Tab *Parámetros*: edición del valor `monto_por_casa` (actualmente $34.000.000). Se guarda en tabla `viv_ch_config` y afecta el cálculo automático en nuevas altas.
+
+**Pendiente:** Reunión con el área para validar estados definitivos y flujo administrativo. La estructura puede ajustarse.
 
 ### Programa Mi Lugar
 Programa de expropiaciones, se creó una unidad ejecutora, hay un panel provisorio. 
