@@ -269,6 +269,22 @@ Sí se agrega a `openapi.yaml` (con su `options:` de CORS) — es de lectura, mi
 - [x] Tercera pestaña visible en el panel, sin afectar las dos existentes ni las mutaciones actuales de `viv_cordon_cuneta`.
 - [x] Cloud Scheduler configurado y corriendo cada 15 min en producción (`sync-cc-checklist-tecnico`, `southamerica-east1`).
 
+## 13.5 Incidente de producción 2026-07-16: fila con dato largo tumbó la corrida entera
+
+La alerta de §14 se disparó el 2026-07-16 15:15 (`500`, no `502` — señal de que algo no salió como estaba diseñado). Causa raíz en dos capas:
+
+1. **Dato**: el área técnica escribió en "REPARTICIÓN" un valor de 66 caracteres (`"DIRECCION DE JURISDICCION DE REGULARIZACION DE OBRAS Y PROYECTOS"`) contra una columna `VARCHAR(50)` → `StringDataRightTruncationError` al hacer `flush()` de esa fila.
+2. **Bug real, más grave que el dato**: el `except Exception` por fila (§5) loguea el error y sigue el loop, pero **no hacía `rollback()`** — un `flush()` fallido deja la sesión de SQLAlchemy en estado `PendingRollbackError` hasta que se le pida rollback explícitamente. Todas las filas siguientes (y la escritura final de `viv_cc_sync_log`) fallaban en cascada con ese mismo error. Resultado: la corrida completa se perdía **sin dejar ningún rastro** en `viv_cc_sync_log` — el aislamiento "un error de fila no frena el batch" no era real, solo lo parecía en los tests (SQLite no tiene límite de longitud en `VARCHAR`, así que este bug nunca se manifestó ahí).
+
+**Fix** (migración `0018` — nota: hubo colisión de numeración con `0017_pedidos_secretaria_nombre` de otra rama en paralelo, se renumeró):
+- `viv_cc_checklist_tecnico.estado_expediente`, `.reparticion` y `viv_cc_checklist_items.valor` ensanchados de `VARCHAR(50)` a `VARCHAR(200)` — son celdas de texto libre del Sheet, sin garantía real de longitud máxima.
+- Cada fila del batch ahora corre dentro de su propio `SAVEPOINT` (`async with db.begin_nested():`) en vez de compartir la transacción completa. Si el `flush()` de una fila falla, SQLAlchemy hace `ROLLBACK TO SAVEPOINT` automáticamente — la sesión sigue sana para el resto del batch y para el log final.
+- Test de regresión (`test_error_de_fila_no_envenena_las_filas_siguientes`) fuerza un `IntegrityError` real (PK duplicada, portable entre SQLite y Postgres) en la fila del medio de un batch de 3, y verifica que la primera y la tercera se procesan igual. Se verificó manualmente que el test falla sin el fix (revierte exactamente el mismo `PendingRollbackError` de producción) antes de confirmarlo como válido.
+
+**Verificado en producción**: corrida post-fix con 54 filas, 0 errores, incluyendo 37 municipios con el valor largo de `reparticion` guardado completo.
+
+**Lección para cualquier sync fila-por-fila con SQLAlchemy**: "loguear el error de una fila y seguir" no alcanza — sin `begin_nested()` (o equivalente) por unidad de trabajo, un solo `flush()` fallido invalida toda la transacción compartida. Ver también `~/.claude/skills/sync-sheets-to-cloudsql/SKILL.md`, actualizado con esta lección.
+
 ## 13. Pendiente / fuera de esta entrega
 
 - Vista agregada por departamento (equivalente "REP Depart.") — derivable client-side, sin backend nuevo, si se pide más adelante.

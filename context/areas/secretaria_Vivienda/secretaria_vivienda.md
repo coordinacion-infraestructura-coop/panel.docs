@@ -39,12 +39,29 @@ Es el programa que está actualmente operativo. Es un ABM manejado desde un pane
 **Catálogo de estados (15 estados, workflow unificado CC y CH, migración 0009):**
 1. Sin Iniciar | 2. Para Notificar | 3. Notificado | 4. Sin Expediente de Gobierno | 5. A la espera de Documentación | 6. En Revisión Técnica | 7. En Corrección | 8. Documentación Completa | 9. Administración para NP | 10. Para Firma de Convenio | 11. Convenio Firmado | 12. Legales para Proyecto de Dictamen y Resolución | 13. Legales del MCyM | 14. Administración OC | 15. TC
 
-La unidad de análisis es el municipio. Al hacer click en el nombre del municipio (o en el ícono de historial) se accede al detalle con dos pestañas: Comunicaciones (pedidos) e Historial de estados.
+La unidad de análisis es el municipio. Al hacer click en el nombre del municipio (o en el ícono de historial) se accede al detalle con tres pestañas: Comunicaciones (pedidos), Historial de estados y Checklist Técnico.
 La pestaña de historial muestra cada transición de estado (campo, estado anterior, estado nuevo, fecha, actor).
+
+**Comunicaciones multi-área (implementado 2026-07-13, ampliado 2026-07-16):**
+
+Jerarquía de visibilidad por secretaría:
+- **vivienda**: ve solo las comunicaciones propias (secretaria='vivienda')
+- **infraestructura**: ve vivienda + infraestructura (no supervision)
+- **supervision** / **Admin**: ve todo (vivienda + infraestructura + supervision)
+- Las comunicaciones de supervision son privadas al grupo — no las ve vivienda ni infraestructura
+
+Usuarios del grupo supervision en producción:
+- `infraestructura.coop@gmail.com` (secretarias: infraestructura + supervision)
+- `lorena752aguilar@gmail.com` (secretaria: supervision, rol: Operador)
+- `aguirrevictoriamariela@gmail.com` (secretaria: supervision, rol: Operador)
+
+Badges: indigo "Infraestructura" / violeta "Supervisión". El botón "+ Nueva actualización" aparece para roles Admin/Supervisor/Operador o usuarios con secretaria infraestructura/supervision.
 
 **En producción (2026-07-13): Checklist Técnico sincronizado desde Google Sheet.** El área técnica de Cordón Cuneta lleva su seguimiento documental en un Google Sheet propio (pestaña "Base TOTAL"), no en nuestro panel. Se sincroniza cada 15 min (Cloud Scheduler → endpoint interno IAM-protegido, solo lectura del Sheet) hacia `viv_cc_checklist_tecnico` + `viv_cc_checklist_items`, vinculada al municipio existente (100% de matching en la primera corrida: 46/46). Tercera pestaña "Checklist Técnico" en el detalle de cada municipio, solo lectura. Ver spec completo: `docs/files/spec-sync-cc-checklist-tecnico.md`.
 
-Dos altas nuevas del Sheet ("Deán Funes", "La Laguna") aparecen como error persistente en `viv_cc_sync_log` porque todavía no tienen Departamento cargado por el área técnica — es esperado, no una falla del sync.
+**Resuelto (2026-07-16)**: las dos altas nuevas del Sheet ("Deán Funes", "La Laguna") que aparecían como error persistente por falta de Departamento ya fueron completadas por el área técnica — `filas_error=0` desde entonces.
+
+**Incidente 2026-07-16 (resuelto)**: un valor de "REPARTICIÓN" más largo que la columna de la base (`VARCHAR(50)`) tumbó una corrida completa del sync — no solo esa fila, sino la corrida entera, sin dejar rastro en el log. Fix: columnas ensanchadas + aislamiento por fila con SAVEPOINT (migración `0018`, ver `docs/files/spec-sync-cc-checklist-tecnico.md` §13.5).
 
 
 ### Programa Córdoba Hogar
@@ -69,6 +86,8 @@ Dos altas nuevas del Sheet ("Deán Funes", "La Laguna") aparecen como error pers
 **Parámetros configurables (botón ⚙ Parámetros, rol Supervisor/Admin):**
 - Tab *Estados*: gestión del catálogo de estados (crear, editar, eliminar)
 - Tab *Parámetros*: edición del valor `monto_por_casa` (actualmente $34.000.000). Se guarda en tabla `viv_ch_config` y afecta el cálculo automático en nuevas altas.
+
+**Comunicaciones multi-área (implementado 2026-07-13):** Mismo comportamiento que CC — usuarios de coord infraestructura agregan y ven todas las comunicaciones; vivienda solo las propias. Badge indigo para comunicaciones de infraestructura, nombre real del autor en cada entrada.
 
 **Pendiente:** Reunión con el área para validar estados definitivos y flujo administrativo. La estructura puede ajustarse.
 
