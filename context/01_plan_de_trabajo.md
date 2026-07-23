@@ -187,6 +187,7 @@ Para cada secretaría, el ciclo es:
 |-----------|---------|
 | Contexto general para Claude Code | `docs/files/CLAUDE.md` |
 | Arquitectura + ADRs (incluyendo ADR-003 revisado) | `docs/files/arquitectura.md` |
+| Auditoría de código — bugs conocidos, corregidos y verificados | `docs/files/auditoria-codigo.md` |
 | Spec infraestructura GCP | `docs/files/spec-infraestructura-gcp.md` |
 | Spec svc-vivienda | `docs/files/spec-svc-vivienda.md` |
 | OpenAPI Gateway | `infra/gateway/openapi.yaml` |

@@ -10,6 +10,10 @@ Sistema de gestión pública para el Ministerio de Cooperativas y Mutuales de la
 
 **Conflictos con ADRs o specs**: si una instrucción del usuario contradice una decisión registrada en `docs/files/arquitectura.md`, señalarlo explícitamente antes de implementar y esperar confirmación.
 
+## Auditoría de código
+
+`docs/files/auditoria-codigo.md` es el registro vivo de bugs y calidad de código (distinto de los ADRs, que son decisiones de arquitectura). **Antes de auditar o revisar el código en busca de bugs, leerlo primero** — evita re-descubrir hallazgos ya documentados y re-verificar código ya confirmado como correcto. Se actualiza con el skill `/auditoria-codigo` (o manualmente con el mismo formato) cada vez que se encuentran o corrigen problemas.
+
 ## Stack tecnológico
 
 | Capa | Tecnología |
