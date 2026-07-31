@@ -83,7 +83,7 @@ gcloud api-gateway api-configs create ministerio-config-v20261307aa \
 # Apuntar el gateway a la nueva config
 gcloud api-gateway gateways update ministerio-gateway \
   --api=ministerio-api \
-  --api-config=ministerio-config-v20261307aa \
+  --api-config=ministerio-config-v20262307 \
   --location=us-central1 \
   --project=gestorcooperativo
 

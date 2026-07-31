@@ -35,6 +35,7 @@ Es el programa que está actualmente operativo. Es un ABM manejado desde un pane
 - **Alta de municipio**: valida nombre+departamento contra catálogo geo oficial (desplegable Depto→Municipio). Si el municipio ya existe, el backend devuelve 409 y el frontend muestra banner amber "Este municipio ya existe" con botón **Ir a editar** que abre el modal de edición directamente.
 - **Edición**: mismo desplegable cascada para cambiar nombre/departamento
 - **Fecha del cambio de estado**: en el modal de edición, campo de fecha junto al título "Estados por Dimensión" (default: hoy, max: hoy). Permite registrar la fecha real del cambio en el historial.
+- **Estado General — 100% manual (desde 2026-07-31)**: el campo Estado General se gestiona solo desde el cuadro de edición. No existe fórmula automática que lo calcule a partir de los sub-estados (Jurídico, Técnico, Presupuestario). Al crear un nuevo municipio, Estado General queda en `null` hasta que el usuario lo setee explícitamente.
 
 **Catálogo de estados (15 estados, workflow unificado CC y CH, migración 0009):**
 1. Sin Iniciar | 2. Para Notificar | 3. Notificado | 4. Sin Expediente de Gobierno | 5. A la espera de Documentación | 6. En Revisión Técnica | 7. En Corrección | 8. Documentación Completa | 9. Administración para NP | 10. Para Firma de Convenio | 11. Convenio Firmado | 12. Legales para Proyecto de Dictamen y Resolución | 13. Legales del MCyM | 14. Administración OC | 15. TC
@@ -79,15 +80,17 @@ Badges: indigo "Infraestructura" / violeta "Supervisión". El botón "+ Nueva ac
 - **Click en nombre de localidad**: abre panel lateral de historial y comunicaciones
 - **Filtros**: por departamento (catálogo geo oficial), por OK Gobernación, por Estado General, búsqueda libre
 - **Exportar a Excel**: botón "↓ Exportar (N)" descarga filas filtradas/ordenadas como `.xlsx`
-- **Alta con monto automático**: al ingresar `cantidad de casas` se calcula automáticamente `monto = cantidad_casas × monto_por_casa`. Muestra hint cyan con la fórmula. Campo monto es de sólo lectura.
+- **Monto automático (alta y edición)**: tanto en el modal de alta como en el de edición, al ingresar o modificar `cantidad de casas` se auto-calcula `monto = cantidad_casas × monto_por_casa`. Muestra hint cyan "= X casas × $Y" cuando el monto coincide con el cálculo. Monto es editable para override manual. En el modal de alta el campo monto es solo lectura; en edición es editable.
 - **Fecha del cambio de estado**: en el modal de edición, campo de fecha junto a "Estados por Dimensión" (default: hoy). Permite registrar la fecha real del cambio en el historial.
+- **Estado General — 100% manual (desde 2026-07-31)**: igual que en CC, el Estado General se gestiona solo desde el cuadro de edición. No hay fórmula automática.
+- **Comunicaciones multi-área (implementado 2026-07-13):** mismo comportamiento jerárquico que CC — supervision/Admin ven todo, infraestructura ve vivienda+infraestructura, vivienda solo las propias.
 - **Edición**: desplegable cascada Depto→Localidad con catálogo oficial geo
 
 **Parámetros configurables (botón ⚙ Parámetros, rol Supervisor/Admin):**
 - Tab *Estados*: gestión del catálogo de estados (crear, editar, eliminar)
 - Tab *Parámetros*: edición del valor `monto_por_casa` (actualmente $34.000.000). Se guarda en tabla `viv_ch_config` y afecta el cálculo automático en nuevas altas.
 
-**Comunicaciones multi-área (implementado 2026-07-13):** Mismo comportamiento que CC — usuarios de coord infraestructura agregan y ven todas las comunicaciones; vivienda solo las propias. Badge indigo para comunicaciones de infraestructura, nombre real del autor en cada entrada.
+Badges: indigo "Infraestructura" / violeta "Supervisión". Nombre real del autor en cada entrada.
 
 **Pendiente:** Reunión con el área para validar estados definitivos y flujo administrativo. La estructura puede ajustarse.
 
