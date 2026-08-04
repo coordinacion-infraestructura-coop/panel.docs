@@ -95,9 +95,67 @@ Badges: indigo "Infraestructura" / violeta "Supervisión". Nombre real del autor
 **Pendiente:** Reunión con el área para validar estados definitivos y flujo administrativo. La estructura puede ajustarse.
 
 ### Programa Mi Lugar
-Programa de expropiaciones, se creó una unidad ejecutora, hay un panel provisorio. 
-Idem Córdoba Hogar, el servicio será un ABM manejado desde un panel, que registra cambios de estado en cada una de las gestiones. 
-El panel provisorio esta en {pegar ruta.html}
+**Análisis completado 2026-08-04 a partir de `Panel_MI_LUGAR (69).html`.**
+
+Programa de adquisición de tierras para vivienda. Tres tipos de gestiones bajo un panel unificado con tabs:
+- **Expropiaciones** (🏗): tierras que pasarán a dominio provincial — 21 proyectos activos
+- **Convenios con Municipios** (🤝): cesión de tierras municipales al programa — 15 proyectos
+- **Lotes Provinciales** (🏛): tierras ya en dominio del Estado Provincial — 13 proyectos
+
+**Estado de desarrollo:** análisis completo, pendiente spec + código. Decisiones de arquitectura acordadas con el usuario (2026-08-04).
+
+**Funcionalidades del panel (UI — planificado):**
+- Tabs por tipo, con color propio: Exp=#B03A2E / Muni=#1E8449 / Prov=#1A5276
+- Columnas: #, Nombre/Obs. (clickeable), Localidad, Expediente, Geolocalización (links), Superficie, Lotes, E.Jurídico, E.Técnico, E.Presup., Monto, Avance, Acciones
+- Columnas adicionales en Exp y Prov: Valor Fiscal, INFRA s/Nexos, Nexos, UNC, Costo Total INFRA
+- **Click en nombre del proyecto**: abre panel lateral con historial de estados + comunicaciones multi-área (igual CC/CH)
+- **Filtros**: búsqueda libre, localidad (select dinámico), estado
+- **Exportar a Excel**: mismo patrón CC/CH
+- **Estado General — 100% manual**: mismo comportamiento que CC/CH (campo nullable seteado manualmente en EditModal). Pendiente confirmación con área.
+- **Avance**: calculado automáticamente como promedio de posición de las 3 dimensiones en el catálogo (≠ CC/CH donde Estado General es manual)
+- **Botón ⚙ Parámetros** (Supervisor/Admin): Tab Estados (ABM catálogo) + Tab Parámetros (tipo_cambio, usd_por_lote)
+
+**Localidad (campo dual):**
+- `localidad_id` FK nullable a `viv_geo_localidades` — vincula con CC/CH cuando coincide con catálogo
+- `localidad_nombre` texto libre siempre requerido — para proyectos en barrios o sectores sin catálogo (ej: "Barrio Chingolo", "Capital - Villa Retiro Sur")
+- Modal usa desplegable cascada Depto→Localidad + opción "Otra localidad / Barrio" con campo libre
+
+**Datos geográficos:**
+- **NO son centroides de `viv_geo_localidades`** — son vértices/puntos de referencia del predio específico (hasta 12 puntos por proyecto en casos complejos como Cruz del Eje)
+- Almacenados en tabla separada `viv_ml_geo_puntos` (1:N con proyectos)
+- Input en modal: URL de Google Maps o líneas de `lat,lng` (una por punto)
+
+**Catálogo de estados (17 estados, workflow adquisición tierras — diferente de CC/CH):**
+1. Sin Iniciar | 2. Nota del Municipio al MCyM | 3. Pase Sec. Gestión Infra | 4. Intervención Min. Infra | 5. Informe Prefactibilidad | 6. Dir. Reg. Obras VF+30% | 7. Para Evaluación Tasación | 8. Adm. DGV NP | 9. Legales Proy. Resolución | 10. Legales MCyM Dictamen | 11. Adm. DGV OC | 12. TC | 13. Min. Economía | 14. Sec. Gral. Gobernación | 15. Consejo Gral. Tasaciones | 16. COMPLETADO | 17. PROCURACION
+
+**Superficie y lotes — auto-cálculo (confirmado por área 2026-08-04):**
+- `superficie` = `NUMERIC(10,4)` en Ha (no texto libre — el área confirmó normalizar a Ha)
+- `lotes_por_ha = 25` nuevo parámetro configurable en ⚙ Parámetros
+- Al ingresar `superficie`, auto-calcula `lotes = superficie × lotes_por_ha` (overrideable manualmente — mismo patrón UX que monto en CH)
+- Hint cyan "= X Ha × 25 lotes/Ha" cuando el valor coincide con el auto-calculado
+- **Pendiente confirmar con área**: si 1 Ha = siempre 25 lotes o hay excepciones por tipo de terreno
+
+**Modelo financiero — cadena de auto-cálculos (constantes configurables en ⚙ Parámetros):**
+- `TIPO_CAMBIO = $1.450/US$` → `infra_sin_nexos = lotes × 10.000 × tipo_cambio` (Exp + Prov)
+- `USD_POR_LOTE = US$10.000`
+- `LOTES_POR_HA = 25`
+- `valor_expropiacion = valor_fiscal × 1.30` (solo Exp, auto readonly)
+- `costo_total_infra = valor_expropiacion + infra_sin_nexos + costo_nexos + convenio_unc`
+
+**4to tipo de proyecto (confirmado por área 2026-08-04):**
+- Existe (tierras cooperativas u otro) pero aún indefinido en su estructura
+- Columna `tipo` sin CHECK constraint fijo para permitir extensión sin DDL complejo
+- Documentado para implementar en próxima versión cuando el área lo defina
+
+**Migración de datos históricos:**
+- Los 49 registros del boceto se migran en script de seed (parte de migración 0020 o script aparte)
+- Seed data extraída del HTML parseando los `<tr>` de cada `<tbody>`
+
+**Pendiente confirmar con área:**
+- Si 1 Ha = siempre 25 lotes o hay excepciones por tipo de terreno
+- Las expropiaciones de Capital (ej: Villa Retiro Sur) — ¿van en sub-tipo `exp` o necesitan un tipo nuevo?
+
+**Comunicaciones multi-área:** mismo comportamiento que CC/CH — supervisión/Admin ven todo, infraestructura ve vivienda+infraestructura, vivienda solo las propias.
 
 ## Unidad Ejecutora de Loteos
 ### Programa Loteos 

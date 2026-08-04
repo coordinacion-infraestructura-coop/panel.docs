@@ -74,7 +74,7 @@ git pull origin main
 grep -c 'operationId: cors' openapi.yaml
 
 # Crear nueva config (cambiar el sufijo si ya existe ese nombre)
-gcloud api-gateway api-configs create ministerio-config-v20261307aa \
+gcloud api-gateway api-configs create ministerio-config-v20260308 \
   --api=ministerio-api \
   --openapi-spec=openapi.yaml \
   --project=gestorcooperativo \
@@ -83,7 +83,7 @@ gcloud api-gateway api-configs create ministerio-config-v20261307aa \
 # Apuntar el gateway a la nueva config
 gcloud api-gateway gateways update ministerio-gateway \
   --api=ministerio-api \
-  --api-config=ministerio-config-v20262307 \
+  --api-config=ministerio-config-v20260308 \
   --location=us-central1 \
   --project=gestorcooperativo
 
