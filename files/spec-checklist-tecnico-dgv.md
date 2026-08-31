@@ -1,12 +1,18 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
 **Estado**: approved
-**Versión**: 1.1.0
+**Versión**: 1.1.1
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
 **Última actualización**: 2026-08-31
 
 ### Changelog
+- **1.1.1 (2026-08-31)** — §8: se agrega `GET /api/v1/vivienda/programas/tablero` (KPIs
+  agregados de CC/CH/ML), con `ROLES_LECTURA_TABLERO`. Motivo: §8 decía que `programas/router.py`
+  "(Tablero/KPIs)" admitía `TecnicoDGV`, pero el Tablero real (`ProgramasPage.tsx`) calculaba
+  todos sus KPIs en el cliente pidiendo los `GET` de panel completo de CC/CH/ML — vedados a ese
+  rol. El endpoint nuevo devuelve solo los agregados; `GET /programas` (catálogo genérico) no
+  servía para eso.
 - **1.1.0 (2026-08-31)** — §6: se agrega `GET /checklist-tecnico/entidades` y
   `GET|POST /checklist-tecnico/{programa}/{entidad_id}/pedidos`. Motivo: la 1.0.0 decía
   reutilizar los `GET` de panel de `cordon_cuneta`/`cordoba_hogar`/`mi_lugar` para el selector
@@ -215,7 +221,12 @@ Rol nuevo: `TecnicoDGV`, agregado a `ROLES_VALIDOS` en `app/portal/schemas.py`.
 **Importante**: `app/auth.py` define constantes compartidas (`ROLES_LECTURA`, `ROLES_ESCRITURA`, etc.) que ya importan tal cual `cordon_cuneta/router.py`, `cordoba_hogar/router.py`, `mi_lugar/router.py` y `programas/router.py`. Agregar `TecnicoDGV` a esas constantes compartidas lo filtraría automáticamente a los 3 paneles completos — lo opuesto de lo aprobado por H. Por eso:
 
 - `checklist_tecnico/router.py` define constantes **locales**: `ROLES_LECTURA_CHECKLIST = ROLES_LECTURA + ("TecnicoDGV",)`, `ROLES_ESCRITURA_CHECKLIST = ROLES_ESCRITURA + ("TecnicoDGV",)`. Catálogos admin (`/admin/...`) usan `ROLES_ADMIN` sin agregar `TecnicoDGV`.
-- `programas/router.py` (Tablero/KPIs) cambia su `require_roles(*ROLES_LECTURA)` por una constante local `ROLES_LECTURA_TABLERO = ROLES_LECTURA + ("TecnicoDGV",)` — único archivo fuera del módulo nuevo que se toca.
+- `programas/router.py` (Tablero/KPIs) cambia su `require_roles(*ROLES_LECTURA)` por una constante local `ROLES_LECTURA_TABLERO = ROLES_LECTURA + ("TecnicoDGV",)`.
+  **(v1.1.1)** Además expone `GET /api/v1/vivienda/programas/tablero` con esa misma constante:
+  KPIs agregados de CC/CH/ML (`app/programas/tablero.py`, replica 1:1 el cálculo que hacía el
+  frontend). El `ProgramasPage.tsx` pasa a consumir ese endpoint en vez de pedir los 5 `GET`
+  de panel completo, que le daban `403` a `TecnicoDGV`. `GET /programas` (catálogo genérico de
+  `viv_programas`) no cambia y no alcanzaba para los KPIs.
 - `cordon_cuneta/router.py`, `cordoba_hogar/router.py`, `mi_lugar/router.py`: **sin cambios** — al no agregarse `TecnicoDGV` a las constantes compartidas de `app.auth`, quedan automáticamente vedados para ese rol (`403 PERMISO_INSUFICIENTE`).
 
 Frontend (`Layout.tsx`): `SECRETARIA_NAV['vivienda']` deja de ser un array fijo — se filtra según `portalUser.rol`; `TecnicoDGV` ve solo `Tablero` y `Checklist Técnico`.
@@ -228,6 +239,7 @@ Frontend (`Layout.tsx`): `SECRETARIA_NAV['vivienda']` deja de ser un array fijo 
 - [ ] Los montos de hitos de obra se recalculan sobre `viv_cordon_cuneta.monto` vigente, nunca se editan directamente.
 - [ ] Usuario con rol `TecnicoDGV`: `200` en `checklist-tecnico` y en `programas` (Tablero); `403` en `cordon-cuneta`, `cordoba-hogar`, `mi-lugar`.
 - [ ] Usuario con rol `TecnicoDGV`: `200` en `GET /checklist-tecnico/entidades` (las 3 fuentes) y en `GET|POST /checklist-tecnico/{programa}/{entidad_id}/pedidos` — el selector y las observaciones del panel cargan sin `403` (v1.1.0).
+- [ ] Usuario con rol `TecnicoDGV`: `200` en `GET /api/v1/vivienda/programas/tablero`; el Tablero de Programas renderiza sus KPIs sin `403` (v1.1.1).
 - [ ] Usuario con rol `TecnicoDGV` en el frontend: la navegación de `vivienda` muestra solo Tablero y Checklist Técnico.
 - [ ] Catálogos de estado del expediente y repartición: editables solo por `Admin` (`403` para el resto de los roles, incluido `TecnicoDGV`).
 - [ ] Las 54 localidades de Cordón Cuneta con dato en el sync aparecen con su checklist pre-cargado tras el backfill; Córdoba Hogar y Mi Lugar arrancan vacíos.
