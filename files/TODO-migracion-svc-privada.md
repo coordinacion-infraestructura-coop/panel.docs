@@ -28,18 +28,22 @@ ADRs: ADR-008..ADR-016 en `arquitectura.md`. Fasado completo en `roadmap.md` (Et
 
 ## Fase 1 — Scaffold + schema
 
-- [ ] `services/svc-privada/` — estructura (Dockerfile, pyproject.toml, alembic.ini,
-      docker-compose.dev.yml, .env.example, .gitignore) copiada de svc-vivienda
-- [ ] `app/` — `main.py`, `config.py`, `database.py`, `auth.py`, `audit.py`
-- [ ] `infra/cloudsql-setup.sh` — agregar `privada` (crea `db_privada`, `user_privada`, secreto
-      `svc-privada-db-url`)
-- [ ] `alembic/env.py` con import explícito de todos los modelos `priv_*`
-- [ ] Migración `0001` — schema `priv_*` completo (§4 del spec):
+- [x] `services/svc-privada/` — estructura (Dockerfile, pyproject.toml, alembic.ini,
+      docker-compose.dev.yml, .env.example, README.md) copiada de svc-vivienda
+- [x] `app/` — `main.py`, `config.py`, `database.py`, `auth.py` (ADR-015: lookup vía endpoint
+      interno IAM, degrada a `invitado` en dev), `audit.py`
+- [x] `infra/cloudsql-setup.sh` — `privada` agregado a `DBS`; create de db/usuario idempotente
+- [x] `alembic/env.py` con import explícito de todos los modelos `priv_*`
+- [x] Migración `0001` — schema `priv_*` completo (§4 del spec):
       `priv_gestiones`, `priv_gestiones_eventos`, `priv_localidades_info`, `priv_departamentos_info`,
-      `priv_geo_localidades`, `priv_cat_*` (6), `priv_audit_log`
+      `priv_geo_localidades`, `priv_cat_*` (6), `priv_audit_log`. Verificada: `alembic upgrade head --sql`
+      emite DDL limpio; `pytest` (2 tests, SQLite) en verde
 - [ ] `services/cloudbuild.yaml` — paso de build+deploy para `svc-privada`
+- [ ] Ejecutar `infra/cloudsql-setup.sh` en prod (crea `db_privada`, `user_privada`, secreto
+      `svc-privada-db-url`)
 - [ ] Cloud Run desplegado; `GET /health` OK
-- [ ] `alembic current` = head en la instancia de staging/local
+- [ ] `alembic upgrade head` contra `db_privada` (Cloud Shell + proxy, desde `services/svc-privada/`);
+      `alembic current` = `0001`
 
 ## Fase 2 — Endpoints a paridad
 
