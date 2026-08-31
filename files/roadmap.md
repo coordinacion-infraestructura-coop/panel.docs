@@ -35,16 +35,73 @@
 
 ---
 
-## Etapa 2 — Conectar svc-privada vía API Gateway (Sem 2, paralelo)
+## Etapa 2 — Conectar svc-privada vía API Gateway (Sem 2, paralelo) ✅
 
 **Objetivo**: Sistema de gestiones existente accesible desde el nuevo gateway.
 
-- [ ] Agregar dominio del API Gateway a `allow_origins` en svc-privada existente
-- [ ] Validar compatibilidad JWT: Google OAuth (existente) ↔ Google Identity Platform (nuevo)
-- [ ] Prueba end-to-end: login → token → `/api/v1/privada/gestiones/` → respuesta
-- [ ] Crear `docs/context/areas/Privada Ministro/contrato_api.md` con mapeo de roles
-- [ ] **Reunión pendiente** con área: mapear roles existentes (Admin/Supervisor/Operador) a roles ministeriales
+- [x] Agregar dominio del API Gateway a `allow_origins` en svc-privada existente
+- [x] Validar compatibilidad JWT
+- [x] Prueba end-to-end: login → token → `/api/v1/privada/gestiones/` → respuesta
+- [x] Frontend `src/modules/privada/` reimplementado en React (lista, drawer, cambiar-estado, tablero)
 - **Entregable**: Gateway → svc-privada funcional y verificado
+
+> **ADR-006 SUPERSEDIDO por ADR-008 (2026-08-31).** La decisión de "no migrar svc-privada" se
+> revirtió. La migración al monorepo (BigQuery → PostgreSQL) + 5 mejoras funcionales se planifican
+> en **Etapa 2-bis** (abajo). Specs: `spec-migracion-svc-privada.md` (approved v1.0.0) +
+> `spec-privada-categorias-programas.md`, `spec-privada-flujo-derivaciones.md`,
+> `spec-privada-tablero.md`, `spec-resumen-territorial-ficha-localidad.md`,
+> `spec-privada-informe-cooperativas-v2.md` (draft).
+
+---
+
+## Etapa 2-bis — Migración de svc-privada al monorepo + mejoras (2026-08-31)
+
+**Objetivo**: Absorber el sistema de la Secretaría Privada al monorepo sobre PostgreSQL, apagar el
+proyecto GCP personal `essential-haiku-482815-u4`, y sumar las mejoras pedidas (categorías/programas/
+áreas editables, DAG de flujo, ficha de localidad, Ok Gobernador/Ok Ministro, Tablero nativo).
+
+### Migración-paridad (contrato `/api/v1/privada/**` intacto en todo momento)
+
+- [ ] **Fase 0** — ADR-008..016 + `spec-migracion-svc-privada.md` `approved`; reunión de
+      relevamiento; Anexos A–G. *(ADR y spec ya escritos 2026-08-31.)*
+- [ ] **Fase 1** — Scaffold `services/svc-privada/`; `db_privada` en `ministerio-postgres`; secreto
+      `svc-privada-db-url`; Alembic `0001` (schema `priv_*`); CI/CD; Cloud Run `/health`.
+- [ ] **Fase 2** — Endpoints a paridad: gestiones (CRUD + `PATCH` + eventos + `cambiar-estado` con
+      lock `updated_at`), catálogos, `localidades-info`, `departamentos-info` (nuevo), informe (4),
+      `rollup-territorial` (nuevo). Byte-compatible.
+- [ ] **Fase 3** — Auth: `svc-privada/app/auth.py` estándar + `GET /internal/portal/usuarios/{email}`
+      IAM-only en svc-vivienda; `"privada"` en `ROLES_VALIDOS`/`SECRETARIAS`/`AdminUsuariosPage`.
+- [ ] **Fase 4** — ETL `migrar_desde_bigquery.py` (12 tablas + verificación conteos/sumas + backfill
+      `fecha_finalizacion`). Idempotente.
+- [ ] **Fase 5** — Tests de contrato (viejo vs nuevo) + unitarios > 80%.
+- [ ] **Fase 6** — Deploy Cloud Run + `ministerio-config-v{YYYYMMDD}` (creada, no activada);
+      validación por URL directa; rollback ensayado.
+- [ ] **Cutover** — ventana: viejo sólo-lectura → ETL delta → `gateway update` → alta usuarios en
+      `portal_usuarios` → smoke desde el portal. Frontend `privada` v1: `updated_at`/`409`, quitar
+      `/usuarios/**` y `modulos`, permisos vía `usePortalUser`.
+
+### Mejoras (specs hijos, post-cutover, aditivas)
+
+- [ ] **E1** — `spec-privada-categorias-programas.md`: 3 catálogos editables + panel admin +
+      desplegables con "+ nueva opción" + `ok_gobernador`/`ok_ministro` + backfill.
+- [ ] **E2** — Campos de gestión (fusionable con E1): `derivado_a`/`acciones_implementadas` cableados
+      en el modal de cambiar-estado.
+- [ ] **E3** — `spec-privada-flujo-derivaciones.md`: `priv_gestion_derivaciones` + backfill + `/flujo`
+      + vista DAG en el drawer.
+- [ ] **E4** — `spec-privada-informe-cooperativas-v2.md`: reclasificación `tema_informe` sobre
+      `categoria_id` + doble corrida + sign-off.
+- [ ] **E5** — `spec-resumen-territorial-ficha-localidad.md`: federación server-side de Privada
+      (ADR-016) + ficha de localidad en Resumen Territorial.
+- [ ] **Tablero nativo** — `spec-privada-tablero.md`: reemplazo del iframe Looker. **Gate del
+      decommission** (apagar BigQuery).
+
+### Decommission (post T+30d estable)
+
+- [ ] Backup frío de `infra_gestion` a GCS; apagar Cloud Run viejo; retirar GitHub Pages + informe
+      Looker; revocar OAuth client; actualizar `CLAUDE.md`/`arquitectura_actual.md`; suspender/borrar
+      `essential-haiku-482815-u4`.
+
+- **Entregable**: sistema de Privada 100% en el monorepo, proyecto GCP personal apagado.
 
 ---
 
