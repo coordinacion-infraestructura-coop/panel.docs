@@ -55,7 +55,9 @@ ADRs: ADR-008..ADR-016 en `arquitectura.md`. Fasado completo en `roadmap.md` (Et
 - [x] Modelos reconciliados con los `schema_*.json` reales: `gestiones_eventos.usuario` NOT NULL,
       `localidades_info`/`departamentos_info` con `created_at`/`created_by`, `costo_estimado`
       `Numeric(18,2)`, free-text a `Text`, `geo_localidades` depto/localidad NOT NULL
-- [ ] `services/cloudbuild.yaml` — paso de build+deploy para `svc-privada`
+- [x] `services/cloudbuild.yaml` — ya es parametrizado por `_SERVICE`; se le sumó la substitución
+      `_SVC_VIVIENDA_INTERNAL_URL` (default vacío) para el deploy de privada. Deploy:
+      `gcloud builds submit --config=cloudbuild.yaml --substitutions=_SERVICE=svc-privada,_SVC_VIVIENDA_INTERNAL_URL=<url-svc-vivienda>`
 - [ ] Ejecutar `infra/cloudsql-setup.sh` en prod (crea `db_privada`, `user_privada`, secreto
       `svc-privada-db-url`)
 - [ ] Cloud Run desplegado; `GET /health` OK
