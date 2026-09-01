@@ -95,12 +95,16 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 
 ## Fase 3 — Unificación de auth
 
-- [ ] `svc-vivienda`: `app/internal/router.py` — `GET /internal/portal/usuarios/{email}` (IAM-only)
-- [ ] `svc-privada`: `app/auth.py` valida Firebase JWT + consulta el endpoint interno; fallback `invitado`
-- [ ] `svc-privada`: cada router chequea secretaría `"privada"` + tuplas `ROLES_*` compartidas
-- [ ] `svc-vivienda`: `"privada"` en `portal/schemas.ROLES_VALIDOS` / lista de secretarías
-- [ ] frontend: `DashboardPage.tsx` `SECRETARIAS` + `AdminUsuariosPage` incluyen `"privada"`
-- [ ] IAM: SA de `svc-privada` con `roles/run.invoker` sobre `svc-vivienda`
+- [x] `svc-vivienda`: `app/internal/router.py` — `GET /internal/portal/usuarios/{email}` (IAM-only,
+      sin prefijo `/api/v1`; sólo usuarios activos → 404 si no; +1 test, 246 tests svc-vivienda OK)
+- [x] `svc-privada`: `app/auth.py` valida Firebase JWT + `_fetch_portal_user` async (httpx.AsyncClient)
+      contra el endpoint interno; fallback `invitado`. `require_privada(*roles)` chequea rol +
+      secretaría `"privada"` (Admin exento). 5 tests de auth e2e
+- [x] `svc-privada`: routers usan `require_privada` + tuplas `ROLES_*` compartidas
+- [x] `svc-vivienda`: `"privada"` ya está en `portal/schemas.SECRETARIAS_VALIDAS` (nada que cambiar)
+- [x] frontend: `DashboardPage.tsx` (id `privada`, activa) + `AdminUsuariosPage` ya incluyen `"privada"`
+- [ ] **deploy**: IAM — SA de `svc-privada` con `roles/run.invoker` sobre `svc-vivienda`
+- [ ] **deploy**: env `SVC_VIVIENDA_INTERNAL_URL` = URL del Cloud Run de svc-vivienda (sin `/api/v1`)
 
 ## Fase 4 — ETL + verificación
 
