@@ -108,11 +108,16 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 
 ## Fase 4 — ETL + verificación
 
-- [ ] `services/svc-privada/scripts/migrar_desde_bigquery.py` — 12 tablas, transformaciones §5
-- [ ] `is_deleted`→`deleted_at`; `''`→`NULL`; `TIMESTAMP`→`TIMESTAMPTZ`; UUID + mapa `id_legacy`→`id`
-- [ ] Backfill `fecha_finalizacion` de gestiones ya finalizadas
-- [ ] Verificación: conteo por tabla + `SUM`/`MIN`/`MAX` de columnas clave, BQ vs PG, reporte de diffs
-- [ ] Idempotente (`TRUNCATE`+recarga o `ON CONFLICT`)
+- [x] `services/svc-privada/scripts/migrar_desde_bigquery.py` — 12 tablas, transformaciones §5;
+      `--dry-run` / `--truncate` / `--limit N`. Helpers `s`/`ts`/`d`/`num`/`meta_to_dict` con tests
+- [x] `is_deleted`→`deleted_at` (fecha del último evento `ARCHIVO`, o `updated_at`, o now);
+      `''`→`NULL`; `TIMESTAMP`→`TIMESTAMPTZ` UTC; `uuid4()` nuevo + mapa `id_legacy`→`id`;
+      `metadata_json` STRING→dict; `lat_centro/lon_centro`→`lat/lon`
+- [x] Backfill `fecha_finalizacion`: último `CAMBIO_ESTADO`→`FINALIZADA`, si no hay usa `fecha_estado`
+- [x] Verificación `_verificar()`: conteos PG vs `anexos/ETL_baseline.json`; chequea `finalizadas_sin_fecha == 0`
+- [x] Idempotente: `--truncate` hace `TRUNCATE priv_* RESTART IDENTITY CASCADE`
+- [ ] **Ejecutar** contra BQ de prod (Cloud Shell + proxy): `--dry-run` primero → validar el reporte
+      de conteos contra la línea base, luego `--truncate` en staging/local
 
 ## Fase 5 — Tests
 
