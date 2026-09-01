@@ -191,8 +191,8 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 
 ### Paridad frontend viejo (`app.js`) vs nuevo (`modules/privada/`)
 
-Vista **Gestiones** — **paridad completa al 2026-09-01** (commits `abe3aac`, `1d81886`, `0294ec7`
-en `panel.front`):
+Vista **Gestiones** — **paridad completa al 2026-09-01**, desplegada a Firebase Hosting y
+verificada en prod (commits `abe3aac`, `1d81886`, `0294ec7` en `panel.front`):
 - [x] Nueva gestión (`AgregarGestionModal`)
 - [x] Exportar tabla a **Excel** según filtros — pagina todo el resultado filtrado y arma `.xlsx`
 - [x] Exportar tabla a **PDF** — `jspdf` + `jspdf-autotable` (lazy-import, no pesa en el bundle
