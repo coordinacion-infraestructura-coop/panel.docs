@@ -1,9 +1,24 @@
 # Spec: svc-privada — Tablero React nativo (reemplazo del iframe Looker Studio)
 
-**Estado**: draft
-**Versión**: 0.1.0
+**Estado**: **implementado** (pendiente de deploy + paridad numérica vs Looker)
+**Versión**: 1.0.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-08-31
+**Última actualización**: 2026-09-01
+
+> **Implementado 2026-09-01** — `panel.front` `6791757`:
+> `src/modules/privada/api/informe.api.ts` (los 4 endpoints ya portados:
+> `resumen`/`temporal`/`por-departamento`/`puntos`) + `TableroPage.tsx` reescrito **sin `<iframe>`
+> ni URLs de Looker/BigQuery** (`grep` de `lookerstudio`/`bigquery` en `src/` = 0). Contenido:
+> KPIs (total / en curso / finalizadas / urgentes / archivadas), donut por tema, barras top-15
+> departamentos, línea de evolución mensual, mapa de puntos (`MapaDualPuntos`); filtros
+> `fecha_desde` / `fecha_hasta` + `tema`. Reutiliza `shared/components/informe/*` (mismo
+> `chartSetup.ts` que los informes de Vivienda). **No** se necesitaron endpoints de agregación
+> nuevos — los 4 existentes cubren el tablero. Cómputo en request (no snapshot; ~2100 filas).
+>
+> **Pendiente**: comparación de paridad numérica contra el informe Looker `f9dc4a4e-…` para un
+> rango de control **antes** de apagar BigQuery (criterio de aceptación 2). El inventario formal
+> del Anexo A no se hizo — el tablero cubre las dimensiones del informe (tema, departamento,
+> tiempo, mapa); si el área detecta un KPI faltante se agrega en v1.1.
 **Servicio**: `svc-privada` (endpoints de agregación) + frontend `src/modules/privada/pages/TableroPage.tsx`
 **Depende de**: `spec-migracion-svc-privada.md` `approved` + Fase 6 (cutover) completada.
 **ADRs**: ADR-014 (Tablero nativo, sin mirror de BigQuery).
@@ -67,14 +82,16 @@ del Anexo A determine que faltan. Todos `ROLES_LECTURA`, paginación no aplica (
 
 ## 6. Criterios de aceptación
 
-- [ ] Inventario del Looker documentado (Anexo A).
-- [ ] Todos los KPIs/gráficos del Looker tienen equivalente nativo; paridad numérica verificada para
-      un rango de fechas de control.
-- [ ] `TableroPage.tsx` sin `<iframe>` y sin ninguna URL de `lookerstudio.google.com` /
-      `bigquery`.
-- [ ] `grep` del frontend por `bigquery`/`lookerstudio` = 0 resultados.
-- [ ] Gateway: paths de agregación nuevos (si los hay) + `options:`; nueva config.
-- [ ] Marca el checklist "Tablero nativo en producción" de `spec-migracion §10`.
+- [~] Inventario del Looker documentado (Anexo A) — no formal; el tablero cubre tema / departamento /
+      tiempo / mapa. Gap a completar con el área si aparece.
+- [ ] Todos los KPIs/gráficos del Looker tienen equivalente nativo; **paridad numérica verificada
+      para un rango de fechas de control** — pendiente, gate del apagado de BigQuery.
+- [x] `TableroPage.tsx` sin `<iframe>` y sin ninguna URL de `lookerstudio.google.com` / `bigquery`.
+- [x] `grep` del frontend por `bigquery`/`lookerstudio` = 0 resultados.
+- [x] Gateway: no hicieron falta paths nuevos (los 4 de informe ya estaban en la config
+      `ministerio-config-v20260901`).
+- [ ] Marca el checklist "Tablero nativo en producción" de `spec-migracion §10` — al desplegar +
+      validar paridad.
 
 ## Anexo A — Inventario del informe Looker (a completar)
 

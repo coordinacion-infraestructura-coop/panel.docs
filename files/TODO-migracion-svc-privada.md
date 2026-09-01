@@ -221,6 +221,26 @@ dentro de privada):
       svc-privada sigue siendo la vía; `tipo_localidad`/`color_semaforo` son read-only)
 - [ ] Exportar resumen a PDF (el nuevo exporta a Excel) — el resumen territorial viejo tenía PDF
 
+### E5a — Federación server-side de Privada (ADR-016) — código listo, falta deploy
+
+- [x] svc-privada: `GET /internal/privada/rollup-territorial` (IAM-only) + tests
+- [x] svc-vivienda: `config.svc_privada_internal_url`, `fetch_privada_lineas` vía endpoint interno,
+      `_map_privada_payload` entiende el rollup
+- [x] `cloudbuild.yaml`: `_PRIVADA_FETCH_ENABLED` / `_SVC_PRIVADA_INTERNAL_URL`
+- [x] frontend: flag `VITE_PRIVADA_SERVER_FEDERATION` (RE-7 — merge cliente un release detrás)
+- [ ] **Deploy**: runbook en `infra/DEPLOY-svc-privada.md §E5a` (IAM `run.invoker` → redeploy
+      svc-privada → redeploy svc-vivienda con el flag → frontend con `VITE_PRIVADA_SERVER_FEDERATION=true`
+      → recomputar snapshot → verificar sin doble conteo)
+
+### Tablero nativo (Fase 7 / spec-privada-tablero.md) — GATE del decommission de BigQuery
+
+- [x] `TableroPage.tsx` nativo: KPIs, donut por tema, barras por departamento, evolución mensual,
+      mapa de puntos, filtros fecha + tema. Sobre los 4 endpoints `informe/cooperativas/*`.
+      Sin `<iframe>`, `grep` de `lookerstudio`/`bigquery` = 0. `panel.front` `6791757`
+- [ ] Deploy del frontend + **paridad numérica vs el Looker `f9dc4a4e-…`** para un rango de control
+      (criterio de aceptación antes de apagar BigQuery)
+- [ ] Marcar "Tablero nativo en producción" en `spec-migracion §10`
+
 Vista **Usuarios**: cubierta por `modules/admin/AdminUsuariosPage`. El "panel de módulos por
 usuario" del viejo se descartó a propósito (ADR-015 / D-3: todos los de Privada ven todo).
 

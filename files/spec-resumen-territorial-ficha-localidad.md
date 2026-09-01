@@ -112,10 +112,22 @@ de las líneas de Privada pasa del browser al servidor.
 - [ ] Excel y vista de impresión incluyen las columnas de la ficha → **diferido** (necesita endpoint
       bulk o el embebido de E5a; ver nota de cabecera).
 
-**E5a — federación server-side (ADR-016)** — pendiente:
-- [ ] `privada_fetch_enabled=True`; las líneas de Privada aparecen en el snapshot server-side; se
-      eliminó `privadaGestiones.ts` (o quedó tras flag).
-- [ ] `GET /api/v1/privada/rollup-territorial` y `.../departamentos-info` consumidos por
-      `svc-vivienda` con la SA (sin error de token).
-- [ ] Una caída simulada de `svc-privada` no rompe el `GET /api/v1/resumen-territorial` (degrada a
-      snapshot sin Privada, con `generado_para_areas` correcto).
+**E5a — federación server-side (ADR-016)** — **código listo, pendiente de deploy** (`panel.backend`
+`2f48a55`, `panel.front` `6791757`):
+- [x] Camino de auth resuelto — **NO** por el gateway (svc-privada rechaza el ID token de la SA),
+      sino por un endpoint **IAM-only** nuevo en svc-privada: `GET /internal/privada/rollup-territorial`
+      (sin `/api/v1`, sin `get_current_user`), que svc-vivienda consume con un ID token cuyo audience
+      es la URL de Cloud Run de svc-privada. Simétrico al `/internal/portal/usuarios/{email}` que
+      svc-privada ya usa contra svc-vivienda.
+- [x] `svc-vivienda`: `config.svc_privada_internal_url` + `fetch_privada_lineas` reescrito +
+      `_map_privada_payload` entiende la forma del `rollup-territorial`.
+- [x] `cloudbuild.yaml`: `_PRIVADA_FETCH_ENABLED` / `_SVC_PRIVADA_INTERNAL_URL` (default off).
+- [x] Frontend: flag `VITE_PRIVADA_SERVER_FEDERATION` — cuando `='true'` no se federa en el browser
+      (RE-7: el código cliente `privadaGestiones.ts` queda un release detrás del flag, sin borrar).
+- [x] Tolerancia: `fetch_privada_lineas` ya devuelve `[]` ante cualquier fallo → el snapshot se
+      guarda sólo con Vivienda y `generado_para_areas` refleja eso (comportamiento preexistente).
+- [ ] **Deploy** (runbook en `infra/DEPLOY-svc-privada.md` §E5a): `run.invoker` de la SA
+      `svc-vivienda@` sobre svc-privada → redeploy svc-privada (endpoint interno) → redeploy
+      svc-vivienda con `PRIVADA_FETCH_ENABLED=true` + `SVC_PRIVADA_INTERNAL_URL` → deploy frontend
+      con `VITE_PRIVADA_SERVER_FEDERATION=true` → recomputar snapshot → verificar
+      `generado_para_areas` incluye `privada` y no hay doble conteo.
