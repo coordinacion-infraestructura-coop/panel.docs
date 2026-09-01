@@ -133,15 +133,27 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 
 ## Fase 5 — Tests
 
-- [ ] Suite de tests de contrato: respuesta vieja (Anexo D) vs nueva, por endpoint marcado `=`
-- [ ] Tests unitarios `pytest` en `services/svc-privada/` — cobertura > 80%
+- [x] Suite de tests de contrato (`test_contrato.py`): key sets de cada respuesta nueva vs los
+      fixtures de `anexos/D/` (se saltea si `anexos/D/` no está)
+- [x] Tests unitarios `pytest` — **64 tests, cobertura 91%** (`gestiones/service` 92%,
+      `informe/service` 90%, `catalogos/service` 97%, `clasificacion` 100%). `auth.py` 65% (sin
+      testear: minteo del ID token de la SA + fetch de JWKS — glue de infra; la lógica de
+      `require_privada`/`get_current_user` sí está cubierta en `test_auth.py`)
+- [x] `pyproject.toml`: `[tool.coverage.run] concurrency = ["greenlet"]` (sin esto coverage no ve
+      el código sync ejecutado dentro del greenlet de SQLAlchemy async)
+- [ ] Pendiente: capturar la forma exacta del payload de `POST /gestiones` y `cambiar-estado` del
+      sistema viejo (los fixtures D no cubren escrituras) — o documentarla del código
 
 ## Fase 6 — Deploy + gateway config (sin activar)
 
-- [ ] `infra/gateway/openapi.yaml` — repuntar `x-google-backend.address` de `/api/v1/privada/**`;
-      quitar `/usuarios/**` y `/catalogos/modulos`; agregar `rollup-territorial`, `departamentos-info`,
-      `PATCH /gestiones/{id}` y los **4 `/informe/cooperativas/*`** (hoy 404 por el gateway);
-      `options:` para cada path nuevo
+- [x] **`infra/gateway/CUTOVER-svc-privada.md`** — spec de todos los cambios de `openapi.yaml`
+      para aplicar de una en el cutover: repuntar `address`/`jwt_audience` de `/api/v1/privada/**`
+      a `<SVC_PRIVADA_URL>`; borrar los 4 paths `/usuarios/**`; agregar `PATCH /gestiones/{id}`,
+      `rollup-territorial`, `departamentos-info` y los 4 `/informe/cooperativas/*` (con bloques YAML
+      listos para pegar); comandos de deploy + rollback + IAM + smoke
+- [ ] `openapi.yaml` **NO se toca hasta el cutover** (hasta entonces el gateway apunta al Cloud
+      Run viejo). Aplicar `CUTOVER-svc-privada.md` cuando `svc-privada` esté desplegado y su URL
+      conocida
 - [ ] `ministerio-config-v{YYYYMMDD}` creada (NO activada)
 - [ ] Smoke end-to-end por URL directa de Cloud Run
 - [ ] Rollback ensayado (revertir a `ministerio-config-v20260716b`)
