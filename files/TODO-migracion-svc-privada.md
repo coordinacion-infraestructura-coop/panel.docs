@@ -187,6 +187,38 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 - [ ] Avisar a los usuarios de Privada que dejen de usar el frontend viejo de GitHub Pages para
       cargar/editar (escribe directo al Cloud Run viejo → BigQuery → bifurca). El alta ya funciona
       en el portal nuevo. Ideal: poner el viejo en sólo-lectura o con aviso de redirección
+- [ ] **Validar paridad frontend viejo vs nuevo antes de despublicar** — ver checklist abajo
+
+### Paridad frontend viejo (`app.js`) vs nuevo (`modules/privada/`)
+
+Vista **Gestiones**:
+- [x] Nueva gestión (`AgregarGestionModal`, 2026-09-01)
+- [x] Exportar tabla a Excel según filtros — `GestionesListPage` pagina todo y arma `.xlsx`
+      (commit `1d81886`)
+- [x] Columna Nro expediente + botón copiar al portapapeles (commit `1d81886`)
+- [x] Filtros (estado/ministerio/categoría/tipo/canal/depto/localidad/buscar), paginación, drawer
+      detalle con timeline, cambiar-estado, eliminar
+- [ ] **Exportar tabla a PDF** — el viejo lo tenía (jsPDF+autoTable). ¿Necesario o basta Excel?
+- [ ] **Ordenar por columna** (click en cabecera) — el viejo tenía sort front; el nuevo no
+- [ ] **Selector de columnas** (Min/Todo/Reset, persistido por usuario en localStorage) — el nuevo
+      tiene 7 columnas fijas
+- [ ] Botón "Copiar ID" por fila (menor) — el viejo tenía un chip por fila
+- [ ] Columna "Días transcurridos" — el dato llega en la API, no se muestra
+- [ ] `cambiar-estado`: campos **Derivado a** y **Acciones implementadas** — el viejo los tenía en
+      el modal; en el nuevo están diferidos a **E2**. Si el área los usa activamente → adelantar E2
+- [ ] `cambiar-estado`: editar Departamento/Localidad desde ese modal (el viejo lo permitía)
+
+Vista **Resumen territorial** (en el nuevo es el módulo transversal `resumen-territorial`, no vive
+dentro de privada):
+- [ ] **Ficha de localidad** (electores, color semáforo, intendente + partido, habitantes) + edición
+      inline (`PUT /localidades-info`) → **E5b** (`spec-resumen-territorial-ficha-localidad.md`)
+- [ ] Exportar resumen a PDF (el nuevo exporta a Excel)
+
+Vista **Usuarios**: cubierta por `modules/admin/AdminUsuariosPage`. El "panel de módulos por
+usuario" del viejo se descartó a propósito (ADR-015 / D-3: todos los de Privada ven todo).
+
+Vista **Tablero**: iframe Looker igual en ambos → **Fase 7** lo reemplaza por nativo (gate del
+decommission).
 - [ ] Ventana: sistema viejo en sólo-lectura *(sigue online read-write; se apaga en el
       decommission. El ETL fue `--truncate` completo, no delta)*
 - [x] ETL contra `db_privada` de prod (ver Fase 4 — corrida completa 2026-09-01, no delta)
