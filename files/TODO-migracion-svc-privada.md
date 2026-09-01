@@ -58,11 +58,11 @@ ADRs: ADR-008..ADR-016 en `arquitectura.md`. Fasado completo en `roadmap.md` (Et
 - [x] `services/cloudbuild.yaml` — ya es parametrizado por `_SERVICE`; se le sumó la substitución
       `_SVC_VIVIENDA_INTERNAL_URL` (default vacío) para el deploy de privada. Deploy:
       `gcloud builds submit --config=cloudbuild.yaml --substitutions=_SERVICE=svc-privada,_SVC_VIVIENDA_INTERNAL_URL=<url-svc-vivienda>`
-- [ ] Ejecutar `infra/cloudsql-setup.sh` en prod (crea `db_privada`, `user_privada`, secreto
-      `svc-privada-db-url`)
-- [ ] Cloud Run desplegado; `GET /health` OK
-- [ ] `alembic upgrade head` contra `db_privada` (Cloud Shell + proxy, desde `services/svc-privada/`);
-      `alembic current` = `0001`
+- [x] Provisionado en prod (Fase A del runbook): `db_privada`, `user_privada`, secreto
+      `svc-privada-db-url` (password hex URL-safe). SA `svc-privada@` con `cloudsql.client` +
+      `secretmanager.secretAccessor`
+- [x] Cloud Run desplegado (2026-09-01): `https://svc-privada-iwni7vc2qq-rj.a.run.app`; `GET /health` OK
+- [x] `alembic upgrade head` contra `db_privada` de prod → `alembic current` = `0001`
 
 ## Fase 2 — Endpoints a paridad
 
@@ -91,7 +91,7 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
       prioridades). Montado bajo `/api/v1/privada`
 - [x] `GET /me` — alias con shape viejo `{email, nombre, rol, modulos: []}`
 - [x] Audit log en toda escritura (`priv_audit_log`)
-- [ ] Pendiente: agregar los paths nuevos a `infra/gateway/openapi.yaml` (Fase 6)
+- [x] Paths nuevos agregados a `infra/gateway/openapi.yaml` y activos en el gateway (Fase 6, 2026-09-01)
 - [ ] Pendiente: `POST /gestiones` / `cambiar-estado` — documentar forma exacta del payload viejo
       (los fixtures D no capturan escrituras)
 
@@ -105,8 +105,10 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 - [x] `svc-privada`: routers usan `require_privada` + tuplas `ROLES_*` compartidas
 - [x] `svc-vivienda`: `"privada"` ya está en `portal/schemas.SECRETARIAS_VALIDAS` (nada que cambiar)
 - [x] frontend: `DashboardPage.tsx` (id `privada`, activa) + `AdminUsuariosPage` ya incluyen `"privada"`
-- [ ] **deploy**: IAM — SA de `svc-privada` con `roles/run.invoker` sobre `svc-vivienda`
-- [ ] **deploy**: env `SVC_VIVIENDA_INTERNAL_URL` = URL del Cloud Run de svc-vivienda (sin `/api/v1`)
+- [x] **deploy**: IAM — SA de `svc-privada` con `roles/run.invoker` sobre `svc-vivienda` (Fase E.1);
+      SA `api-gateway-sa@` con `run.invoker` sobre `svc-privada` (Fase E.2)
+- [x] **deploy**: env `SVC_VIVIENDA_INTERNAL_URL=https://svc-vivienda-iwni7vc2qq-rj.a.run.app`
+      seteada en el `gcloud run deploy` de svc-privada
 
 ## Fase 4 — ETL + verificación
 
@@ -136,8 +138,11 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 - [x] **Validación end-to-end del informe**: `app/informe/service.resumen()` sobre los datos
       migrados reproduce **exacto** `informe_resumen.json` del sistema viejo (10 temas, todos los
       conteos, total 847) → el port del regex de `v_informe_cooperativas` es correcto
-- [ ] Ejecutar contra Cloud SQL de prod (Cloud Shell + `cloud-sql-proxy`, una vez provisionada
-      `db_privada` — Fase 1 pendiente de deploy)
+- [x] **Ejecutado contra Cloud SQL de prod** (2026-09-01, `--truncate` contra `db_privada`):
+      2123 gestiones / 1987 activas / 110 finalizadas / **0 sin fecha** / 166 eventos /
+      426 localidades_info / 25 departamentos_info / 551 geo — coincide exacto con la línea base.
+      Grant temporal `bigquery.jobUser`+`dataViewer` a `infraestructura.coop@gmail.com` sobre
+      `essential-haiku-482815-u4` (revocar en el decommission; se conserva para el ETL delta)
 
 ## Fase 5 — Tests
 
@@ -159,12 +164,13 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
       a `<SVC_PRIVADA_URL>`; borrar los 4 paths `/usuarios/**`; agregar `PATCH /gestiones/{id}`,
       `rollup-territorial`, `departamentos-info` y los 4 `/informe/cooperativas/*` (con bloques YAML
       listos para pegar); comandos de deploy + rollback + IAM + smoke
-- [ ] `openapi.yaml` **NO se toca hasta el cutover** (hasta entonces el gateway apunta al Cloud
-      Run viejo). Aplicar `CUTOVER-svc-privada.md` cuando `svc-privada` esté desplegado y su URL
-      conocida
-- [ ] `ministerio-config-v{YYYYMMDD}` creada (NO activada)
-- [ ] Smoke end-to-end por URL directa de Cloud Run
-- [ ] Rollback ensayado (revertir a `ministerio-config-v20260716b`)
+- [x] `openapi.yaml` — aplicado `CUTOVER-svc-privada.md` (2026-09-01, commit `b71e6d3` en
+      `panel.infra`): 60 refs al backend viejo → `https://svc-privada-iwni7vc2qq-rj.a.run.app`;
+      borrados los 4 paths `/api/v1/privada/usuarios/**`; `modulos` fuera del enum de `/catalogos`;
+      agregados `PATCH /gestiones/{id}`, `rollup-territorial`, `departamentos-info` y los 4
+      `/informe/cooperativas/*` (todos con `options:` + `security: []`). 77 paths, YAML válido
+- [x] `ministerio-config-v20260901` creada **y activada** (`gateways update`) — se optó por cutover
+      directo, no config latente. Rollback disponible: `--api-config=ministerio-config-v20260716b`
 
 ## Cutover
 
@@ -175,12 +181,18 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
       enviarlo, `cambiar-estado` se comporta igual que antes. Las respuestas de `list`/`get`/`eventos`
       son byte-compatibles (tests de contrato). Enviar `updated_at` + cablear `derivado_a`/
       `acciones_implementadas` queda para E1/E2.
-- [ ] Ventana: sistema viejo en sólo-lectura
-- [ ] ETL delta final (`migrar_desde_bigquery.py --truncate` contra `db_privada` de prod)
-- [ ] Aplicar `infra/gateway/CUTOVER-svc-privada.md` → nueva config → `gateways update`
-- [ ] Alta de usuarios de Privada en `portal_usuarios` (desde `C_usuarios_roles.csv`, revisando los
-      4 gateway/test con `Admin`)
-- [ ] Smoke desde el portal: login → lista → detalle → cambiar-estado → informe
+- [ ] Ventana: sistema viejo en sólo-lectura *(el viejo sigue online read-write; se apagará en el
+      decommission. El ETL fue `--truncate` completo, no delta)*
+- [x] ETL contra `db_privada` de prod (ver Fase 4 — corrida completa 2026-09-01, no delta)
+- [x] `CUTOVER-svc-privada.md` aplicado → `ministerio-config-v20260901` → `gateways update` (2026-09-01)
+- [x] Alta de usuarios (2026-09-01): `scripts/fase_g_usuarios.sql` — 13 usuarios reales en
+      `portal_usuarios`/`portal_usuario_secretarias` con secretaría `privada`, rol 1:1. Excluidas
+      las 3 cuentas gateway/test Admin + `prueba@gmail.com` (inactivo). Pendiente decisión:
+      `aguirrevictoriamariela` / `vanetoranzo` figuran Operador en el portal vs Supervisor en el viejo
+- [x] Smoke por el gateway (2026-09-01, token Admin): `/me`, `/gestiones`, `/informe/cooperativas/*`
+      (4), `/gestiones/rollup-territorial`, `/departamentos-info?departamento=`, `PATCH /gestiones/{id}`
+      → todos 200. Preflight CORS (con `Access-Control-Request-Method`) → 200
+- [x] Smoke desde el portal (navegador): lista → detalle → cambiar-estado → **OK**
 - [ ] Monitoreo T+1..T+30
 
 ---
