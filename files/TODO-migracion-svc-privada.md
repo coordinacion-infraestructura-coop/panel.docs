@@ -116,8 +116,20 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 - [x] Backfill `fecha_finalizacion`: último `CAMBIO_ESTADO`→`FINALIZADA`, si no hay usa `fecha_estado`
 - [x] Verificación `_verificar()`: conteos PG vs `anexos/ETL_baseline.json`; chequea `finalizadas_sin_fecha == 0`
 - [x] Idempotente: `--truncate` hace `TRUNCATE priv_* RESTART IDENTITY CASCADE`
-- [ ] **Ejecutar** contra BQ de prod (Cloud Shell + proxy): `--dry-run` primero → validar el reporte
-      de conteos contra la línea base, luego `--truncate` en staging/local
+- [x] **Dry-run ejecutado contra BQ real** (2026-09-01): 2123 gestiones / 136 borradas / 166 eventos
+      / 0 huérfanos / 426 localidades_info / 25 departamentos_info / 110 backfill de
+      `fecha_finalizacion` — **coincide exacto con la línea base** (`ETL_baseline.json`)
+- [x] **Bug encontrado y corregido**: primer `--truncate` real falló con
+      `StringDataRightTruncationError: value too long for character varying(30)` — BQ es STRING
+      sin límite y la muestra chica del Anexo D no reflejaba la diversidad real (datos desde 2004).
+      Se ensancharon `origen/id_legacy/nro_expediente/estado/urgencia/ministerio_agencia_id/
+      organismo_id/derivado_a_id/categoria_general_id/subcategoria_id/tipo_demanda_principal_id/
+      geo_id/costo_moneda/tipo_gestion/canal_origen` (modelo + migración `0001`, no desplegada
+      a prod todavía → edición in-place segura). 61 tests siguen en verde
+- [ ] **Re-ejecutar `--truncate`** contra Postgres local (Docker, `:5433`) con el schema ensanchado
+      y confirmar `finalizadas_sin_fecha: 0` en el reporte de verificación
+- [ ] Ejecutar contra Cloud SQL de prod (Cloud Shell + `cloud-sql-proxy`, una vez provisionada
+      `db_privada` — Fase 1 pendiente de deploy)
 
 ## Fase 5 — Tests
 
