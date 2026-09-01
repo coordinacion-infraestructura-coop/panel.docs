@@ -162,12 +162,18 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 
 ## Cutover
 
-- [ ] frontend `privada` v1: enviar `updated_at` + manejar `409`; quitar usos de `/usuarios/**` y
-      `catalogos/modulos`; permisos vía `usePortalUser` + `"privada"`
+- [x] **frontend `privada`: NO requiere cambios para el cutover.** Revisado
+      `frontend/src/modules/privada/`: no usa `/usuarios/**` ni `/catalogos/modulos` (eso era del
+      Vanilla JS viejo; el admin React vive en `modules/admin/`). `me()` pega a `/api/v1/privada/me`
+      que se mantiene como alias. El lock `updated_at`/`409` es **opt-in** en el backend nuevo → sin
+      enviarlo, `cambiar-estado` se comporta igual que antes. Las respuestas de `list`/`get`/`eventos`
+      son byte-compatibles (tests de contrato). Enviar `updated_at` + cablear `derivado_a`/
+      `acciones_implementadas` queda para E1/E2.
 - [ ] Ventana: sistema viejo en sólo-lectura
-- [ ] ETL delta final
-- [ ] `gcloud api-gateway gateways update` → nueva config
-- [ ] Alta de usuarios de Privada en `portal_usuarios` (desde el CSV del Anexo C)
+- [ ] ETL delta final (`migrar_desde_bigquery.py --truncate` contra `db_privada` de prod)
+- [ ] Aplicar `infra/gateway/CUTOVER-svc-privada.md` → nueva config → `gateways update`
+- [ ] Alta de usuarios de Privada en `portal_usuarios` (desde `C_usuarios_roles.csv`, revisando los
+      4 gateway/test con `Admin`)
 - [ ] Smoke desde el portal: login → lista → detalle → cambiar-estado → informe
 - [ ] Monitoreo T+1..T+30
 
