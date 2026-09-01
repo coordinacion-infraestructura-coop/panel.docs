@@ -211,9 +211,15 @@ verificada en prod (commits `abe3aac`, `1d81886`, `0294ec7` en `panel.front`):
 
 Vista **Resumen territorial** (en el nuevo es el módulo transversal `resumen-territorial`, no vive
 dentro de privada):
-- [ ] **Ficha de localidad** (electores, color semáforo, intendente + partido, habitantes) + edición
-      inline (`PUT /localidades-info`) → **E5b** (`spec-resumen-territorial-ficha-localidad.md`)
-- [ ] Exportar resumen a PDF (el nuevo exporta a Excel)
+- [x] **Ficha de localidad** (E5b, drawer, 2026-09-01) — `FichaDemografica` en el `DetailDrawer`:
+      habitantes, electores, semáforo (chip), intendente + partido, tipo de localidad, legisladores
+      + electores/habitantes del departamento. On-demand con el token del usuario a
+      `GET /api/v1/privada/{localidades,departamentos}-info`. `spec-resumen-territorial-ficha-localidad.md` v0.2.0
+- [ ] Ficha en el **export Excel** y la **vista de impresión** — diferido: necesita endpoint bulk
+      de `localidades-info` en svc-privada o el embebido server-side de E5a
+- [ ] Edición inline de la ficha desde el panel transversal — fuera de alcance (el `PUT` de
+      svc-privada sigue siendo la vía; `tipo_localidad`/`color_semaforo` son read-only)
+- [ ] Exportar resumen a PDF (el nuevo exporta a Excel) — el resumen territorial viejo tenía PDF
 
 Vista **Usuarios**: cubierta por `modules/admin/AdminUsuariosPage`. El "panel de módulos por
 usuario" del viejo se descartó a propósito (ADR-015 / D-3: todos los de Privada ven todo).

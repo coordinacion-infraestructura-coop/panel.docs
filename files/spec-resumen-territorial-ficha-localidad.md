@@ -1,9 +1,24 @@
 # Spec: Resumen Territorial — Ficha de localidad + federación server-side de Privada
 
-**Estado**: draft
-**Versión**: 0.1.0 (candidato a enmienda v0.3.0 de `spec-resumen-territorial.md`)
+**Estado**: E5b (ficha) **implementado parcial** (drawer, on-demand) · E5a (federación server-side) draft
+**Versión**: 0.2.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-08-31
+**Última actualización**: 2026-09-01
+
+> **Implementado 2026-09-01 (E5b, drawer)** — `panel.front`:
+> `src/modules/resumen-territorial/api/fichaLocalidad.api.ts` + componente `FichaDemografica`
+> dentro del `DetailDrawer` de `ResumenTerritorialPage.tsx`. La ficha se consulta **on-demand con
+> el token del usuario** a `GET /api/v1/privada/localidades-info` y `.../departamentos-info` (no se
+> embebe en el snapshot; no depende de E5a). Muestra: habitantes, electores, semáforo (chip de
+> color), intendente + partido, tipo de localidad, y los legisladores + electores/habitantes del
+> departamento. Cacheada en React Query (5 min). Degrada a "Sin datos de padrón cargados" cuando
+> la fila `priv_localidades_info` está vacía, y a un mensaje de error si la llamada falla — sin
+> romper el resto de la ficha.
+>
+> **Pendiente de E5b**: columnas de demografía en el **export Excel** y en la **vista de impresión**
+> (`.rt-print-doc`) — requieren la demografía de *todas* las localidades del snapshot, o sea un
+> endpoint bulk en svc-privada (`GET /localidades-info/all`) o el embebido server-side de E5a.
+> El `GET /localidades-info` actual es lookup de a una. No hacer N+1 de 551 llamadas desde el browser.
 **Servicio**: `svc-vivienda` (módulo `app/resumen_territorial/`) + frontend
 `src/modules/resumen-territorial/`
 **Depende de**: `spec-migracion-svc-privada.md` Fase 2 (endpoints `rollup-territorial` y
@@ -87,13 +102,20 @@ de las líneas de Privada pasa del browser al servidor.
 
 ## 5. Criterios de aceptación
 
+**E5b — ficha (drawer)** — implementado 2026-09-01:
+- [x] La ficha muestra electores, `color_semaforo` (con chip de color), intendente + partido,
+      habitantes, `tipo_localidad`, y los legisladores + electores/habitantes del departamento.
+- [x] Visible para todos los roles del panel, sin enmascarado (consulta con el token del usuario;
+      demografía = padrón público).
+- [x] Una caída de `svc-privada` (o fila vacía) no rompe el drawer — degrada a mensaje y el resto
+      de la ficha (programas) sigue funcionando.
+- [ ] Excel y vista de impresión incluyen las columnas de la ficha → **diferido** (necesita endpoint
+      bulk o el embebido de E5a; ver nota de cabecera).
+
+**E5a — federación server-side (ADR-016)** — pendiente:
 - [ ] `privada_fetch_enabled=True`; las líneas de Privada aparecen en el snapshot server-side; se
       eliminó `privadaGestiones.ts` (o quedó tras flag).
 - [ ] `GET /api/v1/privada/rollup-territorial` y `.../departamentos-info` consumidos por
       `svc-vivienda` con la SA (sin error de token).
-- [ ] La ficha muestra electores, `color_semaforo` (con chip de color), intendente + partido,
-      habitantes, `tipo_localidad`, y los legisladores del departamento.
-- [ ] Visible para todos los roles del panel, sin enmascarado.
-- [ ] Excel y vista de impresión incluyen las columnas de la ficha.
 - [ ] Una caída simulada de `svc-privada` no rompe el `GET /api/v1/resumen-territorial` (degrada a
       snapshot sin Privada, con `generado_para_areas` correcto).
