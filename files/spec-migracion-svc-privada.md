@@ -236,6 +236,17 @@ El frontend Vanilla JS en `labotech-analytics.github.io` ya fue reemplazado por
 `src/modules/privada/` en el portal. Tras el cutover se despublica (o queda con un aviso de
 redirección). El CORS `allow_origins` del backend viejo deja de importar.
 
+**Paridad de frontend pendiente detectada en el cutover (2026-09-01):** el módulo React
+`src/modules/privada/` no había portado el **alta de gestiones** (`openNew()` /
+`submitNewGestion()` del Vanilla JS → `POST /gestiones`). El endpoint existe y está probado desde
+Fase 2, pero no había UI que lo invocara, y el frontend viejo apunta **directo al Cloud Run viejo**
+(no al gateway) → toda alta hecha ahí entraría a BigQuery e invisible para el sistema nuevo. Se
+agrega el modal **"Nueva gestión"** (`AgregarGestionModal.tsx` + `gestionesApi.crear` + botón en
+`GestionesListPage`, gate `canModify` = Admin/Supervisor/Operador) a paridad con el formulario
+viejo (campos de `GestionCreate`). Es prerequisito de despublicar el frontend viejo. El spec hijo
+`spec-privada-categorias-programas.md` (E1) lo **extiende** luego con la cascada
+Categoría→Programa→Área y `ok_gobernador`/`ok_ministro`; no lo reescribe.
+
 ### 3.11 Las columnas legacy de clasificación se conservan verbatim
 
 La migración de `priv_gestiones` **conserva sin renombrar ni dropear** las columnas

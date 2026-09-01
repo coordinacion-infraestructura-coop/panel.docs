@@ -174,13 +174,17 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 
 ## Cutover
 
-- [x] **frontend `privada`: NO requiere cambios para el cutover.** Revisado
-      `frontend/src/modules/privada/`: no usa `/usuarios/**` ni `/catalogos/modulos` (eso era del
-      Vanilla JS viejo; el admin React vive en `modules/admin/`). `me()` pega a `/api/v1/privada/me`
-      que se mantiene como alias. El lock `updated_at`/`409` es **opt-in** en el backend nuevo → sin
-      enviarlo, `cambiar-estado` se comporta igual que antes. Las respuestas de `list`/`get`/`eventos`
-      son byte-compatibles (tests de contrato). Enviar `updated_at` + cablear `derivado_a`/
-      `acciones_implementadas` queda para E1/E2.
+- [x] frontend `privada`: no usa `/usuarios/**` ni `/catalogos/modulos` (eso era del Vanilla JS
+      viejo; el admin React vive en `modules/admin/`). `me()` pega a `/api/v1/privada/me` (alias).
+      El lock `updated_at`/`409` es **opt-in** → sin enviarlo, `cambiar-estado` se comporta igual.
+      `list`/`get`/`eventos` byte-compatibles (tests de contrato). `updated_at` + `derivado_a`/
+      `acciones_implementadas` quedan para E1/E2.
+- [x] **Alta de gestiones en el frontend nuevo** (2026-09-01) — hueco de paridad detectado en el
+      cutover: el módulo React no tenía UI de alta (`POST /gestiones` existía sin invocador).
+      Agregado `AgregarGestionModal.tsx` + `gestionesApi.crear` + botón "+ Nueva gestión" en
+      `GestionesListPage` (gate `canModify`). `npm run build` OK. Registrado en `spec-migracion §3.10`.
+      **Prerequisito de despublicar el frontend viejo** (que escribe directo a BigQuery). Falta:
+      deploy `firebase deploy --only hosting` + prueba en el navegador.
 - [ ] Ventana: sistema viejo en sólo-lectura *(el viejo sigue online read-write; se apagará en el
       decommission. El ETL fue `--truncate` completo, no delta)*
 - [x] ETL contra `db_privada` de prod (ver Fase 4 — corrida completa 2026-09-01, no delta)
