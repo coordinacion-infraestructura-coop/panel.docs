@@ -22,10 +22,21 @@ intuitivo que el timeline vertical actual (`GestionDetalleDrawer.tsx` → secci�
 - **No existe entidad de flujo.** `gestiones` tiene `ministerio_agencia_id` (FK a catálogo),
   `organismo_id` (texto libre, se setea al alta, nunca se actualiza) y `derivado_a_id` (texto libre,
   se **pisa** en cada `cambiar-estado`).
-- La traza histórica de derivaciones vive **dentro de `gestiones_eventos.metadata_json`** (claves
-  `derivado_a`, `acciones_implementadas`, `ministerio_agencia_id`).
 - **No hay taxonomía de áreas.** `derivado_a` es texto libre → sin un set de nodos estable no se
-  puede dibujar un DAG legible.
+  puede dibujar un DAG legible. Valores reales (Anexo F): `VIVIENDA`, `MOLINARI`, `GOBIERNO`,
+  `SECRETARIA DE GOBIERNO`, apellidos sueltos (`CHESTA`, `BORELLO`, `BENSO`), reparticiones largas
+  (`SUAC DEL MINISTERIO DE INFRAESTRUCTURA Y SERVICIOS PUBLICOS…`). ~27 valores distintos, cola larga.
+- **El histórico NO es reconstruible.** Comprobado en datos (Anexo G):
+  - Sólo **166 eventos** en total para 2123 gestiones (159 `CREACION`, 3 `CAMBIO_ESTADO`, 2
+    `ACTUALIZA_DATO`, 2 `ARCHIVO`). El grueso de las gestiones se importó por Excel sin eventos.
+  - **`metadata_json.derivado_a` es siempre `null`** (`F_metadata_derivado_a_distinct` = `[]`).
+  - ⇒ el backfill desde `metadata_json` **no produce aristas históricas**. Lo único disponible por
+    gestión es el `derivado_a_id` **actual** (un solo valor, sin historia) y el ministerio de
+    ingreso (`metadata_json.ministerio_agencia_id` de `CREACION`, sólo para las ~159 con evento).
+
+**Implicancia de alcance:** el DAG es una feature **hacia adelante** — se llena a medida que
+`svc-privada` escribe `priv_gestion_derivaciones` en cada `cambiar-estado` post-migración. Para las
+gestiones históricas el "flujo" es a lo sumo 2 nodos (ingreso → área actual). Ver §5 (decisión E-4).
 
 ## 2. Alcance
 
@@ -34,10 +45,11 @@ intuitivo que el timeline vertical actual (`GestionDetalleDrawer.tsx` → secci�
 - `priv_area_alias` — mapea variantes de texto libre observadas a un `priv_areas.id`.
 - Escritura **runtime**: `cambiar-estado` (y un `POST .../derivar` si se separa) insertan una fila
   de derivación en la misma transacción que la mutación.
-- Job de **backfill** best-effort desde `priv_gestiones_eventos.metadata_json`: por cada evento
-  `CAMBIO_ESTADO` con `derivado_a`, resuelve el área destino contra `priv_areas` + `priv_area_alias`
-  (nodo centinela "área desconocida" si no matchea), con `confianza` ∈ {`alta`, `media`, `baja`} y
-  `origen = 'backfill'`.
+- Job de **backfill** best-effort — dado que `metadata_json.derivado_a` está vacío (§1), el backfill
+  se reduce a: 1 fila por gestión con `area_hacia_id` = resolución de `gestiones.derivado_a_id`
+  actual contra `priv_areas` + `priv_area_alias` (centinela si no matchea), `area_desde_id` =
+  resolución del `ministerio_agencia_id` de ingreso (o `NULL`), `origen = 'backfill'`,
+  `confianza = 'baja'`. No hay cadena histórica que reconstruir.
 - `GET /api/v1/privada/gestiones/{id}/flujo` → `{ nodos: [{area_id, label, es_actual, primera_fecha,
   ultima_fecha}], aristas: [{desde, hacia, fecha, estado, usuario, confianza, origen}], actual:
   {area_id, estado} }`.

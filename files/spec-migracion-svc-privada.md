@@ -172,9 +172,13 @@ como `ENUM` de Postgres (para poder agregar estados sin migración de tipo).
 
 **Corrección de bug del sistema viejo (desviación deliberada de paridad, RE-9):** el
 `cambiar-estado` viejo **nunca** setea `fecha_finalizacion`, ni siquiera cuando
-`nuevo_estado == FINALIZADA`. El port **sí** setea `fecha_finalizacion` cuando la gestión pasa a
-`FINALIZADA` (y la limpia si sale de `FINALIZADA`). El ETL backfillea `fecha_finalizacion` de las
-gestiones ya finalizadas desde la fecha del último evento `CAMBIO_ESTADO` a `FINALIZADA`.
+`nuevo_estado == FINALIZADA`. Confirmado en datos: **103 de 103** gestiones activas en
+`FINALIZADA` tienen `fecha_finalizacion IS NULL` (Anexo `ETL_fecha_finalizacion_gap`). El port
+**sí** setea `fecha_finalizacion` cuando la gestión pasa a `FINALIZADA` (y la limpia si sale). El
+ETL backfillea `fecha_finalizacion` de las ya finalizadas desde la fecha del último evento
+`CAMBIO_ESTADO` a `FINALIZADA`; para las que no tienen ese evento (la mayoría — sólo 3
+`CAMBIO_ESTADO` en todo el dataset), usa `fecha_estado` como aproximación y lo marca en el reporte
+del ETL.
 
 ### 3.6 Control de concurrencia
 
@@ -302,22 +306,31 @@ GIN/trigram para el buscador `q` si hace falta.
 
 | Columna | Tipo |
 |---|---|
-| `id` | UUID PK |
-| `gestion_id` | UUID FK → `priv_gestiones.id` |
-| `fecha_evento` | TIMESTAMPTZ |
-| `usuario` | VARCHAR (email) |
-| `rol_usuario` | VARCHAR |
-| `tipo_evento` | VARCHAR (`ALTA` / `CAMBIO_ESTADO` / `EDICION` / `BAJA`) |
+| `id` | VARCHAR(36) PK (uuid) |
+| `gestion_id` | VARCHAR(36) FK → `priv_gestiones.id` NOT NULL |
+| `fecha_evento` | TIMESTAMPTZ NOT NULL |
+| `usuario` | VARCHAR(200) **NOT NULL** (REQUIRED en el origen) |
+| `rol_usuario` | VARCHAR(40) nullable |
+| `tipo_evento` | VARCHAR(30) NOT NULL — valores reales: `CREACION`, `CAMBIO_ESTADO`, `ACTUALIZA_DATO`, `ARCHIVO` |
 | `estado_anterior` / `estado_nuevo` | VARCHAR nullable |
 | `campo_modificado` / `valor_anterior` / `valor_nuevo` | VARCHAR/TEXT nullable |
 | `comentario` | TEXT nullable |
-| `metadata_json` | JSONB nullable |
+| `metadata_json` | JSON nullable (SQLite-friendly; a JSONB si E3 necesita operadores PG) |
+
+> **Datos reales (Anexo G / línea base ETL):** sólo **166 eventos** para **2123 gestiones** —
+> 159 `CREACION`, 3 `CAMBIO_ESTADO`, 2 `ACTUALIZA_DATO`, 2 `ARCHIVO`. El histórico de eventos
+> cubre sólo las gestiones cargadas por la app (~7,5 %); el resto se importó por Excel sin
+> eventos (`fecha_ingreso` va hasta 2004). Además **`metadata_json.derivado_a` es siempre
+> `null`** en los eventos — la traza histórica de derivaciones que ADR-013 esperaba backfillear
+> **no existe**. Ver `spec-privada-flujo-derivaciones.md`.
 
 ### 4.3 `priv_localidades_info` / `priv_departamentos_info`
 
-Mismas columnas que hoy (habitantes, electores, intendente/legisladores, partido político,
-`color_semaforo`, `updated_at`, `updated_by`). PK: `(departamento, localidad)` y `(departamento)`
-respectivamente. Upsert (hoy `MERGE`) → `INSERT ... ON CONFLICT DO UPDATE`.
+Mismas columnas que el origen (habitantes, electores, intendente/legisladores, partido político,
+`tipo_localidad`, `color_semaforo`, **`created_at`, `created_by`**, `updated_at`, `updated_by`).
+PK: `(departamento, localidad)` y `(departamento)` respectivamente. Upsert (hoy `MERGE`) →
+`INSERT ... ON CONFLICT DO UPDATE`. Filas reales: `localidades_info` **426**,
+`departamentos_info` **25**.
 
 ### 4.4 `priv_geo_localidades`
 
@@ -338,19 +351,31 @@ viejo permite altas de catálogo vía BigQuery). Sin CRUD de catálogos en v1 sa
 
 ### 4.6 Vista / agregación de informe
 
-`v_informe_cooperativas` de BigQuery clasifica cada gestión en un `tema_informe` mediante un
-`CASE WHEN` de **10 prioridades** sobre `categoria_general_id` + `REGEXP_CONTAINS(LOWER(detalle), …)`
-(DDL disponible: `proyecto_sistema_gestiones/informe/bq_views/v_informe_cooperativas.sql` — ver
-**Anexo A**). Temas: `Cordón Cuneta + Adoquinado`, `Kits Solares`, `Luces LED`, `Gas`,
-`Bombeo Solar`, `Vivienda`, `Lotes`, `Infraestructura Eléctrica`, `Préstamos y Fortalecimiento`,
-`Otras Obras`, else `NULL`.
+> **Ojo — dos cosas distintas (Anexo A vs A2):**
+> - **Anexo A** (`A_v_informe_cooperativas.sql`) es la vista **`v_informe_cooperativas`**: el
+>   **informe de Cooperativas**, exclusivo de ese informe. Clasifica cada gestión en `tema_informe`
+>   con un `CASE WHEN` de **10 prioridades** sobre `categoria_general_id` +
+>   `REGEXP_CONTAINS(LOWER(detalle), …)` y filtra a `es_ministerio_cooperativas OR tema_informe IS
+>   NOT NULL`. **No es lógica transversal** — no usarla fuera del informe de Cooperativas.
+> - **Anexo A2** (`A2_resumen_territorial.sql`) es el **Resumen Territorial**: en el origen **no
+>   existe vista ni tabla** — se arma en request en `gestiones.py::get_resumen_territorial` con SQL
+>   inline (`sql_gestiones.py`) sobre las tablas base + agregación en Python. Es **la misma lógica
+>   ya implementada en el módulo `resumen_territorial` de svc-vivienda** para las líneas de
+>   Vivienda. Para Privada: **replicar ese patrón** leyendo de las tablas migradas — no crear una
+>   vista nueva salvo que se decida materializarla.
 
-**v1 porta esa lógica TAL CUAL** (regex incluido), como función pura en
-`app/privada/informe_service.py` (patrón `informes/aggregations.py`; 523 filas, cómputo trivial en
-request) o como vista SQL `priv_v_informe_cooperativas`. **No** se re-apunta a un campo estructurado
-en la migración-paridad — eso es `spec-privada-informe-cooperativas-v2.md` (mueve la clasificación a
-`categoria_id` con un mapa de compatibilidad nueva-categoría→`tema_informe` y sign-off del área;
-RE-1).
+**Informe de Cooperativas.** v1 porta la lógica de `v_informe_cooperativas` **TAL CUAL** (regex
+incluido) como función pura en `app/informe/service.py` (patrón `informes/aggregations.py`; ~2123
+filas, cómputo trivial en request) o como vista SQL `priv_v_informe_cooperativas`. **No** se
+re-apunta a un campo estructurado en la migración-paridad — eso es
+`spec-privada-informe-cooperativas-v2.md` (mueve la clasificación a `categoria_id` con un mapa de
+compatibilidad nueva-categoría→`tema_informe` y sign-off del área; RE-1).
+
+**Resumen Territorial.** v1 implementa `GET /api/v1/privada/gestiones/resumen-territorial` (2
+scopes, `departamento` obligatorio) y `GET /api/v1/privada/gestiones/rollup-territorial` (rollup
+global) replicando el patrón de `resumen_territorial` de svc-vivienda contra `priv_gestiones` /
+`priv_gestiones_eventos` / `priv_localidades_info` / `priv_departamentos_info`. Forma de respuesta
+y métricas: Anexo A2.
 
 ### 4.7 Sin tabla de usuarios
 
@@ -407,10 +432,18 @@ Prefijo `/api/v1/privada`. "=" ⇒ contrato idéntico; el frontend no cambia.
 | `GET /localidades-info` / `PUT /localidades-info` | Lectura / Escritura | = | upsert (el `PUT` sólo escribe `habitantes`/`electores`/`intendente_jefe_comunal`/`partido_politico` — igual que hoy) |
 | `GET /departamentos-info` | Lectura | ➕ v1 | read-only; `?departamento=` (§3.12) |
 | `GET /catalogos/{catalogo}` | todos | = | `estados, urgencias, ministerios, categorias, tipos-gestion, canales-origen, departamentos, localidades?departamento=, geo` |
-| `GET /informe/cooperativas/resumen` | Lectura | = | KPIs por tema |
-| `GET /informe/cooperativas/temporal` | Lectura | = | evolución mensual |
-| `GET /informe/cooperativas/por-departamento` | Lectura | = | tema × departamento |
-| `GET /informe/cooperativas/puntos` | Lectura | = | puntos lat/lon para Leaflet |
+| `GET /informe/cooperativas/resumen` | Lectura | ➕ v1 (nuevo en el gateway) | KPIs por tema |
+| `GET /informe/cooperativas/temporal` | Lectura | ➕ v1 (nuevo en el gateway) | evolución mensual |
+| `GET /informe/cooperativas/por-departamento` | Lectura | ➕ v1 (nuevo en el gateway) | tema × departamento |
+| `GET /informe/cooperativas/puntos` | Lectura | ➕ v1 (nuevo en el gateway) | puntos lat/lon para Leaflet |
+
+> **Los 4 endpoints de informe hoy NO son alcanzables por el gateway.** El backend viejo los monta
+> sólo en la ruta legacy `/informe/cooperativas/*` (para el Vanilla JS), **no** bajo
+> `/api/v1/privada` (`main.py` no incluye ese router con el prefijo). Por el gateway dan **404**, y
+> el frontend nuevo no los llama (`TableroPage.tsx` usa el iframe Looker). Consecuencia: no hay
+> contrato que preservar — `svc-privada` los monta bien bajo `/api/v1/privada/informe/cooperativas/*`,
+> y hay que **agregarlos a `infra/gateway/openapi.yaml`** (con su `options:` de CORS) en la config
+> nueva del cutover. Los consumirá el Tablero nativo (`spec-privada-tablero.md`).
 | `GET/POST/PUT/DELETE /usuarios/**` | Admin | ❌ eliminado | pasa a `/api/v1/portal/admin/usuarios` (§3.7) |
 | `GET/POST/DELETE /usuarios/{email}/modulos/**` | Admin | ❌ eliminado | mecanismo descartado |
 | `GET /catalogos/modulos` | todos | ❌ eliminado | — |
@@ -505,9 +538,12 @@ durante ese lapso habría que re-exportarlas manualmente (bajo volumen esperado)
   push a `services/`).
 - IAM: SA de `svc-privada` con `roles/cloudsql.client`; SA del gateway con `run.invoker` sobre
   el nuevo Cloud Run; SA del ETL con `bigquery.dataViewer` en el proyecto viejo (temporal).
-- Gateway: `infra/gateway/openapi.yaml` — los 12 paths `/api/v1/privada/**` ya existen; sólo
-  cambia `x-google-backend.address`. Quitar los paths `/usuarios/**` y `/catalogos/modulos`.
-  Nueva config `ministerio-config-v{YYYYMMDD}` + `gateway update` (configs inmutables, ADR-002).
+- Gateway: `infra/gateway/openapi.yaml` — los paths `/api/v1/privada/**` existentes sólo cambian
+  `x-google-backend.address`. **Agregar** (con su `options:` de CORS): los 4
+  `/api/v1/privada/informe/cooperativas/*` (hoy 404 por el gateway, §6), `GET .../gestiones/rollup-territorial`,
+  `GET .../departamentos-info`, `PATCH .../gestiones/{id}`. **Quitar** `/usuarios/**` y
+  `/catalogos/modulos`. Nueva config `ministerio-config-v{YYYYMMDD}` + `gateway update` (configs
+  inmutables, ADR-002).
 - Seguir el skill `/deploy-servicio` paso a paso.
 - Migraciones contra prod: desde Cloud Shell con `cloud-sql-proxy`, desde
   `services/svc-privada/`, nunca desde la raíz.
@@ -561,8 +597,9 @@ hijos, no acá.
 
 | # | Decisión |
 |---|---|
-| Roles 1:1 | Confirmado como hipótesis (D-3). Si el relevamiento revela lo contrario → enmienda a ADR-015 (rol acotado tipo `TecnicoDGV`). |
-| `usuario_modulos` | Se descarta; acceso = secretaría `"privada"` (D-3). Sujeto a la misma condición. |
+| Roles 1:1 | **Confirmado en datos (D-3).** `usuario_modulos` está **vacía** (Anexo `C_usuario_modulos.csv` — 0 filas): ningún usuario tiene acceso módulo-parcial. Roles 1:1, sin rol acotado. |
+| `usuario_modulos` | Se descarta; acceso = secretaría `"privada"`. Confirmado. |
+| Alta de usuarios | `usuarios_roles` tiene 17 filas; 4 son cuentas de gateway/test marcadas `Admin` (`infraestructura.coop@gmail.com`, `test.operador@ministerio-test.com`, etc.). Revisar antes del alta en `portal_usuarios` — no todas deben quedar `Admin`. `priv.infracoop@gmail.com` (Molinari) es `Consulta` cross-área. |
 | Tablero | Nativo en React (D-4 / ADR-014). Sin mirror BQ. |
 | `GET /me` | Se mantiene como alias de `/portal/me` en v1; se retira en v2. |
 | `PATCH /gestiones/{id}` | Se expone separado de `cambiar-estado` en v1 (§6). |
@@ -573,7 +610,8 @@ hijos, no acá.
 
 1. **Ventana de mantenimiento**: fecha/hora del cutover; quién valida el smoke test.
 2. **Retención del proyecto viejo**: ¿suspender o borrar tras el backup? ¿owner del billing hoy?
-3. **`usuario_modulos`**: confirmar que ningún usuario tiene acceso módulo-parcial (condición de D-3).
+3. **Alta de usuarios**: revisar los 17 de `usuarios_roles` — cuáles van a `portal_usuarios` y con
+   qué rol (4 son cuentas de gateway/test con `Admin`).
 
 ### En los specs hijos (no en este spec)
 

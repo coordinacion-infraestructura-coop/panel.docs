@@ -17,14 +17,28 @@ ADRs: ADR-008..ADR-016 en `arquitectura.md`. Fasado completo en `roadmap.md` (Et
 - [x] 5 specs hijos creados en `draft`
 - [x] `roadmap.md` actualizado (Etapa 2 ✅ + Etapa 2-bis)
 - [ ] Reunión de relevamiento con Secretaría Privada — ventana de cutover, retención del proyecto
-      viejo, confirmar que ningún usuario tiene acceso módulo-parcial (`usuario_modulos`)
-- [ ] **Anexo A** — copiar el DDL de `v_informe_cooperativas` al spec
-      (`proyecto_sistema_gestiones/informe/bq_views/v_informe_cooperativas.sql`)
-- [ ] **Anexo B** — dump de valores actuales de `cat_*` (para el seed de `priv_cat_*`)
-- [ ] **Anexo C** — export de `usuarios_roles` + `usuarios_eventos` (alta en `portal_usuarios` + backup)
-- [ ] **Anexo D** — capturar respuestas reales del sistema viejo por endpoint (fixtures de contrato)
-- [ ] **Anexo F** — `SELECT DISTINCT derivado_a, organismo_id FROM gestiones` + curado → borrador de `priv_areas`
-- [ ] **Anexo G** — muestras de `metadata_json` por `tipo_evento`
+      viejo, revisión del alta de usuarios (17 en `usuarios_roles`, 4 gateway/test con `Admin`)
+- [x] **Anexo A** — `A_v_informe_cooperativas.sql` (informe de Cooperativas, 10 temas por regex —
+      NO transversal)
+- [x] **Anexo A2** — `A2_resumen_territorial.sql` (Resumen Territorial: no hay vista; replicar el
+      patrón de `resumen_territorial` de svc-vivienda) + `A2_rollup_territorial_baseline` (ETL)
+- [x] **Anexo B** — `B_cat_*.json` (6 catálogos; `cat_estado.id == nombre`, orden 10..60)
+- [x] **Anexo C** — `C_usuarios_roles.csv` (17 filas), `C_usuario_modulos.csv` **vacío** → D-3
+      confirmado (nadie con acceso parcial), `C_usuarios_eventos.json`
+- [ ] **Anexo D** — BLOQUEADO: (a) necesita token Firebase; (b) **bug**: los 4
+      `/api/v1/privada/informe/cooperativas/*` no están montados con el prefijo `/api/v1/privada`
+      en el `main.py` viejo → 404 por el gateway. El frontend nuevo no los usa (Looker iframe).
+      Capturar los demás endpoints igual; los de informe se validan directo contra el Cloud Run
+      viejo (`/informe/cooperativas/*` legacy) o se difieren al Tablero nativo.
+- [x] **Anexo F** — `F_derivado_a_distinct.json` (~27 valores, cola larga),
+      `F_organismo_id_distinct.json`, `F_cat_ministerio_agencia.json`. **`F_metadata_derivado_a` =
+      `[]`** → no hay traza histórica de derivaciones (afecta E3, ver `spec-privada-flujo-derivaciones.md`)
+- [x] **Anexo G** — `G_por_tipo_evento.json`, `G_muestras.json`. Sólo **166 eventos** / 2123
+      gestiones; `metadata_json.derivado_a` siempre null
+- [x] Línea base ETL — `ETL_baseline.json` (2123 gestiones / 1987 activas / 110 finalizadas),
+      `ETL_fecha_finalizacion_gap.json` (**103/103** FINALIZADA sin fecha → RE-9 100%),
+      `schema_*.json` (14 tablas)
+- [x] `scripts/generar_anexos.sh` — script empaquetado y re-ejecutable (delta del cutover)
 
 ## Fase 1 — Scaffold + schema
 
@@ -38,6 +52,9 @@ ADRs: ADR-008..ADR-016 en `arquitectura.md`. Fasado completo en `roadmap.md` (Et
       `priv_gestiones`, `priv_gestiones_eventos`, `priv_localidades_info`, `priv_departamentos_info`,
       `priv_geo_localidades`, `priv_cat_*` (6), `priv_audit_log`. Verificada: `alembic upgrade head --sql`
       emite DDL limpio; `pytest` (2 tests, SQLite) en verde
+- [x] Modelos reconciliados con los `schema_*.json` reales: `gestiones_eventos.usuario` NOT NULL,
+      `localidades_info`/`departamentos_info` con `created_at`/`created_by`, `costo_estimado`
+      `Numeric(18,2)`, free-text a `Text`, `geo_localidades` depto/localidad NOT NULL
 - [ ] `services/cloudbuild.yaml` — paso de build+deploy para `svc-privada`
 - [ ] Ejecutar `infra/cloudsql-setup.sh` en prod (crea `db_privada`, `user_privada`, secreto
       `svc-privada-db-url`)
@@ -54,14 +71,16 @@ ADRs: ADR-008..ADR-016 en `arquitectura.md`. Fasado completo en `roadmap.md` (Et
       setea `fecha_finalizacion`; evento `CAMBIO_ESTADO` + `ACTUALIZA_DATO` por campo
 - [ ] `PATCH /gestiones/{id}` — edición separada
 - [ ] `DELETE /gestiones/{id}` — soft delete `deleted_at`
-- [ ] `GET /gestiones/resumen-territorial` (`departamento` obligatorio, paridad)
-- [ ] `GET /gestiones/rollup-territorial` — **nuevo**, rollup global sin `departamento`
+- [ ] `GET /gestiones/resumen-territorial` (`departamento` obligatorio) — replicar el patrón de
+      `resumen_territorial` de svc-vivienda (Anexo A2), NO crear vista
+- [ ] `GET /gestiones/rollup-territorial` — **nuevo**, rollup global sin `departamento` (Anexo A2)
 - [ ] `GET /localidades-info` / `PUT /localidades-info` (el PUT sólo 4 campos, como hoy)
 - [ ] `GET /departamentos-info` — **nuevo**, read-only
 - [ ] `GET /catalogos/{catalogo}` (estados, urgencias, ministerios, categorias, tipos-gestion,
       canales-origen, departamentos, localidades, geo)
 - [ ] `GET /informe/cooperativas/{resumen,temporal,por-departamento,puntos}` — porta la
-      clasificación regex de `v_informe_cooperativas` **tal cual** (Anexo A)
+      clasificación regex de `v_informe_cooperativas` **tal cual** (Anexo A). **Montar bajo
+      `/api/v1/privada`** (el viejo NO lo hace) + agregar los 4 paths + `options:` al gateway
 - [ ] `GET /me` — alias de `/api/v1/portal/me`
 - [ ] Audit log en toda escritura
 
@@ -91,7 +110,8 @@ ADRs: ADR-008..ADR-016 en `arquitectura.md`. Fasado completo en `roadmap.md` (Et
 
 - [ ] `infra/gateway/openapi.yaml` — repuntar `x-google-backend.address` de `/api/v1/privada/**`;
       quitar `/usuarios/**` y `/catalogos/modulos`; agregar `rollup-territorial`, `departamentos-info`,
-      `PATCH /gestiones/{id}`; `options:` para cada path nuevo
+      `PATCH /gestiones/{id}` y los **4 `/informe/cooperativas/*`** (hoy 404 por el gateway);
+      `options:` para cada path nuevo
 - [ ] `ministerio-config-v{YYYYMMDD}` creada (NO activada)
 - [ ] Smoke end-to-end por URL directa de Cloud Run
 - [ ] Rollback ensayado (revertir a `ministerio-config-v20260716b`)
