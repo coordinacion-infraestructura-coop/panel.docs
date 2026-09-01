@@ -191,22 +191,23 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 
 ### Paridad frontend viejo (`app.js`) vs nuevo (`modules/privada/`)
 
-Vista **Gestiones**:
-- [x] Nueva gestión (`AgregarGestionModal`, 2026-09-01)
-- [x] Exportar tabla a Excel según filtros — `GestionesListPage` pagina todo y arma `.xlsx`
-      (commit `1d81886`)
-- [x] Columna Nro expediente + botón copiar al portapapeles (commit `1d81886`)
-- [x] Filtros (estado/ministerio/categoría/tipo/canal/depto/localidad/buscar), paginación, drawer
-      detalle con timeline, cambiar-estado, eliminar
-- [ ] **Exportar tabla a PDF** — el viejo lo tenía (jsPDF+autoTable). ¿Necesario o basta Excel?
-- [ ] **Ordenar por columna** (click en cabecera) — el viejo tenía sort front; el nuevo no
-- [ ] **Selector de columnas** (Min/Todo/Reset, persistido por usuario en localStorage) — el nuevo
-      tiene 7 columnas fijas
-- [ ] Botón "Copiar ID" por fila (menor) — el viejo tenía un chip por fila
-- [ ] Columna "Días transcurridos" — el dato llega en la API, no se muestra
-- [ ] `cambiar-estado`: campos **Derivado a** y **Acciones implementadas** — el viejo los tenía en
-      el modal; en el nuevo están diferidos a **E2**. Si el área los usa activamente → adelantar E2
-- [ ] `cambiar-estado`: editar Departamento/Localidad desde ese modal (el viejo lo permitía)
+Vista **Gestiones** — **paridad completa al 2026-09-01** (commits `abe3aac`, `1d81886`, `0294ec7`
+en `panel.front`):
+- [x] Nueva gestión (`AgregarGestionModal`)
+- [x] Exportar tabla a **Excel** según filtros — pagina todo el resultado filtrado y arma `.xlsx`
+- [x] Exportar tabla a **PDF** — `jspdf` + `jspdf-autotable` (lazy-import, no pesa en el bundle
+      inicial), encabezado con filtros activos + total, horizontal
+- [x] Columna Nro expediente + botón copiar; botón **Copiar ID** por fila
+- [x] **Selector de columnas** — 14 columnas, Min/Todo/Reset, persistido en `localStorage` del
+      navegador (antes 7 fijas). Columnas nuevas: Departamento, Ministerio, Categoría, Tipo, Canal,
+      Costo, Días transcurridos, ID
+- [x] **Ordenar por columna** (click en cabecera). ⚠️ *Limitación*: ordena la **página cargada**
+      (50 filas), no el dataset completo — para eso falta un parámetro `sort` en `GET /gestiones`
+      (backend, requiere redeploy). Documentado, no bloquea
+- [x] `cambiar-estado` (`CambiarEstadoModal`): campos **Derivado a** y **Acciones implementadas**
+      (el backend ya los aceptaba — era el pedacito de E2 que faltaba cablear) + editar
+      **Departamento/Localidad** (cascada, prefill desde el detalle, se envían sólo si cambian)
+- [x] Filtros, paginación, drawer detalle con timeline, eliminar
 
 Vista **Resumen territorial** (en el nuevo es el módulo transversal `resumen-territorial`, no vive
 dentro de privada):
