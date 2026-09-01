@@ -128,8 +128,14 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
       organismo_id/derivado_a_id/categoria_general_id/subcategoria_id/tipo_demanda_principal_id/
       geo_id/costo_moneda/tipo_gestion/canal_origen` (modelo + migración `0001`, no desplegada
       a prod todavía → edición in-place segura). 61 tests siguen en verde
-- [ ] **Re-ejecutar `--truncate`** contra Postgres local (Docker, `:5433`) con el schema ensanchado
-      y confirmar `finalizadas_sin_fecha: 0` en el reporte de verificación
+- [x] **`--truncate` ejecutado OK contra Postgres local** (2026-09-01, 2ª corrida, schema
+      ensanchado). Verificación: 2123 gestiones / 1987 activas / 110 finalizadas / **0 sin fecha**
+      / 166 eventos / 426 / 25 / 551 — **coincide exacto con la línea base**. El culpable del
+      `varchar(30)` era `geo_id` (valores de hasta 56 chars); `String(60)` alcanza. `origen` sólo
+      tiene `APP/ACTUAL/Actual/Histórico`
+- [x] **Validación end-to-end del informe**: `app/informe/service.resumen()` sobre los datos
+      migrados reproduce **exacto** `informe_resumen.json` del sistema viejo (10 temas, todos los
+      conteos, total 847) → el port del regex de `v_informe_cooperativas` es correcto
 - [ ] Ejecutar contra Cloud SQL de prod (Cloud Shell + `cloud-sql-proxy`, una vez provisionada
       `db_privada` — Fase 1 pendiente de deploy)
 
