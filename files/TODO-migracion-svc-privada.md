@@ -64,25 +64,34 @@ ADRs: ADR-008..ADR-016 en `arquitectura.md`. Fasado completo en `roadmap.md` (Et
 
 ## Fase 2 — Endpoints a paridad
 
-- [ ] `app/gestiones/` — `GET /gestiones` (+ trailing slash) con filtros + paginación
-- [ ] `GET /gestiones/{id}` (acepta UUID o `id_legacy`), `GET /gestiones/{id}/eventos`
-- [ ] `POST /gestiones` (evento `ALTA`)
-- [ ] `POST /gestiones/{id}/cambiar-estado` — lock optimista `updated_at` + `409`; `FINALIZADA`
-      setea `fecha_finalizacion`; evento `CAMBIO_ESTADO` + `ACTUALIZA_DATO` por campo
-- [ ] `PATCH /gestiones/{id}` — edición separada
-- [ ] `DELETE /gestiones/{id}` — soft delete `deleted_at`
-- [ ] `GET /gestiones/resumen-territorial` (`departamento` obligatorio) — replicar el patrón de
-      `resumen_territorial` de svc-vivienda (Anexo A2), NO crear vista
-- [ ] `GET /gestiones/rollup-territorial` — **nuevo**, rollup global sin `departamento` (Anexo A2)
-- [ ] `GET /localidades-info` / `PUT /localidades-info` (el PUT sólo 4 campos, como hoy)
-- [ ] `GET /departamentos-info` — **nuevo**, read-only
-- [ ] `GET /catalogos/{catalogo}` (estados, urgencias, ministerios, categorias, tipos-gestion,
-      canales-origen, departamentos, localidades, geo)
-- [ ] `GET /informe/cooperativas/{resumen,temporal,por-departamento,puntos}` — porta la
-      clasificación regex de `v_informe_cooperativas` **tal cual** (Anexo A). **Montar bajo
-      `/api/v1/privada`** (el viejo NO lo hace) + agregar los 4 paths + `options:` al gateway
-- [ ] `GET /me` — alias de `/api/v1/portal/me`
-- [ ] Audit log en toda escritura
+Implementado en `services/svc-privada/app/` (panel-module, SQLAlchemy async, sin BigQuery).
+Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixtures de `anexos/D/`
+(key sets == sistema viejo). Cobertura ~67% (el gate >80% es Fase 5).
+
+- [x] `app/gestiones/` — `GET /gestiones` (+ `/`) con filtros (`estado/ministerio/categoria/
+      departamento/localidad/tipo_gestion/canal_origen/q`) + paginación; 15 campos por item
+- [x] `GET /gestiones/{id}` (acepta UUID o `id_legacy`; 32 campos + `is_deleted`),
+      `GET /gestiones/{id}/eventos` (`metadata_json` como **objeto**)
+- [x] `POST /gestiones` — geo lookup + evento `CREACION`; `origen="APP"`, `estado="INGRESADO"`
+- [x] `POST /gestiones/{id}/cambiar-estado` — lock optimista **opcional** `updated_at` → `409`;
+      `FINALIZADA` setea `fecha_finalizacion` (RE-9); evento `CAMBIO_ESTADO` + `ACTUALIZA_DATO` por campo
+- [x] `PATCH /gestiones/{id}` — edición separada (nuevo en v1) + eventos `ACTUALIZA_DATO`
+- [x] `DELETE /gestiones/{id}` — soft delete `deleted_at` + evento `ARCHIVO`
+- [x] `GET /gestiones/resumen-territorial` (2 scopes, `departamento` obligatorio) — patrón A2;
+      `metadata_json` de eventos va como **string** acá (inconsistencia del viejo, replicada)
+- [x] `GET /gestiones/rollup-territorial` — **nuevo**, rollup global por (depto, localidad)
+- [x] `GET /localidades-info` / `PUT /localidades-info` (el PUT sólo escribe los 4 campos, como hoy)
+- [x] `GET /departamentos-info` — **nuevo**, read-only
+- [x] `GET /catalogos/{estados,urgencias,ministerios,categorias,tipos-gestion,canales-origen}` +
+      `/departamentos` + `/localidades?departamento=` + `/geo?departamento=&localidad=`. Sin `/modulos`.
+- [x] `GET /informe/cooperativas/{resumen,temporal,por-departamento,puntos}` — clasificación
+      regex de `v_informe_cooperativas` portada a Python (`app/informe/clasificacion.py`, 10
+      prioridades). Montado bajo `/api/v1/privada`
+- [x] `GET /me` — alias con shape viejo `{email, nombre, rol, modulos: []}`
+- [x] Audit log en toda escritura (`priv_audit_log`)
+- [ ] Pendiente: agregar los paths nuevos a `infra/gateway/openapi.yaml` (Fase 6)
+- [ ] Pendiente: `POST /gestiones` / `cambiar-estado` — documentar forma exacta del payload viejo
+      (los fixtures D no capturan escrituras)
 
 ## Fase 3 — Unificación de auth
 
