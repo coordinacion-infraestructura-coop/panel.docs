@@ -182,10 +182,12 @@ Verificado con **48 tests** (SQLite) incl. **tests de contrato** contra los fixt
 - [x] **Alta de gestiones en el frontend nuevo** (2026-09-01) — hueco de paridad detectado en el
       cutover: el módulo React no tenía UI de alta (`POST /gestiones` existía sin invocador).
       Agregado `AgregarGestionModal.tsx` + `gestionesApi.crear` + botón "+ Nueva gestión" en
-      `GestionesListPage` (gate `canModify`). `npm run build` OK. Registrado en `spec-migracion §3.10`.
-      **Prerequisito de despublicar el frontend viejo** (que escribe directo a BigQuery). Falta:
-      deploy `firebase deploy --only hosting` + prueba en el navegador.
-- [ ] Ventana: sistema viejo en sólo-lectura *(el viejo sigue online read-write; se apagará en el
+      `GestionesListPage` (gate `canModify`). Registrado en `spec-migracion §3.10`. Commit `abe3aac`
+      en `panel.front`. **Desplegado a Firebase Hosting y verificado en prod** (2026-09-01)
+- [ ] Avisar a los usuarios de Privada que dejen de usar el frontend viejo de GitHub Pages para
+      cargar/editar (escribe directo al Cloud Run viejo → BigQuery → bifurca). El alta ya funciona
+      en el portal nuevo. Ideal: poner el viejo en sólo-lectura o con aviso de redirección
+- [ ] Ventana: sistema viejo en sólo-lectura *(sigue online read-write; se apaga en el
       decommission. El ETL fue `--truncate` completo, no delta)*
 - [x] ETL contra `db_privada` de prod (ver Fase 4 — corrida completa 2026-09-01, no delta)
 - [x] `CUTOVER-svc-privada.md` aplicado → `ministerio-config-v20260901` → `gateways update` (2026-09-01)
