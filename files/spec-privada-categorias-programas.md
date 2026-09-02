@@ -38,7 +38,7 @@
 > rotula **"Categoría General"**. El desplegable de cada catálogo editable tiene como última opción
 > "＋ Cargar nueva opción…" (input inline) en vez de un botón lateral.
 >
-> **Pendiente**: panel de administración full (editar orden/colores/activo, borrar con guard);
+> **Pendiente**: columna "Campo de Trabajo" en la lista; ejecutar `backfill_categorias.py` en prod (hecho 2026-09-02: 1946/2047); deploy del frontend.
 > ejecutar `backfill_categorias.py` en prod (hecho 2026-09-02: 1946/2047); deploy del frontend.
 > **A revisar con Secretaría Privada**: `orden`/colores concretos de los catálogos y el mapa de
 > backfill `categoria_general_id → categoria_id` (RE-1: doble corrida + `--diff-informe` + sign-off
