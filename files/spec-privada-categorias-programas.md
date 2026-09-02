@@ -33,8 +33,13 @@
 >   config `ministerio-config-v{FECHA}` + `gateways update`.
 > - Tests: 73 en verde (`test_catalogos_editables.py` + contrato ajustado a superset).
 >
-> **Pendiente**: frontend (panel de administración + 3 desplegables con "+ nueva opción" en el
-> alta/edición + filtros Ok Gob/Min); ejecutar `backfill_categorias.py` en prod; deploy.
+> **Nomenclatura en la UI (2026-09-02)**: el catálogo `priv_categorias` (tabla/endpoint/`categoria_id`
+> sin cambios) se rotula **"Campo de Trabajo"** en pantalla; el viejo `categoria_general_id` se
+> rotula **"Categoría General"**. El desplegable de cada catálogo editable tiene como última opción
+> "＋ Cargar nueva opción…" (input inline) en vez de un botón lateral.
+>
+> **Pendiente**: panel de administración full (editar orden/colores/activo, borrar con guard);
+> ejecutar `backfill_categorias.py` en prod (hecho 2026-09-02: 1946/2047); deploy del frontend.
 > **A revisar con Secretaría Privada**: `orden`/colores concretos de los catálogos y el mapa de
 > backfill `categoria_general_id → categoria_id` (RE-1: doble corrida + `--diff-informe` + sign-off
 > antes de que E4 retire el regex).
