@@ -1,6 +1,6 @@
 # Spec: Resumen Territorial — Ficha de localidad + federación server-side de Privada
 
-**Estado**: E5b (ficha) **implementado parcial** (drawer, on-demand) · E5a (federación server-side) draft
+**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · Excel/print de la ficha diferido
 **Versión**: 0.2.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-09-01

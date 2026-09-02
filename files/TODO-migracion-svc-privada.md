@@ -228,9 +228,16 @@ dentro de privada):
       `_map_privada_payload` entiende el rollup
 - [x] `cloudbuild.yaml`: `_PRIVADA_FETCH_ENABLED` / `_SVC_PRIVADA_INTERNAL_URL`
 - [x] frontend: flag `VITE_PRIVADA_CLIENT_FEDERATION (opt-in de rollback; OFF por default)` (RE-7 — merge cliente un release detrás)
-- [ ] **Deploy**: runbook en `infra/DEPLOY-svc-privada.md §E5a` (IAM `run.invoker` → redeploy
-      svc-privada → redeploy svc-vivienda con el flag → frontend con `VITE_PRIVADA_CLIENT_FEDERATION (opt-in de rollback; OFF por default)=true`
-      → recomputar snapshot → verificar sin doble conteo)
+- [x] **Desplegado y verificado en prod** (2026-09-02): IAM `run.invoker` de `svc-vivienda@` sobre
+      svc-privada · svc-privada con `/internal/privada/rollup-territorial` · svc-vivienda con
+      `PRIVADA_FETCH_ENABLED=true` + `SVC_PRIVADA_INTERNAL_URL` · frontend con el merge client-side
+      OFF por default (`ba70889`). `POST /resumen-territorial/actualizar` → `generado_para_areas`
+      = `[vivienda, privada]`; en el navegador las líneas de Privada aparecen una sola vez.
+      El scheduler `resumen-territorial-refresh` (*/30) mantiene el snapshot.
+- [x] `cloudbuild.yaml` defaults en E5a-on (`a7d1794`) — un redeploy con `--set-env-vars` desde el
+      yaml borraba las env seteadas a mano y el Resumen Territorial perdía Privada hasta el próximo
+      `gcloud run services update`. ⚠️ un deploy que pase `--set-env-vars` **sin** incluir
+      `PRIVADA_FETCH_ENABLED`/`SVC_PRIVADA_INTERNAL_URL` sigue pudiendo pisarlo — usar el yaml.
 
 ### Tablero nativo (Fase 7 / spec-privada-tablero.md) — GATE del decommission de BigQuery
 
