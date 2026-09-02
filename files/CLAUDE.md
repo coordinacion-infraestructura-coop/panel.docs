@@ -84,6 +84,10 @@ Los permisos se gestionan en Cloud SQL (tabla `portal_usuarios` en `svc-vivienda
 
 Cada usuario tiene una o más **secretarías asignadas**. Solo ve los módulos de sus secretarías en el dashboard. El `role="invitado"` es el fallback si el usuario Firebase no tiene entrada en `portal_usuarios`.
 
+**Roles fuera de la jerarquía** (alcance acotado a un módulo, NO se agregan a las constantes de `app/auth.py` — cada router declara su tupla local):
+- `TecnicoDGV` — sólo `checklist_tecnico` + Tablero de `programas` (spec-checklist-tecnico-dgv.md §8).
+- `Autoridad` — lectura consolidada cross-área en `resumen_territorial`; ve todas las áreas como `Admin` (spec-resumen-territorial.md §7).
+
 ## Módulo portal (gestión de usuarios)
 
 Vive en `svc-vivienda/app/portal/`:

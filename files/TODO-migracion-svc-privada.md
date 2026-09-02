@@ -227,9 +227,9 @@ dentro de privada):
 - [x] svc-vivienda: `config.svc_privada_internal_url`, `fetch_privada_lineas` vía endpoint interno,
       `_map_privada_payload` entiende el rollup
 - [x] `cloudbuild.yaml`: `_PRIVADA_FETCH_ENABLED` / `_SVC_PRIVADA_INTERNAL_URL`
-- [x] frontend: flag `VITE_PRIVADA_SERVER_FEDERATION` (RE-7 — merge cliente un release detrás)
+- [x] frontend: flag `VITE_PRIVADA_CLIENT_FEDERATION (opt-in de rollback; OFF por default)` (RE-7 — merge cliente un release detrás)
 - [ ] **Deploy**: runbook en `infra/DEPLOY-svc-privada.md §E5a` (IAM `run.invoker` → redeploy
-      svc-privada → redeploy svc-vivienda con el flag → frontend con `VITE_PRIVADA_SERVER_FEDERATION=true`
+      svc-privada → redeploy svc-vivienda con el flag → frontend con `VITE_PRIVADA_CLIENT_FEDERATION (opt-in de rollback; OFF por default)=true`
       → recomputar snapshot → verificar sin doble conteo)
 
 ### Tablero nativo (Fase 7 / spec-privada-tablero.md) — GATE del decommission de BigQuery
