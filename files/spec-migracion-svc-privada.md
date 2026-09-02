@@ -706,3 +706,56 @@ Resumen de la migración-paridad:
 - **Anexo G** *(insumo del parser de backfill de derivaciones)*: payloads de muestra de
   `gestiones_eventos.metadata_json` para los 4 `tipo_evento` (`CREACION`, `CAMBIO_ESTADO`,
   `ACTUALIZA_DATO`, `ARCHIVO`).
+
+- **Anexo H** — **forma exacta de los payloads de escritura del sistema viejo** (cierra el pendiente
+  de Fases 2/5: los fixtures D sólo capturaron respuestas de lectura). Fuente autoritativa: el
+  frontend Vanilla JS `proyecto_sistema_gestiones/front_infraestructura V2/app.js`
+  (`submitNewGestion()` línea ~2352, `submitChangeState()` línea ~2268). El sistema nuevo replica
+  esto en `services/svc-privada/app/gestiones/schemas.py` (`GestionCreate`, `CambioEstado`) —
+  verificado campo por campo:
+
+  `POST /api/v1/privada/gestiones` — cuerpo:
+  ```json
+  {
+    "ministerio_agencia_id": "MIN_GOBIERNO",      // obligatorio (id de cat_ministerio_agencia)
+    "categoria_general_id": "CAT_OBRA_DE_GAS",     // obligatorio (id de cat_categoria_general)
+    "detalle": "texto libre",                       // obligatorio, min_length 1
+    "departamento": "CALAMUCHITA",                  // obligatorio (debe existir en geo_localidades)
+    "localidad": "AMBOY",                           // obligatorio (idem, cascada con departamento)
+    "urgencia": "Media",                            // opcional, default "Media" (Alta|Media|Baja)
+    "direccion": null,                              // opcional
+    "observaciones": null,                          // opcional
+    "tipo_gestion": null,                           // opcional (id de cat_tipo_gestion)
+    "canal_origen": null,                           // opcional (id de cat_canal_origen)
+    "organismo_id": null,                           // opcional (texto libre)
+    "subtipo_detalle": null,                        // opcional (texto libre)
+    "costo_estimado": null,                         // opcional (número)
+    "costo_moneda": "ARS",                          // opcional, default "ARS"
+    "nro_expediente": null                          // opcional (texto libre)
+  }
+  ```
+  El servidor fija `origen="APP"`, `estado="INGRESADO"`, `fecha_ingreso=today()` y emite un evento
+  `CREACION`. Respuesta: el detalle completo de la gestión (32 campos).
+
+  `POST /api/v1/privada/gestiones/{id}/cambiar-estado` — cuerpo:
+  ```json
+  {
+    "nuevo_estado": "DERIVADO A SUAC",              // obligatorio
+    "comentario": null,                             // obligatorio SÓLO si nuevo_estado ∈ {ARCHIVADO, NO REMITE SUAC}
+    "nro_expediente": null,                         // opcional — si cambia, emite ACTUALIZA_DATO
+    "fecha_ingreso": null,                          // opcional (YYYY-MM-DD) — idem
+    "departamento": null,                           // opcional — si cambia, re-valida geo + ACTUALIZA_DATO
+    "localidad": null,                              // opcional — idem
+    "derivado_a": null,                             // opcional (texto libre) — va a metadata_json del evento
+    "acciones_implementadas": null,                 // opcional (texto libre) — idem
+    "updated_at": null                              // opcional — lock optimista (§3.6): si viene y no coincide → 409
+  }
+  ```
+  Desviaciones deliberadas vs el viejo: `updated_at` (lock, RE opt-in) y `nuevo_estado=="FINALIZADA"`
+  setea `fecha_finalizacion` (RE-9). Sin validación de transición (§3.5). Respuesta:
+  `{"ok": true, "id_gestion": "...", "estado": "..."}`.
+
+  `PATCH /api/v1/privada/gestiones/{id}` (nuevo en v1, no existía en el viejo) — subconjunto editable
+  sin cambio de estado: `ministerio_agencia_id, categoria_general_id, detalle, observaciones,
+  urgencia, direccion, subtipo_detalle, organismo_id, costo_estimado, costo_moneda, tipo_gestion,
+  canal_origen, departamento, localidad, updated_at` (todos opcionales; `updated_at` = lock).
