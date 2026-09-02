@@ -271,34 +271,45 @@ decommission).
 
 ## Mejoras (specs hijos — post-cutover, aditivas, no bloquean el cutover)
 
-### E1 — Categorías / Programas / Áreas editables (`spec-privada-categorias-programas.md`)
+### E1 — Categorías / Programas / Áreas editables (`spec-privada-categorias-programas.md` **approved v1.0.0**)
 
-- [ ] Migración `0002`: `priv_categorias`, `priv_programas`, `priv_areas` + columnas
-      `categoria_id`/`programa_id`/`area_id`/`ok_gobernador`/`ok_ministro`/`acciones_implementadas`
-- [ ] Seed de las 9 categorías + backfill `categoria_id` desde `categoria_general_id` (Anexo A del spec hijo)
-- [ ] CRUD de los 3 catálogos + guard 409 (`*_EN_USO`)
-- [ ] Schemas `POST/PATCH /gestiones` aditivos
-- [ ] Frontend: modal(es) "Gestionar…" + 3 desplegables con "+ nueva opción" + filtros `Ok Gob/Min`
+- [x] Migración `0002` (2026-09-02): `priv_categorias`/`priv_programas`/`priv_areas` + columnas
+      `categoria_id`/`programa_id`/`area_id`/`ok_gobernador`/`ok_ministro`/`acciones_implementadas` en `priv_gestiones`
+- [x] Seed de las 9 categorías (orden/colores por defecto, editables) + arranque programas/áreas
+- [x] CRUD `/api/v1/privada/{categorias,programas,areas}` (`app/catalogos_editables/`) + guard 409
+      (`*_EN_USO`, `CODIGO_DUPLICADO`) + roles (GET lectura / escritura `ROLES_TRANSICION`)
+- [x] Schemas `POST/PATCH/cambiar-estado` aditivos + filtros `ok_gobernador`/`ok_ministro` en `GET /gestiones`
+- [x] `scripts/backfill_categorias.py` (RE-1, `--dry-run`/`--force`/`--diff-informe`) — deriva de `tema_informe`
+- [x] Gateway: 6 paths en `openapi.yaml` (nueva config pendiente)
+- [x] Frontend: `CatalogoEditableSelect` (3 desplegables con "+ nueva opción" inline en el alta) +
+      selects Ok Gob/Min + filtros de lista. `panel.front` `92422d5`
+- [ ] **Deploy**: redeploy svc-privada + `alembic upgrade head` (0002) en prod + `backfill_categorias.py`
+      (`--dry-run` → `--diff-informe` → aplicar) + nueva config de gateway + frontend
+- [ ] Panel de administración **full** (editar orden/colores/activo, borrar con guard) — el "+ nueva"
+      cubre el alta al vuelo; falta la UI de gestión completa
+- [ ] **Con Secretaría Privada**: revisar orden/colores de los catálogos + validar el mapa de backfill
+      (`--diff-informe`) antes de que E4 retire el regex
 
-### E2 — Campos de gestión (fusionable con E1)
+### E2 — Campos de gestión — **hecho** (parte con E1)
 
-- [ ] `CambiarEstadoModal` cablea `derivado_a` + `acciones_implementadas`
-- [ ] `acciones_implementadas` se persiste en `priv_gestiones` (no sólo en `metadata_json`)
+- [x] `CambiarEstadoModal` cablea `derivado_a` + `acciones_implementadas` (sprint del cutover)
+- [x] `acciones_implementadas` se persiste en `priv_gestiones` (0002 + `cambiar_estado`)
 
-### E3 — Flujo / DAG (`spec-privada-flujo-derivaciones.md`)
+### E3 — Flujo / DAG (`spec-privada-flujo-derivaciones.md`) — **BLOQUEADO** hasta el relevamiento
 
-- [ ] `priv_gestion_derivaciones` + `priv_area_alias`
-- [ ] Escritura runtime en `cambiar-estado`
-- [ ] Job de backfill desde `metadata_json` (confianza + nodo centinela)
-- [ ] `GET /gestiones/{id}/flujo`
-- [ ] Vista "Flujo" (DAG) en `GestionDetalleDrawer`, junto al timeline
+- [ ] Requiere la **taxonomía de áreas** definida con Secretaría Privada (RE-3) — `priv_areas` ya
+      existe (0002) pero sólo con 3 valores de arranque + el centinela
+- [ ] `metadata_json.derivado_a` es **null en todos los 166 eventos** (Anexo G) → el backfill del DAG
+      no tiene datos de origen. Decidir: DAG sólo forward-only para gestiones nuevas
+- [ ] `priv_gestion_derivaciones` + `priv_area_alias` + escritura en `cambiar-estado` + `GET /gestiones/{id}/flujo`
+      + vista DAG en el drawer
 
-### E4 — Informe v2 (`spec-privada-informe-cooperativas-v2.md`)
+### E4 — Informe v2 (`spec-privada-informe-cooperativas-v2.md`) — depende de E1 + **sign-off del área**
 
-- [ ] Mapa `categoria_id` → `tema_informe`
-- [ ] Reimplementar la clasificación sin regex
-- [ ] Doble corrida regex vs estructurada + reporte de diffs + sign-off del área
-- [ ] Congelar/dropear `categoria_general_id`
+- [ ] `categoria_id` ya se puebla (E1 backfill). Falta el mapa `categoria_id → tema_informe`
+- [ ] Doble corrida regex vs estructurada (`backfill_categorias.py --diff-informe`) + **sign-off de
+      Secretaría Privada** — el spec no puede pasar a `approved` sin eso (RE-1)
+- [ ] Recién con sign-off: reimplementar la clasificación sin regex + congelar/dropear `categoria_general_id`
 
 ### E5 — Resumen Territorial (`spec-resumen-territorial-ficha-localidad.md`)
 
