@@ -1,12 +1,43 @@
 # Spec: svc-privada — Categorías, Programas y Áreas editables + panel de administración
 
-**Estado**: draft
-**Versión**: 0.1.0
+**Estado**: **approved** (backend + migración implementados 2026-09-02; frontend en curso)
+**Versión**: 1.0.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-08-31
-**Servicio**: `svc-privada` (módulo `app/catalogos_gestion/` o extensión de `app/gestiones/`)
+**Última actualización**: 2026-09-02
+**Servicio**: `svc-privada` (módulo `app/catalogos_editables/`)
 **Depende de**: `spec-migracion-svc-privada.md` `approved` + Fase 6 (cutover) completada.
 **ADRs**: ADR-010 (3 catálogos editables), ADR-011 (`priv_programas` propio con `POST`).
+
+> **Implementado 2026-09-02 (E1 + E2 backend)** — `panel.backend`:
+> - Migración `0002`: `priv_categorias` / `priv_programas` / `priv_areas` (patrón `viv_cc_estados`:
+>   `id` BigInteger client-gen, `label`, `orden`, `activo`; `bg`/`text_color` en categorías,
+>   `codigo` único en programas, `es_centinela` en áreas). `priv_gestiones` += `categoria_id` /
+>   `programa_id` / `area_id` (FK nullable) + `ok_gobernador` / `ok_ministro` (`VARCHAR(20)` CHECK
+>   `IN ('SI','NO','PENDIENTE')`, default `'PENDIENTE'`) + `acciones_implementadas` (Text).
+> - Seed: las **9 categorías** con `orden` 10..90 y colores por defecto (editables en runtime);
+>   arranque de 3 programas + 3 áreas (incluye el centinela "Área desconocida" para E3).
+> - `app/catalogos_editables/` (models/schemas/service/router): CRUD `GET/POST/PATCH/DELETE`
+>   `/api/v1/privada/{categorias,programas,areas}` — GET con `ROLES_LECTURA`, escritura con
+>   `ROLES_TRANSICION` (Admin/Supervisor; Operador NO administra catálogos, RE-5). `DELETE` con
+>   guard 409 (`CATEGORIA_EN_USO` / `PROGRAMA_EN_USO` / `AREA_EN_USO`) contando refs en
+>   `priv_gestiones` no borradas. `POST /programas` valida `codigo` único → 409 `CODIGO_DUPLICADO`.
+> - `GestionCreate` / `GestionUpdate` / `CambioEstado` ganan `categoria_id`/`programa_id`/`area_id`/
+>   `ok_gobernador`/`ok_ministro`/`acciones_implementadas` (aditivo). **E2**: `cambiar_estado`
+>   persiste `acciones_implementadas` **en la gestión**, no sólo en el evento. `_list_item`
+>   (+5 campos) y `_detail` (+6) los exponen. `GET /gestiones` filtra por `ok_gobernador`/`ok_ministro`.
+> - `scripts/backfill_categorias.py` (RE-1, re-ejecutable, `--dry-run`/`--force`/`--diff-informe`):
+>   deriva `categoria_id` de `tema_informe(...)` → categoría, con fallback por `categoria_general_id`
+>   (los 14 `CAT_*` legacy); lo que no matchea queda NULL (el área lo completa en el panel).
+>   `acciones_implementadas` se backfillea del último evento con ese campo en `metadata_json`.
+> - Gateway: `infra/gateway/openapi.yaml` con los 6 paths nuevos (+ `options`). Requiere nueva
+>   config `ministerio-config-v{FECHA}` + `gateways update`.
+> - Tests: 73 en verde (`test_catalogos_editables.py` + contrato ajustado a superset).
+>
+> **Pendiente**: frontend (panel de administración + 3 desplegables con "+ nueva opción" en el
+> alta/edición + filtros Ok Gob/Min); ejecutar `backfill_categorias.py` en prod; deploy.
+> **A revisar con Secretaría Privada**: `orden`/colores concretos de los catálogos y el mapa de
+> backfill `categoria_general_id → categoria_id` (RE-1: doble corrida + `--diff-informe` + sign-off
+> antes de que E4 retire el regex).
 
 ---
 
