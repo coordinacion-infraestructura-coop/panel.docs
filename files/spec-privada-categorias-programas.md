@@ -38,8 +38,14 @@
 > rotula **"Categoría General"**. El desplegable de cada catálogo editable tiene como última opción
 > "＋ Cargar nueva opción…" (input inline) en vez de un botón lateral.
 >
-> **Pendiente**: columna "Campo de Trabajo" en la lista; ejecutar `backfill_categorias.py` en prod (hecho 2026-09-02: 1946/2047); deploy del frontend.
-> ejecutar `backfill_categorias.py` en prod (hecho 2026-09-02: 1946/2047); deploy del frontend.
+> **Implementado 2026-09-02 (frontend)** — `panel.front`: `CatalogoEditableSelect` (3 desplegables
+> con "＋ Cargar nueva opción…" como última opción), campos en `AgregarGestionModal` /
+> `CambiarEstadoModal` / `GestionDetalleDrawer`, filtros Ok Gob/Min en la lista, y
+> `GestionarCatalogosModal` (botón "⚙ Catálogos", Admin/Supervisor — editar label/orden/colores/
+> código/activo, borrar con guard 409, agregar). `backfill_categorias.py` corrido en prod
+> (1946/2047 con `categoria_id`).
+>
+> **Pendiente**: columna "Campo de Trabajo" en la tabla de la lista; deploy del frontend.
 > **A revisar con Secretaría Privada**: `orden`/colores concretos de los catálogos y el mapa de
 > backfill `categoria_general_id → categoria_id` (RE-1: doble corrida + `--diff-informe` + sign-off
 > antes de que E4 retire el regex).
