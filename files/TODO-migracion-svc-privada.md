@@ -215,11 +215,28 @@ dentro de privada):
       habitantes, electores, semáforo (chip), intendente + partido, tipo de localidad, legisladores
       + electores/habitantes del departamento. On-demand con el token del usuario a
       `GET /api/v1/privada/{localidades,departamentos}-info`. `spec-resumen-territorial-ficha-localidad.md` v0.2.0
-- [ ] Ficha en el **export Excel** y la **vista de impresión** — diferido: necesita endpoint bulk
-      de `localidades-info` en svc-privada o el embebido server-side de E5a
+- [x] Ficha en el **export Excel** y la **vista de impresión** del RT (2026-09-02) — columnas
+      Habitantes/Electores/Semáforo/Intendente/Partido/Tipo, vía `GET /api/v1/privada/localidades-info/all`
+      (bulk, evita N+1). `fichaLocalidadApi.todas()`.
+- [x] **Exportar RT a PDF** (2026-09-02) — botón "⤓ PDF" (`jspdf`+`jspdf-autotable` lazy), horizontal,
+      con encabezado de alcance + filtros.
+- [x] **Filtro de localidad con autocompletar** (2026-09-03) — combobox `<input list>` en la barra
+      del RT; si hay departamento elegido, las opciones se limitan a las localidades de ese depto;
+      al cambiar de depto se limpia si la localidad ya no pertenece.
+- [x] **"Ficha de municipio" imprimible** (2026-09-03, `panel.front` hasta `7a7d235`) —
+      botones "📄 Ficha de municipio (PDF)" / "Ficha (Excel)" en el RT (habilitados cuando hay una
+      localidad elegida). `src/modules/resumen-territorial/fichaMunicipio.ts` junta client-side:
+      demografía (`localidades-info`), Córdoba Hogar / Cordón Cuneta (paneles de vivienda, match por
+      nombre normalizado, estado→label vía `.estados`, avance ≈ posición del estado en el catálogo),
+      Mi Lugar (`/mi-lugar/proyectos?localidad_nombre=` + estados), Gestiones
+      (`/privada/gestiones?departamento=&localidad=` + último evento por gestión),
+      `categoria_general_id`→nombre vía `/catalogos/categorias`. PDF A4 B/N con membrete (escudo
+      `docs/data/heraldico.png` re-teñido a navy, embebido en `heraldico.ts` como chunk lazy),
+      franja de 4 KPIs, chips de color en Estado General, gestiones como bloque (≤6) o tabla (>6),
+      pie "Generado… / Página X de Y". `avance` es una **estimación** (no hay campo numérico en
+      CC/CH/ML) — a validar con el área si tienen fórmula real.
 - [ ] Edición inline de la ficha desde el panel transversal — fuera de alcance (el `PUT` de
       svc-privada sigue siendo la vía; `tipo_localidad`/`color_semaforo` son read-only)
-- [ ] Exportar resumen a PDF (el nuevo exporta a Excel) — el resumen territorial viejo tenía PDF
 
 ### E5a — Federación server-side de Privada (ADR-016) — código listo, falta deploy
 

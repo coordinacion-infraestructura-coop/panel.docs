@@ -15,10 +15,16 @@
 > la fila `priv_localidades_info` está vacía, y a un mensaje de error si la llamada falla — sin
 > romper el resto de la ficha.
 >
-> **Pendiente de E5b**: columnas de demografía en el **export Excel** y en la **vista de impresión**
-> (`.rt-print-doc`) — requieren la demografía de *todas* las localidades del snapshot, o sea un
-> endpoint bulk en svc-privada (`GET /localidades-info/all`) o el embebido server-side de E5a.
-> El `GET /localidades-info` actual es lookup de a una. No hacer N+1 de 551 llamadas desde el browser.
+> **E5b completado 2026-09-02/03** — además del drawer:
+> - `GET /api/v1/privada/localidades-info/all` (bulk) + columnas de demografía en el **export
+>   Excel** y la **vista de impresión** del RT + botón **"⤓ PDF"** del RT.
+> - **Filtro de localidad con autocompletar** en la barra del RT (combobox `<input list>`, scope
+>   por departamento).
+> - **"Ficha de municipio" imprimible** (`fichaMunicipio.ts`): PDF + Excel por municipio que junta
+>   demografía + Córdoba Hogar + Cordón Cuneta + Mi Lugar + Gestiones (con último evento por
+>   gestión). PDF A4 con membrete (escudo re-teñido a navy), franja de KPIs, chips de estado,
+>   gestiones bloque (≤6) / tabla (>6). `avance` es estimación por posición del estado en el
+>   catálogo — validar con el área si hay fórmula oficial.
 **Servicio**: `svc-vivienda` (módulo `app/resumen_territorial/`) + frontend
 `src/modules/resumen-territorial/`
 **Depende de**: `spec-migracion-svc-privada.md` Fase 2 (endpoints `rollup-territorial` y
