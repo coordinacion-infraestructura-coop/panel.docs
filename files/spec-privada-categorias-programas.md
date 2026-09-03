@@ -45,7 +45,7 @@
 > código/activo, borrar con guard 409, agregar). `backfill_categorias.py` corrido en prod
 > (1946/2047 con `categoria_id`).
 >
-> **Pendiente**: columna "Campo de Trabajo" en la tabla de la lista; deploy del frontend.
+> **Pendiente**: sólo deploy del frontend (columna + filtro "Campo de Trabajo" ya hechos, panel.front d4ce471).
 > **A revisar con Secretaría Privada**: `orden`/colores concretos de los catálogos y el mapa de
 > backfill `categoria_general_id → categoria_id` (RE-1: doble corrida + `--diff-informe` + sign-off
 > antes de que E4 retire el regex).

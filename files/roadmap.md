@@ -60,45 +60,51 @@
 proyecto GCP personal `essential-haiku-482815-u4`, y sumar las mejoras pedidas (categorías/programas/
 áreas editables, DAG de flujo, ficha de localidad, Ok Gobernador/Ok Ministro, Tablero nativo).
 
+> **Estado 2026-09-03**: migración-paridad + cutover + E1/E2/E5 + Tablero nativo **en producción**.
+> Detalle vivo en `TODO-migracion-svc-privada.md`. Falta: paridad numérica Tablero vs Looker →
+> decommission; E3/E4 dependen de la reunión de relevamiento.
+
 ### Migración-paridad (contrato `/api/v1/privada/**` intacto en todo momento)
 
-- [ ] **Fase 0** — ADR-008..016 + `spec-migracion-svc-privada.md` `approved`; reunión de
-      relevamiento; Anexos A–G. *(ADR y spec ya escritos 2026-08-31.)*
-- [ ] **Fase 1** — Scaffold `services/svc-privada/`; `db_privada` en `ministerio-postgres`; secreto
-      `svc-privada-db-url`; Alembic `0001` (schema `priv_*`); CI/CD; Cloud Run `/health`.
-- [ ] **Fase 2** — Endpoints a paridad: gestiones (CRUD + `PATCH` + eventos + `cambiar-estado` con
-      lock `updated_at`), catálogos, `localidades-info`, `departamentos-info` (nuevo), informe (4),
-      `rollup-territorial` (nuevo). Byte-compatible.
-- [ ] **Fase 3** — Auth: `svc-privada/app/auth.py` estándar + `GET /internal/portal/usuarios/{email}`
-      IAM-only en svc-vivienda; `"privada"` en `ROLES_VALIDOS`/`SECRETARIAS`/`AdminUsuariosPage`.
-- [ ] **Fase 4** — ETL `migrar_desde_bigquery.py` (12 tablas + verificación conteos/sumas + backfill
-      `fecha_finalizacion`). Idempotente.
-- [ ] **Fase 5** — Tests de contrato (viejo vs nuevo) + unitarios > 80%.
-- [ ] **Fase 6** — Deploy Cloud Run + `ministerio-config-v{YYYYMMDD}` (creada, no activada);
-      validación por URL directa; rollback ensayado.
-- [ ] **Cutover** — ventana: viejo sólo-lectura → ETL delta → `gateway update` → alta usuarios en
-      `portal_usuarios` → smoke desde el portal. Frontend `privada` v1: `updated_at`/`409`, quitar
-      `/usuarios/**` y `modulos`, permisos vía `usePortalUser`.
+- [x] **Fase 0** — ADR-008..016 + `spec-migracion-svc-privada.md` `approved` v1.0.0; Anexos A–H.
+      *(Reunión de relevamiento sigue pendiente — no bloqueó las Fases 0–6.)*
+- [x] **Fase 1** — Scaffold `services/svc-privada/`; `db_privada`; secreto; Alembic `0001`; Cloud Run.
+- [x] **Fase 2** — Endpoints a paridad (gestiones CRUD + PATCH + eventos + cambiar-estado, catálogos,
+      `localidades-info`, `departamentos-info`, informe ×4, `rollup-territorial`). Byte-compatible.
+- [x] **Fase 3** — Auth a `portal_usuarios` vía `GET /internal/portal/usuarios/{email}` (IAM-only).
+- [x] **Fase 4** — ETL `migrar_desde_bigquery.py` — corrida `--truncate` en prod (2123/1987/110/0).
+- [x] **Fase 5** — 73 tests svc-privada (incl. contrato vs `anexos/D/`).
+- [x] **Fase 6** — Deploy Cloud Run + `ministerio-config-v20260901`.
+- [x] **Cutover** (2026-09-01) — `gateway update` + alta de 17 usuarios en `portal_usuarios` + smoke
+      OK. Frontend `privada`: sin cambios de contrato + modal "Nueva gestión" (hueco de paridad) +
+      paridad total de la vista Gestiones (export Excel/PDF, columnas, sort, copiar, Derivado a /
+      Acciones / editar localidad en cambiar-estado).
 
-### Mejoras (specs hijos, post-cutover, aditivas)
+### Mejoras (specs hijos)
 
-- [ ] **E1** — `spec-privada-categorias-programas.md`: 3 catálogos editables + panel admin +
-      desplegables con "+ nueva opción" + `ok_gobernador`/`ok_ministro` + backfill.
-- [ ] **E2** — Campos de gestión (fusionable con E1): `derivado_a`/`acciones_implementadas` cableados
-      en el modal de cambiar-estado.
-- [ ] **E3** — `spec-privada-flujo-derivaciones.md`: `priv_gestion_derivaciones` + backfill + `/flujo`
-      + vista DAG en el drawer.
-- [ ] **E4** — `spec-privada-informe-cooperativas-v2.md`: reclasificación `tema_informe` sobre
-      `categoria_id` + doble corrida + sign-off.
-- [ ] **E5** — `spec-resumen-territorial-ficha-localidad.md`: federación server-side de Privada
-      (ADR-016) + ficha de localidad en Resumen Territorial.
-- [ ] **Tablero nativo** — `spec-privada-tablero.md`: reemplazo del iframe Looker. **Gate del
-      decommission** (apagar BigQuery).
+- [x] **E1** — 3 catálogos editables (`priv_categorias`/`priv_programas`/`priv_areas`, migración
+      `0002`), CRUD + panel de administración (`GestionarCatalogosModal`), desplegables con "＋ Cargar
+      nueva opción…", `ok_gobernador`/`ok_ministro`, columna + filtro "Campo de Trabajo",
+      `backfill_categorias.py` corrido (1946/2047). Spec `approved` v1.0.0.
+- [x] **E2** — `acciones_implementadas` persistida en `priv_gestiones`; `derivado_a`/`acciones`
+      cableados en `CambiarEstadoModal`.
+- [ ] **E3** — `spec-privada-flujo-derivaciones.md`: **bloqueado** — necesita la taxonomía de áreas
+      del relevamiento; `metadata_json.derivado_a` es null en los 166 eventos (sin datos de backfill).
+- [ ] **E4** — `spec-privada-informe-cooperativas-v2.md`: `categoria_id` ya poblado; falta el mapa
+      `categoria_id → tema_informe` + **sign-off del área** sobre la reclasificación (RE-1). Spec `draft`.
+- [x] **E5** — **E5b** ficha de localidad (drawer del Resumen Territorial, on-demand) + **E5a**
+      federación server-side de Privada (ADR-016, endpoint IAM-only `/internal/privada/rollup-territorial`).
+      Diferido: columnas de ficha en Excel/impresión del RT (necesita el bulk endpoint — hecho:
+      `/localidades-info/all`) → pendiente cablearlo.
+- [x] **Tablero nativo** — `TableroPage.tsx` sin iframe Looker (KPIs + donut por tema + barras por
+      depto + evolución + mapa, sobre `informe/cooperativas/**`). **Falta paridad numérica vs el
+      Looker** para un rango de control antes de apagar BigQuery.
 
 ### Decommission (post T+30d estable)
 
 - [ ] Backup frío de `infra_gestion` a GCS; apagar Cloud Run viejo; retirar GitHub Pages + informe
-      Looker; revocar OAuth client; actualizar `CLAUDE.md`/`arquitectura_actual.md`; suspender/borrar
+      Looker; revocar OAuth client + los grants temporales de BigQuery a `infraestructura.coop@gmail.com`;
+      actualizar `CLAUDE.md` raíz + `docs/files/CLAUDE.md` + `arquitectura_actual.md`; suspender/borrar
       `essential-haiku-482815-u4`.
 
 - **Entregable**: sistema de Privada 100% en el monorepo, proyecto GCP personal apagado.

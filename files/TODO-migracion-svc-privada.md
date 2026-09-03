@@ -285,7 +285,7 @@ decommission).
       selects Ok Gob/Min + filtros de lista. `panel.front` `92422d5`
 - [ ] **Deploy**: redeploy svc-privada + `alembic upgrade head` (0002) en prod + `backfill_categorias.py`
       (`--dry-run` → `--diff-informe` → aplicar) + nueva config de gateway + frontend
-- [x] Panel de administración (`GestionarCatalogosModal`, `panel.front` 8217318) — editar label/orden/colores/código/activo, borrar con guard 409, agregar. Falta: columna "Campo de Trabajo" en la tabla de la lista
+- [x] Panel de administración (`GestionarCatalogosModal`, `panel.front` 8217318) — editar label/orden/colores/código/activo, borrar con guard 409, agregar
       cubre el alta al vuelo; falta la UI de gestión completa
 - [ ] **Con Secretaría Privada**: revisar orden/colores de los catálogos + validar el mapa de backfill
       (`--diff-informe`) antes de que E4 retire el regex
