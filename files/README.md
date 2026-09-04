@@ -1,11 +1,11 @@
-# Sistema Integral de Gestión — Ministerio de Cooperativas y Mutuales
+# Sistema Integral de Gestión — Secretaría General de Gobierno
 
 ## Documentación
 
 | Archivo | Descripción |
 |---------|-------------|
 | `.claude/CLAUDE.md` | **Leer primero.** Contexto completo para Claude Code |
-| `docs/context/organigrama.md` | Estructura del ministerio y mapeo a servicios |
+| `docs/context/organigrama.md` | Estructura orgánica y mapeo a servicios |
 | `docs/context/arquitectura.md` | Decisiones técnicas y patrones |
 | `docs/context/roadmap.md` | Fases de implementación |
 

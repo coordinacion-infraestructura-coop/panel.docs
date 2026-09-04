@@ -18,8 +18,8 @@ Archivo a crear: `svc-gateway/openapi.yaml`
 ```yaml
 swagger: "2.0"
 info:
-  title: Sistema Ministerio de Cooperativas y Mutuales
-  description: API Gateway unificado para todos los subsistemas del ministerio
+  title: Sistema Secretaría General de Gobierno (ex Ministerio de Cooperativas y Mutuales)
+  description: API Gateway unificado para todos los subsistemas de la secretaría
   version: "1.0.0"
 host: api.ministerio-coop.gob.ar
 schemes:

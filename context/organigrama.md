@@ -1,9 +1,13 @@
-# Organigrama Ministerio de Cooperativas y Mutuales — Córdoba
+# Organigrama Secretaría General de Gobierno — Córdoba
+
+> Rebrand desde "Ministerio de Cooperativas y Mutuales" (ver ADR-018 en `docs/files/arquitectura.md`).
+> El resto de este documento (puertos, roles, servicios `svc-auth`/`svc-notificaciones`/`svc-documentos`)
+> es un boceto temprano de planificación — no refleja el estado actual implementado, ver root `CLAUDE.md`.
 
 ## Estructura jerárquica
 
 ```
-Ministerio de Cooperativas y Mutuales
+Secretaría General de Gobierno
 │
 ├── Secretaría de Vivienda
 │   └── Dirección de Vivienda

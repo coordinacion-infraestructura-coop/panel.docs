@@ -1,8 +1,8 @@
-# Sistema Integral de Gestión Ministerial — Contexto para Claude Code
+# Sistema Integral de Gestión — Secretaría General de Gobierno — Contexto para Claude Code
 
 ## Qué es este proyecto
 
-Sistema de gestión pública para el Ministerio de Cooperativas y Mutuales de la Provincia de Córdoba. Centraliza múltiples subsistemas independientes (uno por secretaría/dirección) bajo un portal unificado que permite al ministro y autoridades acceder a información consolidada de todas las áreas.
+Sistema de gestión pública de la Secretaría General de Gobierno de la Provincia de Córdoba (rebrand desde "Ministerio de Cooperativas y Mutuales" — ver ADR-018 en `arquitectura.md`). Centraliza múltiples subsistemas independientes (uno por secretaría/dirección) bajo un portal unificado que permite a las autoridades acceder a información consolidada de todas las áreas.
 
 ## Principio de desarrollo
 
