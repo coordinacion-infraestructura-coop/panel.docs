@@ -759,3 +759,13 @@ Resumen de la migración-paridad:
   sin cambio de estado: `ministerio_agencia_id, categoria_general_id, detalle, observaciones,
   urgencia, direccion, subtipo_detalle, organismo_id, costo_estimado, costo_moneda, tipo_gestion,
   canal_origen, departamento, localidad, updated_at` (todos opcionales; `updated_at` = lock).
+
+  > **Nota (2026-09-04, fuera del alcance migración-paridad de este spec, ver ADR-017)**:
+  > `PATCH /api/v1/privada/gestiones/{id}/detalle` es un endpoint *aparte* del de arriba —
+  > corrección manual del campo `detalle` desde el panel general (`GestionesListPage.tsx`) para
+  > errores de carga. A diferencia del PATCH genérico, no emite `ACTUALIZA_DATO` ni aparece en
+  > el timeline de "Movimientos": genera `tipo_evento=CORRECCION_DETALLE`, que
+  > `service.listar_eventos` excluye explícitamente de la respuesta (queda igual en
+  > `priv_gestiones_eventos` + `audit_log` para auditoría interna). Mismo lock optimista
+  > (`updated_at` + 409). No lo documenta este Anexo H porque no es paridad con el sistema
+  > viejo — el ADR-017 es la fuente de la verdad para este endpoint.

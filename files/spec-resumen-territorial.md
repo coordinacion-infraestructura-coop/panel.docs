@@ -1,17 +1,32 @@
 # Spec: Resumen Territorial — panel consolidado por localidad y departamento
 
 **Estado**: approved
-**Versión**: 0.2.0
+**Versión**: 0.3.0
 **Aprobado**: 2026-08-28 (Pedro Bonafe) — decisiones de arquitectura, alcance con Privada,
 enmascarado de comunicaciones, coordinación de gateway y número de migración confirmados.
 **Servicio**: `svc-vivienda` (módulo nuevo `app/resumen_territorial/`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-08-28
+**Última actualización**: 2026-09-04
 
 > **Cambio 0.2.0 (2026-08-28)**: la v1 incluye **también las gestiones de la Secretaría
 > Privada del Ministro**, no sólo los 3 programas de Vivienda. El panel debe mostrar *todos*
 > los programas/gestiones que tiene una localidad. Privada deja de ser Fase 2. Ver §2, §3.4,
 > §5.2, §6.3, §7, §12.
+
+> **Cambio 0.3.0 (2026-09-04)**: se reemplaza el export/impresión diseñado en §10 (Excel de una
+> hoja + `window.print()` sobre `.rt-print-doc`) por un **único export `.xlsx` multi-hoja**
+> (`exportarResumenXlsx` en `frontend/src/modules/resumen-territorial/exportResumen.ts`) que
+> además incorpora las gestiones y movimientos de Sec. Privada de las localidades filtradas — el
+> diseño original sólo volcaba el roll-up por localidad, sin detalle de casos (ver §2 "Fuera de
+> alcance"). Motivo (según el comentario del propio código removido, no re-verificado a fondo
+> acá): el export/impresión viejo armaba las columnas de demografía (`Habitantes`, `Electores`,
+> `Semáforo`, `Intendente`) con un join client-side de `fichaLocalidadApi.todas()` contra la
+> localidad — "join difuso de nombre" que salía con datos cruzados; si hace falta el detalle
+> exacto del bug, revisar el diff del commit `panel.front 245e9c9`. Se elimina la impresión (`Ctrl+P`,
+> `@media print`, botón "Imprimir") y el botón "PDF" — no se reintroducen; **se elimina también
+> el buscador de texto libre de los filtros** (motivo no documentado en el commit — si hace
+> falta, confirmar con quien aprobó el cambio antes de asumir que fue intencional). Ver §10 y
+> los criterios de aceptación al final.
 
 ---
 
@@ -22,8 +37,8 @@ sea la localidad (y opcionalmente el departamento), que muestre por localidad qu
 tiene, en qué `estado_general` está cada uno, qué ítems del checklist técnico faltan y cuál fue
 la última comunicación registrada. El mismo panel debe servir a todas las áreas con control de
 visibilidad: un usuario de Vivienda ve sólo lo de Vivienda por localidad, uno de Gasífera lo
-suyo, etc.; `Admin` y un rol nuevo `Autoridad` ven todo. Debe ser exportable a Excel e
-imprimible.
+suyo, etc.; `Admin` y un rol nuevo `Autoridad` ven todo. Debe ser exportable a Excel (desde
+0.3.0, sin impresión — ver §10).
 
 Se evaluaron alternativas de arquitectura (sesión 2026-08-28) y se aprobó un prototipo visual
 (artifact "Resumen Territorial", https://claude.ai/code/artifact/2d5d0c8b-a77f-4554-9da4-3d900a5a6078).
@@ -63,8 +78,7 @@ calculado en el backend, con una única regla de visibilidad por área.
   datos, para poder cambiar la fuente en Fase 2 (ver §13) sin tocar el frontend.
 - **Visibilidad por área**: el snapshot guarda TODO; el `GET` filtra las filas según el rol y
   las secretarías del usuario. Rol nuevo `Autoridad` (ve todo, como `Admin`).
-- **Export a Excel** (reusa `exportToXlsx`, ya existe) e **impresión** (vista `@media print`,
-  A4 vertical).
+- **Export a Excel** — ver §10 (v0.3.0: un `.xlsx` multi-hoja, sin impresión).
 - Módulo frontend nuevo **transversal**: carpeta `src/modules/resumen-territorial/`, ruta
   `/resumen-territorial`, entrada de navegación top-level (no bajo una secretaría).
 
@@ -81,7 +95,8 @@ calculado en el backend, con una única regla de visibilidad por área.
 - **Historial de `estado_general`**: no existe en base (`*_estado_historial` sólo registra las
   3 sub-dimensiones, nunca `estado_general` — gap conocido, CLAUDE.md). El panel muestra el
   estado vigente, sin "desde cuándo".
-- **PDF descargable** — se usa la impresión del navegador (Ctrl+P) sobre la vista `@media print`.
+- **PDF descargable / impresión** — desde 0.3.0 directamente no hay impresión de este panel (se
+  sacó del alcance, no quedó como Ctrl+P); ver §10.
 - **Descarga / recálculo desde el propio panel de un rol de sólo lectura de otra área** — el
   botón "Actualizar" queda para `ROLES_ESCRITURA` + `Autoridad`.
 - **Emisión de eventos Pub/Sub** — este módulo no publica eventos (igual que el resto de los
@@ -403,7 +418,39 @@ Planificación y Articulación Territorial).
   - `src/shared/hooks/usePortalUser.ts`: `'Autoridad'` en la unión `PortalUser['rol']`.
   - `src/modules/admin/pages/AdminUsuariosPage.tsx`: `Autoridad` en el `<select>` de roles.
 
-## 10. Impresión y export
+## 10. Export (v0.3.0 — reemplaza el diseño original de esta sección)
+
+> Diseño original (Excel de una hoja + impresión `@media print`) al final de esta sección,
+> como referencia histórica — ya no está implementado.
+
+- **Un único botón "⤓ Exportar Excel"** llama `exportarResumenXlsx(localidadesFiltradas, meta)`
+  (`frontend/src/modules/resumen-territorial/exportResumen.ts`), que arma y descarga un `.xlsx`
+  de 5 hojas con `exportSheetsToXlsx` (`src/shared/utils/exportTable.ts`) sobre las localidades
+  que cumplen los filtros en pantalla:
+  - **Resumen** — alcance, filtros aplicados, fecha de generación, totales por hoja, y un aviso
+    si se recortó el detalle de movimientos (ver tope abajo).
+  - **Programas** — una fila por (localidad, programa), Vivienda + Privada, con sub-estados
+    jurídico/técnico/financiero, checklist y última comunicación.
+  - **Checklists** — una fila por ítem faltante de cada checklist de Vivienda (CC/CH/ML).
+  - **Gestiones** — una fila por gestión de Sec. Privada de las localidades en scope, traída con
+    `GET /api/v1/privada/gestiones` paginado client-side.
+  - **Movimientos** — una fila por evento (`GET .../gestiones/{id}/eventos`) de esas gestiones.
+    Tope `MAX_GESTIONES_EVENTOS = 300` (con concurrencia 8) para no disparar cientos de requests
+    en un export sin filtrar — por encima del tope, la hoja Gestiones sale completa pero
+    Movimientos se corta y el aviso en la hoja Resumen lo indica.
+  - No incluye las columnas de demografía (`Habitantes`/`Electores`/`Semáforo`/`Intendente`) que
+    tenía el diseño original — ver nota en "Cambio 0.3.0" arriba sobre por qué se sacaron.
+- **Sin impresión ni PDF**: se elimina el botón "Imprimir", `window.print()`, el
+  `<div class="rt-print-doc">` y el bloque `@media print` de `src/index.css` (era el primer
+  `@media print` del proyecto — al día de hoy no queda ninguno). Se elimina también el botón
+  "PDF" (`jspdf`/`jspdf-autotable`) y **el buscador de texto libre** de la barra de filtros.
+- Si en el futuro hace falta un documento imprimible del Resumen Territorial en sí (distinto de
+  la "Ficha de municipio" de `spec-resumen-territorial-ficha-localidad.md`, que sí imprime),
+  es una decisión nueva — no asumir que el diseño de abajo se puede reactivar tal cual: el
+  `@media print` ya no existe en `index.css`.
+
+<details>
+<summary>Diseño original hasta 2026-09-04 (histórico, no implementado)</summary>
 
 - **Excel**: botón que arma una fila por (localidad × programa/gestión) y llama
   `exportToXlsx(rows, 'Resumen territorial', 'resumen_territorial_<fecha>.xlsx')`
@@ -418,6 +465,8 @@ Planificación y Articulación Territorial).
   `thead { display: table-header-group }`, `tr { break-inside: avoid }`,
   `@page { size: A4 portrait; margin: 14mm }`. Es el primer `@media print` del proyecto — no
   hay estilos de impresión previos que respetar.
+
+</details>
 
 ## 11. Infraestructura
 
@@ -468,10 +517,11 @@ Planificación y Articulación Territorial).
 - [ ] Usuario `invitado`: `403` en el `GET`; en el frontend la ruta redirige a `/`.
 - [ ] `Autoridad` es valor válido en `POST/PUT /api/v1/portal/admin/usuarios` y aparece en el
       `<select>` de `AdminUsuariosPage`.
-- [ ] Export a Excel: una fila por (localidad × programa) con las columnas de §10.
-- [ ] `Ctrl+P` sobre `/resumen-territorial` produce un documento A4 vertical con encabezado,
-      filtros aplicados y la tabla, sin el nav ni el header del `Layout`, con el `thead`
-      repetido por página.
+- [x] Export a Excel (0.3.0): el botón "⤓ Exportar Excel" descarga un `.xlsx` con las 5 hojas
+      de §10, filtrado por lo que está en pantalla. Verificado 2026-09-04 (build limpio;
+      pendiente prueba manual en browser).
+- [x] (0.3.0, reemplaza el ítem anterior de Ctrl+P) No hay impresión de este panel — el botón
+      "Imprimir", `.rt-print-doc` y el bloque `@media print` de `src/index.css` ya no existen.
 - [ ] `pytest` en `services/svc-vivienda/` verde, incluido `tests/test_resumen_territorial.py`
       (unitarios de `aggregations.py` + `filtrar_por_visibilidad` + un test de servicio con
       SQLite in-memory que siembra 1 CC + 1 CH + 1 ML y **mockea `_fetch_privada_lineas`**,
