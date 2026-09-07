@@ -113,6 +113,24 @@ Todos los fixes de esta sección son del **2026-07-23**, aplicados en la misma s
 12. **[Menor] `programas/router.py` sin `require_roles`** → los 3 endpoints (`listar_programas`, `get_programa`, `estadisticas_programa`) ahora usan `Depends(require_roles(*ROLES_LECTURA))` en vez de `Depends(get_current_user)` — un usuario con rol `invitado` (no registrado en `portal_usuarios`) ya no puede leer el catálogo. El test `test_lectura_requiere_autenticacion` (que documentaba el bug como comportamiento esperado) se renombró a `test_lectura_denegada_a_invitado` y ahora afirma el 403 correcto; se agregó `test_lectura_permitida_a_consulta` para no perder cobertura del camino positivo.
 13. **[Menor] `onEditExisting` no limpiaba `editError` en `CordobaHogarPage.tsx`** → agregado `setEditError(null)` (paridad con CC).
 
+### 2026-09-07 — `checklist_tecnico` (fuera del alcance de la auditoría 2026-07-23)
+
+14. **[Crítico] `checklist_tecnico`: 500 al editar un ítem o un hito — `resource_id` excede `VARCHAR(36)`.**
+    `actualizar_item` / `actualizar_hito` (`app/checklist_tecnico/service.py`) construían
+    `log_audit(resource_id=f"{checklist.id}:{item_num}:{sub_item_num}")` /
+    `f"{checklist.id}:{tipo}"` (38-45 chars). `viv_audit_log.resource_id` es `VARCHAR(36)`
+    (migración `0001`) → `StringDataRightTruncationError` → 500. En producción el API Gateway
+    no adjunta headers CORS a las respuestas 5xx, por lo que el síntoma visible en el browser
+    era "blocked by CORS policy". **Latente desde que se creó el módulo** (2026-08): la suite
+    corre en SQLite (no enforcea el largo de `VARCHAR`) y `conftest.py` mockea `log_audit` en
+    todos los services. El `PATCH` de estado del expediente no fallaba porque usa
+    `resource_id=checklist.id` (36 chars), igual que el resto de los `log_audit` del repo.
+    **Fix**: `resource_id=checklist.id`; el detalle (`item_num`/`sub_item_num`/`tipo`) pasó a
+    `payload`. Cubierto por `test_audit_resource_id_cabe_en_varchar36` (nuevo, afirma
+    `len(resource_id) <= 36` para ítem, sub-ítem y hito).
+    - Cleanup sugerido (no aplicado): ensanchar `viv_audit_log.resource_id` a `VARCHAR(120)`
+      o `TEXT` para admitir claves compuestas sin este cuidado manual en cada caller.
+
 ### Tests nuevos agregados junto con estos fixes
 - `test_reordenar_estado_recomputa_estado_general_de_municipios` / `..._localidades` (CC y CH)
 - `test_crear_municipio` / `test_crear_municipio_duplicado_devuelve_409` (antes no existía NINGÚN test de creación para CC)
