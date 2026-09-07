@@ -131,6 +131,27 @@ Todos los fixes de esta sección son del **2026-07-23**, aplicados en la misma s
     - Cleanup sugerido (no aplicado): ensanchar `viv_audit_log.resource_id` a `VARCHAR(120)`
       o `TEXT` para admitir claves compuestas sin este cuidado manual en cada caller.
 
+15. **[Medio] `checklist_tecnico`: las 54 localidades de Cordón Cuneta sembradas por la
+    migración `0022` quedaron sin filas en `viv_checklist_obra_hitos`.**
+    `0022` insertó la fila de `viv_checklist_tecnico` directamente (sin pasar por
+    `service._get_or_create_checklist`), y la creación de hitos vivía solo en la rama de
+    "fila nueva" de esa función → un `GET` posterior encontraba la fila y salía sin crear los
+    hitos. `0024` backfilleó `ch`/`ml` pero asumió (comentario incluido) que `cc` ya los
+    tenía. Síntoma: la tarjeta "Ejecución de obra" del panel renderiza el encabezado pero
+    `hitos: []` → sin las 4 casillas Anticipo/40/70/100. **Fix**: `_ensure_hitos()`
+    idempotente, llamada también para filas preexistentes (self-heal en el próximo `GET`);
+    migración `0025` hace el backfill inmediato de los hitos faltantes en los 3 programas.
+    Test `test_hitos_self_heal_en_fila_preexistente`.
+
+16. **[Menor] `ChecklistTecnicoPage.tsx`: scroll horizontal de toda la página en el panel.**
+    El grid `lg:grid-cols-[1.55fr_1fr]` sin `min-w-0` en las columnas: los tracks
+    `minmax(auto, 1fr)` adoptan el `min-content` de su contenido (stepper de 9 pasos con
+    `min-w-max`, `<select>` de repartición con opciones largas) y la suma excede el ancho del
+    contenedor → la columna derecha se desborda ~550px. **Fix**: `min-w-0` en las dos
+    columnas y en el wrapper `overflow-x-auto` del stepper (para que scrollee adentro en vez
+    de empujar). Verificado con Claude-in-Chrome sobre producción (`documentElement.scrollWidth`
+    1566 vs viewport 1012 → tras el fix, iguales).
+
 ### Tests nuevos agregados junto con estos fixes
 - `test_reordenar_estado_recomputa_estado_general_de_municipios` / `..._localidades` (CC y CH)
 - `test_crear_municipio` / `test_crear_municipio_duplicado_devuelve_409` (antes no existía NINGÚN test de creación para CC)
