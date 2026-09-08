@@ -152,6 +152,46 @@ Todos los fixes de esta sección son del **2026-07-23**, aplicados en la misma s
     de empujar). Verificado con Claude-in-Chrome sobre producción (`documentElement.scrollWidth`
     1566 vs viewport 1012 → tras el fix, iguales).
 
+### 2026-09-08 — `checklist_tecnico` frontend (ronda 2, junto con spec v1.3.0)
+
+Auditoría dirigida de `ChecklistTecnicoPage.tsx` + `AdminCatalogosChecklistPage.tsx` (subagente).
+Fixes aplicados en el mismo commit que la bitácora de observaciones de obra:
+
+17. **[Medio] Autosave escribía la respuesta en la key de caché equivocada al cambiar de
+    programa/localidad mientras el `PATCH` viajaba.** `onMutationSuccess` cerraba sobre
+    `checklistKey` (recalculada por render) y TanStack invoca el último closure → el panel
+    nuevo mostraba los datos del anterior. **Fix**: `qc.setQueryData(['checklist-tecnico',
+    data.programa, data.entidad_id], data)` (identidad propia del payload); el flash "✓ Guardado"
+    solo si sigue siendo la entidad visible.
+18. **[Medio] `ChecklistCard`: un único `openDisclosure` abría el "Detalle técnico" de TODOS
+    los ítems con sub-ítems a la vez.** (Hoy no se dispara porque cada programa tiene 1 solo,
+    pero es frágil.) **Fix**: estado por `item_num` (`Record<number, boolean>`).
+19. **[Medio-bajo] `AdminCatalogosChecklistPage`: las 3 tablas no tenían `onError`** → un
+    toggle/rename fallido revertía en silencio. **Fix**: banner de error compartido en la
+    página + `onError` en cada mutación.
+20. **[Bajo] El `<select>` de repartición perdía el valor guardado** si un Admin re-scopeaba
+    esa repartición a otro programa (no había `<option>` que matchee → se veía "Sin radicar").
+    **Fix**: incluir siempre `r.id === checklist.reparticion_id` en el filtro + control custom
+    que muestra la etiqueta elegida aunque no esté en la lista.
+21. **[Bajo] `todayISO()` devolvía la fecha UTC** → las observaciones cargadas de tarde en AR
+    (UTC-3) quedaban con fecha del día siguiente. **Fix**: fecha calendario local.
+22. **[Bajo] Inputs de label del admin (`defaultValue` no controlado + `key` estable)** no
+    reflejaban una corrección del server (trim/normalización/edición concurrente). **Fix**:
+    `key={\`${id}:${label}\`}` → remonta al cambiar la etiqueta canónica.
+23. **[Bajo] El `<select>` de "Estado del expediente" listaba estados inactivos**
+    (`StatusPill` de ítems sí filtra — inconsistente). **Fix**: filtrar a
+    `activo || id === actual`.
+24. **[Bajo] Alta de fila de catálogo usaba `array.length` como `orden`** → colisiona si el
+    seed tiene huecos (y el `orden` define el paso del stepper). **Fix**: `max(orden) + 1`.
+25. **[Bajo / spec] `canEdit = rol !== 'Consulta'`** dejaba a `Autoridad` (rol de lectura
+    cross-área) con los campos habilitados (el backend igual 403ea). **Fix**: allow-list
+    `['Admin','Supervisor','Operador','TecnicoDGV']`.
+26. **[Menor] El desplegable de estado de un ítem quedaba tapado por la tarjeta "Ejecución de
+    obra"** (recortado por `overflow-hidden` de la tarjeta + orden de pintado). **Fix**: menú
+    en `position:fixed` anclado al botón, se abre hacia arriba si no hay lugar abajo.
+    Pendiente/no aplicado: `TecnicoDGV` sigue viendo el link "Resumen Territorial" en
+    `Layout.tsx`/`DashboardPage.tsx` — revisar contra spec §8 en una ronda aparte.
+
 ### Tests nuevos agregados junto con estos fixes
 - `test_reordenar_estado_recomputa_estado_general_de_municipios` / `..._localidades` (CC y CH)
 - `test_crear_municipio` / `test_crear_municipio_duplicado_devuelve_409` (antes no existía NINGÚN test de creación para CC)

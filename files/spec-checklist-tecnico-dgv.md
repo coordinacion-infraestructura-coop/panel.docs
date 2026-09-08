@@ -1,12 +1,28 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
 **Estado**: approved
-**Versión**: 1.2.0
+**Versión**: 1.3.0
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
-**Última actualización**: 2026-09-07
+**Última actualización**: 2026-09-08
 
 ### Changelog
+- **1.3.0 (2026-09-08)** — Ajustes de UX pedidos por el área tras probar la v1.2.0.
+  Migración `0026`.
+  1. **"Observaciones de obra" pasa de campo único a bitácora fechada** (`viv_checklist_obra_obs`,
+     misma forma que `viv_*_pedidos`): una entrada por fecha, con el usuario que la cargó, y
+     **botón "Guardar" explícito** — se acepta el botón aunque el patrón general del módulo sea
+     autosave (pedido directo del área). Endpoints `GET|POST /checklist-tecnico/{programa}/{entidad_id}/obs-obra`.
+     El campo `viv_checklist_tecnico.obs_obra` se elimina (su valor se migra a una entrada).
+  2. **Ambas bitácoras registran y muestran el usuario** que hizo cada observación
+     (`created_by` / `created_by_nombre`). La sección lateral se renombra a
+     **"Observaciones del expediente"**; la de abajo queda como **"Observaciones de obra"**.
+  3. Fixes de UI (auditoría, sin cambio de contrato): el desplegable de estado de un ítem ya no
+     lo tapa la tarjeta siguiente (menú en `position:fixed`, se abre hacia arriba si no hay
+     lugar); el `<select>` de repartición pasa a control custom que muestra la opción elegida
+     completa (con salto de línea); `min-w-0` en el grid; `todayISO()` usa fecha local (no UTC);
+     el disclosure "Detalle técnico" es por ítem; `Autoridad` no ve los campos habilitados; los
+     catálogos admin muestran errores y no colisionan el `orden`.
 - **1.2.0 (2026-09-07)** — Correcciones enviadas por el área técnica de la DGV
   (`docs/context/areas/secretaria_Vivienda/obervaciones AREA TECNICA.pdf` +
   `DGV Programas 2026.xlsx` solapa `Validaciones` filas 403-418). Migración `0024`.
@@ -175,16 +191,29 @@ entidad_id            VARCHAR(36) NOT NULL   -- id en viv_cordon_cuneta / viv_co
 estado_expediente_id  BIGINT NULL REFERENCES viv_checklist_estado_expediente(id)
 fecha_radicacion      DATE NULL
 reparticion_id        BIGINT NULL REFERENCES viv_checklist_reparticion(id)
-obs_obra             TEXT NULL              -- v1.2.0 — observaciones de la etapa de obra (columna AT del Excel)
 created_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 updated_by            VARCHAR(200) NULL
 
 UNIQUE (programa, entidad_id)
 ```
-`obs_obra` es un único campo de texto por localidad, distinto de las observaciones del
-expediente (bitácora en `viv_*_pedidos`) — "son 2 etapas diferentes" (área técnica).
 `entidad_id` no lleva FK real de Postgres (apunta a 3 tablas distintas según `programa` — mismo patrón polimórfico que ya usa `viv_ml_proyectos.tipo`). `service.py` valida que la entidad exista en la tabla correspondiente antes de escribir.
+El campo `obs_obra` de la v1.2.0 fue **reemplazado en v1.3.0** por la bitácora §5.3-bis.
+
+### 5.3-bis `viv_checklist_obra_obs` — bitácora de observaciones de obra (v1.3.0)
+```
+id                UUID PK
+checklist_id      UUID NOT NULL REFERENCES viv_checklist_tecnico(id) ON DELETE CASCADE
+descripcion       TEXT NOT NULL
+fecha             DATE NOT NULL
+created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+created_by        VARCHAR(200) NULL   -- email del actor
+created_by_nombre VARCHAR(255) NULL
+```
+Misma forma que `viv_*_pedidos` (observaciones del expediente). Distinta de esas —
+"son 2 etapas diferentes" (área técnica). Se lista más nueva primero (`fecha DESC, created_at DESC`).
+La migración `0026` crea la tabla, migra el valor de `obs_obra` (si lo había) a una entrada y
+elimina la columna.
 
 ### 5.4 `viv_checklist_items`
 ```
@@ -237,12 +266,14 @@ Base: `/api/v1/vivienda/checklist-tecnico`
 ```
 GET    /catalogos                                    # estado_expediente + reparticion + items_estado (v1.2.0) + definición de ítems por programa (§4)
 GET    /entidades                                     # [{programa, id, nombre, departamento}] de CC+CH+ML no borradas — para el selector (v1.1.0)
-GET    /{programa}/{entidad_id}                       # checklist + items + hitos (v1.2.0: hitos para los 3 programas) + obs_obra; crea la fila padre on-the-fly
-PATCH  /{programa}/{entidad_id}                        # body: estado_expediente_id? / fecha_radicacion? / reparticion_id? / obs_obra? (v1.2.0)
+GET    /{programa}/{entidad_id}                       # checklist + items + hitos (v1.2.0: hitos para los 3 programas); crea la fila padre on-the-fly
+PATCH  /{programa}/{entidad_id}                        # body: estado_expediente_id? / fecha_radicacion? / reparticion_id?
 PATCH  /{programa}/{entidad_id}/items/{item_num}        # body: item_estado_id (v1.2.0), sub_item_num?
 PATCH  /{programa}/{entidad_id}/hitos/{tipo}            # body: fecha_acreditado — v1.2.0: los 3 programas
-GET    /{programa}/{entidad_id}/pedidos                 # observaciones DEL EXPEDIENTE de la entidad (v1.1.0) — distintas de obs_obra
+GET    /{programa}/{entidad_id}/pedidos                 # observaciones DEL EXPEDIENTE de la entidad (v1.1.0)
 POST   /{programa}/{entidad_id}/pedidos                 # body: descripcion, fecha_pedido (v1.1.0)
+GET    /{programa}/{entidad_id}/obs-obra                # observaciones DE OBRA — bitácora fechada con usuario (v1.3.0)
+POST   /{programa}/{entidad_id}/obs-obra                # body: descripcion, fecha (v1.3.0)
 
 GET    /admin/estado-expediente                         # catálogo completo (incluye inactivos)
 POST   /admin/estado-expediente
