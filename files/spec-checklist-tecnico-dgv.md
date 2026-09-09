@@ -1,12 +1,24 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
 **Estado**: approved
-**Versión**: 1.3.0
+**Versión**: 1.4.0
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
-**Última actualización**: 2026-09-08
+**Última actualización**: 2026-09-09
 
 ### Changelog
+- **1.4.0 (2026-09-09)** — El stepper de "Estado del expediente" ponía ✓ a TODOS los estados
+  anteriores al actual, aunque el expediente nunca hubiera estado en ellos. `RECHAZADO por M/C`
+  y `SIN AUTORIZACION MIN.GOB` **no son parte obligatoria del camino** — algunos expedientes
+  pasan por ahí, otros no. Migración `0027`.
+  1. **`viv_checklist_estado_expediente.en_ruta`** (BOOLEAN, default `true`): `false` = estado
+     de excepción. Editable por Admin. Seed: `false` en los 2 de arriba.
+  2. **`viv_checklist_estado_hist`**: registra cada cambio de estado del expediente. Backfill
+     desde `viv_audit_log` + el estado actual. `GET .../{programa}/{entidad_id}` devuelve
+     `estados_visitados: int[]` (estados por los que pasó de verdad).
+  3. **Frontend**: los estados `en_ruta=false` se muestran **sueltos, a la izquierda del camino
+     numerado, sin conectores**, y se marcan ✓ **solo si `estados_visitados` los incluye** (o si
+     es el estado actual). El camino regular (7 pasos) mantiene el ✓ por posición (es lineal).
 - **1.3.0 (2026-09-08)** — Ajustes de UX pedidos por el área tras probar la v1.2.0.
   Migración `0026`.
   1. **"Observaciones de obra" pasa de campo único a bitácora fechada** (`viv_checklist_obra_obs`,
@@ -169,9 +181,23 @@ id       BIGINT PK
 label    VARCHAR(100) NOT NULL
 orden    INTEGER NOT NULL
 activo   BOOLEAN NOT NULL DEFAULT true
+en_ruta  BOOLEAN NOT NULL DEFAULT true   -- v1.4.0 — false = estado de excepción, fuera del camino lineal
 ```
 Seed: los valores de §3, en orden (9 desde v1.2.0; la migración `0024` reetiqueta los 7
-originales in place e inserta 2).
+originales in place e inserta 2). `en_ruta=false` en `RECHAZADO por M/C` y
+`SIN AUTORIZACION MIN.GOB` (v1.4.0, migración `0027`).
+
+### 5.1-bis `viv_checklist_estado_hist` — historial de estado del expediente (v1.4.0)
+```
+id                   UUID PK
+checklist_id         UUID NOT NULL REFERENCES viv_checklist_tecnico(id) ON DELETE CASCADE
+estado_expediente_id BIGINT NOT NULL REFERENCES viv_checklist_estado_expediente(id)
+created_at           TIMESTAMPTZ NOT NULL DEFAULT now()
+created_by           VARCHAR(200) NULL
+```
+Se escribe solo cuando **cambia** el estado del expediente (no en cada PATCH). Permite saber si
+un expediente transitó un estado de excepción. `GET .../{programa}/{entidad_id}` agrega
+`estados_visitados: int[]` (ids distintos, más el actual). Backfill inicial desde `viv_audit_log`.
 
 ### 5.2 `viv_checklist_reparticion` — catálogo administrable
 ```

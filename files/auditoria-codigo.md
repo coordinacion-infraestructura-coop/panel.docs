@@ -192,6 +192,16 @@ Fixes aplicados en el mismo commit que la bitácora de observaciones de obra:
     Pendiente/no aplicado: `TecnicoDGV` sigue viendo el link "Resumen Territorial" en
     `Layout.tsx`/`DashboardPage.tsx` — revisar contra spec §8 en una ronda aparte.
 
+27. **[Medio] El stepper de "Estado del expediente" ponía ✓ a todos los estados anteriores al
+    actual**, aunque el expediente nunca hubiera pasado por ellos — engañoso para
+    `RECHAZADO por M/C` y `SIN AUTORIZACION MIN.GOB`, que son de excepción (no todos los
+    expedientes los transitan). **Fix (spec v1.4.0, migración `0027`)**: flag
+    `viv_checklist_estado_expediente.en_ruta` (los 2 de excepción en `false`); tabla
+    `viv_checklist_estado_hist` que registra cada cambio de estado (+ backfill desde
+    `viv_audit_log`); `GET` devuelve `estados_visitados`. El frontend muestra los estados de
+    excepción sueltos a la izquierda, sin conectores, con ✓ solo si `estados_visitados` los
+    incluye. El camino regular (7 pasos, lineal) mantiene el ✓ por posición.
+
 ### Tests nuevos agregados junto con estos fixes
 - `test_reordenar_estado_recomputa_estado_general_de_municipios` / `..._localidades` (CC y CH)
 - `test_crear_municipio` / `test_crear_municipio_duplicado_devuelve_409` (antes no existía NINGÚN test de creación para CC)
