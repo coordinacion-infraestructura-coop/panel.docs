@@ -1,9 +1,9 @@
 # Spec: Resumen Territorial — Ficha de localidad + federación server-side de Privada
 
-**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · Excel/print de la ficha diferido
-**Versión**: 0.2.0
+**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · exportables del RT rediseñados 2026-09-03
+**Versión**: 0.3.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-09-01
+**Última actualización**: 2026-09-03
 
 > **Implementado 2026-09-01 (E5b, drawer)** — `panel.front`:
 > `src/modules/resumen-territorial/api/fichaLocalidad.api.ts` + componente `FichaDemografica`
@@ -25,6 +25,35 @@
 >   gestión). PDF A4 con membrete (escudo re-teñido a navy), franja de KPIs, chips de estado,
 >   gestiones bloque (≤6) / tabla (>6). `avance` es estimación por posición del estado en el
 >   catálogo — validar con el área si hay fórmula oficial.
+>
+> **Rediseño de exportables del RT — 2026-09-03** (`panel.front`):
+> - **Búsqueda libre separada de los filtros.** El `<input type="search">` (localidad/departamento)
+>   pasó a una barra propia con ícono arriba de la toolbar; abajo, la fila de filtros ahora rotulada
+>   "Filtros". Orden nuevo: KPIs → búsqueda → toolbar (unidad + alcance + exportar) → filtros → tabla.
+> - **Se eliminaron los botones "⤓ Excel", "⤓ PDF" y "⎙ Imprimir"** y el documento oculto
+>   `.rt-print-doc` + su bloque `@media print` en `src/index.css` (era el primer `@media print` del
+>   proyecto; ya no hay ninguno). Los tres compartían `fichaCols()`, que cruzaba el snapshot con
+>   `priv_localidades_info` por `norm(departamento)|norm(localidad)`: como los dos lados traen el
+>   departamento de fuentes distintas (padrón geo vs. Excel de Privada) y `norm` no reconcilia
+>   abreviaturas, el `Map` colisionaba y muchas filas salían con la demografía de otra localidad
+>   (el usuario reportó "siempre carga Villa Sarmiento"). **La demografía por localidad se sirve
+>   ahora sólo desde la "Ficha de municipio", que la trae exacta para un municipio.**
+> - **Único exportable nuevo: "⤓ Exportar Excel"** (`exportResumen.ts`, helper
+>   `exportSheetsToXlsx` en `shared/utils/exportTable.ts`). `.xlsx` multi-hoja con los municipios
+>   que cumplen los filtros aplicados: **Resumen** (alcance, filtros, totales, fecha) · **Programas**
+>   (fila por localidad×programa: estado, sub-estados, checklist, monto, expediente, últ. com.) ·
+>   **Checklists** (fila por ítem faltante de cada checklist de vivienda) · **Gestiones** (fila por
+>   gestión de Sec. Privada de esas localidades, con Ok Gob/Min y nº de movimientos) ·
+>   **Movimientos** (fila por evento de esas gestiones — el "trackeo por gestión" pedido).
+>   Federación client-side con el token del usuario: 1 barrido paginado de `GET /gestiones/` +
+>   `GET /gestiones/{id}/eventos` con concurrencia 8, tope de 300 gestiones para el detalle de
+>   movimientos (por encima, aviso en pantalla y en la hoja Resumen). El match gestión↔localidad
+>   es por `norm(depto)|norm(localidad)` — puede omitir gestiones cuyo texto libre no normaliza
+>   igual que el padrón geo; falla "seguro" (fila de menos, nunca cruzada).
+> - **`fichaLocalidadApi.todas()` y `GET /api/v1/privada/localidades-info/all`** quedan sin uso en
+>   el front (los consumía el export viejo). El endpoint backend se conserva por si vuelve a hacer
+>   falta un bulk.
+> - **Sin tocar**: botón "Ficha (Excel)" / `fichaMunicipioXlsx` (rework en un paso siguiente).
 **Servicio**: `svc-vivienda` (módulo `app/resumen_territorial/`) + frontend
 `src/modules/resumen-territorial/`
 **Depende de**: `spec-migracion-svc-privada.md` Fase 2 (endpoints `rollup-territorial` y
@@ -115,8 +144,11 @@ de las líneas de Privada pasa del browser al servidor.
       demografía = padrón público).
 - [x] Una caída de `svc-privada` (o fila vacía) no rompe el drawer — degrada a mensaje y el resto
       de la ficha (programas) sigue funcionando.
-- [ ] Excel y vista de impresión incluyen las columnas de la ficha → **diferido** (necesita endpoint
-      bulk o el embebido de E5a; ver nota de cabecera).
+- [~] Excel y vista de impresión incluyen las columnas de la ficha → **descartado 2026-09-03**: el
+      join snapshot↔`priv_localidades_info` por nombre normalizado cruzaba datos entre localidades
+      ("siempre carga Villa Sarmiento"). La demografía por localidad la da ahora sólo la "Ficha de
+      municipio" (exacta, un municipio); los exportables masivos del RT se unificaron en un único
+      "⤓ Exportar Excel" multi-hoja sin demografía (ver nota de cabecera, 2026-09-03).
 
 **E5a — federación server-side (ADR-016)** — **código listo, pendiente de deploy** (`panel.backend`
 `2f48a55`, `panel.front` `6791757`):
