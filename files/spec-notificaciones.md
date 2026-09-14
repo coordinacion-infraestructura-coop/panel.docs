@@ -1,9 +1,9 @@
 # Spec: Panel de notificaciones internas
 
-**Estado**: approved (backend + frontend + gateway implementados 2026-09-10; pendiente de deploy)
+**Estado**: implementado y en producción (2026-09-14)
 **Versión**: 0.1.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-09-10
+**Última actualización**: 2026-09-14
 **Servicio**: `svc-vivienda` (módulo nuevo `app/notificaciones/`, sin servicio nuevo) + frontend `src/modules/notificaciones/`
 **Depende de**: ADR-007 (módulo transversal en svc-vivienda) · `spec-resumen-territorial.md` §3.4 (mismo criterio de ubicación)
 **ADRs**: ADR-019 (panel de notificaciones internas)
@@ -183,7 +183,10 @@ Router `app/notificaciones/router.py`, tupla local
 - [x] `invitado` → 403 en todos los `/api/v1/notificaciones/*`.
 - [x] Frontend: `npm run build` pasa; la campana muestra el badge y decrementa al marcar leída; el
       toggle "solo no leídas" filtra.
-- [ ] Deploy: config nueva del gateway activa + `curl` a `/api/v1/notificaciones` por el gateway
-      devuelve el feed; `OPTIONS` responde CORS.
+- [x] Deploy 2026-09-14: migración `0028` aplicada en prod (proxy vía Cloud Shell), redeploy de
+      `svc-vivienda`, config nueva del gateway activa. Verificado sin token: los 4 paths de
+      `/api/v1/notificaciones/**` devuelven `401` (existen y exigen auth) — un path inexistente da
+      `404` limpio, así que están bien ruteados. Falta la verificación autenticada end-to-end
+      (campana + panel en el navegador) para cerrar del todo el criterio.
 - [x] `pytest tests/test_notificaciones.py` en verde (12 casos) + suite completa sin regresiones
       (272 en verde).

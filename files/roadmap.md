@@ -145,10 +145,11 @@ Prerequisito: marcar `docs/files/spec-svc-vivienda.md` como `approved`.
 ### Transversales post-vivienda
 
 - [x] **Resumen Territorial** — panel consolidado por localidad/departamento (spec `spec-resumen-territorial.md`).
-- [~] **Panel de notificaciones internas** — módulo transversal `app/notificaciones/` en svc-vivienda +
+- [x] **Panel de notificaciones internas** — módulo transversal `app/notificaciones/` en svc-vivienda +
   `src/modules/notificaciones/` + campana en la barra (spec `spec-notificaciones.md`, ADR-019).
-  Implementado 2026-09-10 (feed global + lectura por usuario + endpoint interno de alta + 2 filas
-  sembradas); **pendiente de deploy** y de la lógica que lo alimenta automáticamente (paso siguiente).
+  En producción desde 2026-09-14 (feed global + lectura por usuario + endpoint interno de alta + 2
+  filas sembradas). **Pendiente**: la lógica que lo alimenta automáticamente (paso siguiente —
+  quién dispara cada tipo de alerta y con qué contenido).
 
 ---
 
