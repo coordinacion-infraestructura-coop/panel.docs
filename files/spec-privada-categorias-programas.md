@@ -187,11 +187,37 @@ los programas de Vivienda (ADR-011) y un reporte de "programa sin categoría / h
 - [ ] Audit log en cada escritura de catálogo (`resource_type` `priv_categoria`/`priv_programa`/`priv_area`).
 - [ ] Gateway: nuevos paths `/categorias`/`/programas`/`/areas` + `options:` CORS; nueva config.
 
-## Anexo A — Mapa de compatibilidad `categoria_general_id` → categoría nueva (a completar)
+## Anexo A — Mapa de compatibilidad `categoria_general_id` → categoría nueva
 
-| `categoria_general_id` legacy | Categoría nueva sugerida |
+**Completado 2026-09-14** con los datos reales del catálogo legacy (`B_cat_categoria_general.json`,
+generado con `scripts/generar_anexos.sh`). Es una transcripción de `_LEGACY_A_CAT` en
+`scripts/backfill_categorias.py` — **ya corre en prod** como fallback del backfill (cuando
+`tema_informe(...)` no matchea nada); este Anexo documenta lo que el código ya decide, no introduce
+un mapeo nuevo. `CAT_OTROS` (catch-all, "incluye `SIN_DEFINIR` y valores no mapeados") queda
+deliberadamente sin mapear — el backfill lo deja `categoria_id = NULL` para que el área lo
+complete a mano desde el panel.
+
+| `categoria_general_id` legacy | Categoría nueva (Campo de Trabajo) |
 |---|---|
-| `CAT_INFRAESTRUCTURA_VIAL` (+ regex cordón/adoquín) | Cordón Cuneta y adoquinado |
+| `CAT_GESTION_MUNICIPAL_INSTITUCIONAL` | Pedidos Administrativos |
 | `CAT_AGUA_Y_SANEAMIENTO` | Obras de Recursos Hídricos |
+| `CAT_INFRAESTRUCTURA_VIAL` | Cordón Cuneta y adoquinado |
+| `CAT_OBRAS_PUBLICAS` | Otras Obras |
+| `CAT_OBRA_ELECTRICA_ENERGIA` | Otras Obras |
+| `CAT_OBRA_DE_GAS` | Otras Obras |
+| `CAT_EDUCACION` | Ayudas a instituciones |
+| `CAT_SALUD` | Ayudas a instituciones |
+| `CAT_DESARROLLO_SOCIAL` | Ayudas a instituciones |
 | `CAT_AYUDA_A_INSTITUCIONES` | Ayudas a instituciones |
-| … (resto) | … a definir con el área |
+| `CAT_COOPERATIVAS_Y_MUTUALES` | Ayudas a instituciones |
+| `CAT_CULTURA_EVENTOS` | Otras Obras |
+| `CAT_DEPORTES` | Otras Obras |
+| `CAT_OTROS` (catch-all) | — (sin mapear; `categoria_id` queda `NULL`) |
+
+Nota: el backfill real (`categoria_para()`) prioriza `tema_informe(categoria_general_id, detalle,
+ministerio_agencia_id)` — que también usa regex sobre `detalle` — y sólo cae a esta tabla cuando
+`tema_informe` no matchea nada. Por eso, p. ej., una gestión `CAT_INFRAESTRUCTURA_VIAL` puede
+terminar en "Vivienda" o "Loteos" en vez de "Cordón Cuneta y adoquinado" si el `detalle` matchea esa
+regex primero (reglas 6-7 de `app/informe/clasificacion.py`, "cualquier categoría"). Esta tabla es el
+mapeo **de respaldo**, no el único criterio — ver `spec-privada-informe-cooperativas-v2.md` para el
+análisis de esta interacción de cara al informe (E4).
