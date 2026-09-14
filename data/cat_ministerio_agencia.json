@@ -1,0 +1,133 @@
+[{
+  "id": "MIN_AMBIENTE",
+  "nombre": "Ministerio de Ambiente",
+  "activo": "true",
+  "orden": "60",
+  "descripcion": null
+}, {
+  "id": "AG_CBA_INNOVACION",
+  "nombre": "Agencia Córdoba Innovación",
+  "activo": "true",
+  "orden": "140",
+  "descripcion": null
+}, {
+  "id": "MIN_ECONOMIA",
+  "nombre": "Ministerio de Economía",
+  "activo": "true",
+  "orden": "90",
+  "descripcion": null
+}, {
+  "id": "MIN_DESARROLLO_HUMANO",
+  "nombre": "Ministerio de Desarrollo Humano",
+  "activo": "true",
+  "orden": "110",
+  "descripcion": null
+}, {
+  "id": "MIN_PRODUCCION",
+  "nombre": "Ministerio de Producción",
+  "activo": "true",
+  "orden": "80",
+  "descripcion": null
+}, {
+  "id": "MIN_DESARROLLO_SOCIAL",
+  "nombre": "Ministerio de Desarrollo Social",
+  "activo": "true",
+  "orden": "30",
+  "descripcion": null
+}, {
+  "id": "MIN_INFRAESTRUCTURA_SERVICIOS_PUBLICOS",
+  "nombre": "Ministerio de Infraestructura y Servicios Públicos",
+  "activo": "true",
+  "orden": "70",
+  "descripcion": null
+}, {
+  "id": "AG_CONECTIVIDAD_CBA",
+  "nombre": "Agencia de Conectividad Córdoba",
+  "activo": "true",
+  "orden": "160",
+  "descripcion": null
+}, {
+  "id": "MIN_JUSTICIA_TRABAJO",
+  "nombre": "Ministerio de Justicia y Trabajo",
+  "activo": "true",
+  "orden": "100",
+  "descripcion": null
+}, {
+  "id": "SEC_GRAL_GOBERNACION",
+  "nombre": "Secretaría General de la Gobernación",
+  "activo": "true",
+  "orden": "200",
+  "descripcion": null
+}, {
+  "id": "OTROS",
+  "nombre": "Otros / No especificado",
+  "activo": "true",
+  "orden": "999",
+  "descripcion": null
+}, {
+  "id": "AG_PROCBA",
+  "nombre": "Agencia ProCBA",
+  "activo": "true",
+  "orden": "190",
+  "descripcion": null
+}, {
+  "id": "AG_CBA_TURISMO",
+  "nombre": "Agencia Córdoba Turismo",
+  "activo": "true",
+  "orden": "170",
+  "descripcion": null
+}, {
+  "id": "AG_CBA_DEPORTES",
+  "nombre": "Agencia Córdoba Deportes",
+  "activo": "true",
+  "orden": "130",
+  "descripcion": null
+}, {
+  "id": "MIN_COOPERATIVAS_MUTUALES",
+  "nombre": "Ministerio de Cooperativas y Mutuales",
+  "activo": "true",
+  "orden": "120",
+  "descripcion": null
+}, {
+  "id": "LEGISLATURA",
+  "nombre": "Legislatura",
+  "activo": "true",
+  "orden": "210",
+  "descripcion": null
+}, {
+  "id": "MIN_SEGURIDAD",
+  "nombre": "Ministerio de Seguridad",
+  "activo": "true",
+  "orden": "50",
+  "descripcion": null
+}, {
+  "id": "AG_CBA_CULTURA",
+  "nombre": "Agencia Córdoba Cultura",
+  "activo": "true",
+  "orden": "150",
+  "descripcion": null
+}, {
+  "id": "MIN_EDUCACION",
+  "nombre": "Ministerio de Educación",
+  "activo": "true",
+  "orden": "40",
+  "descripcion": null
+}, {
+  "id": "MIN_GOBIERNO",
+  "nombre": "Ministerio de Gobierno",
+  "activo": "true",
+  "orden": "10",
+  "descripcion": null
+}, {
+  "id": "AG_CBA_JOVEN",
+  "nombre": "Agencia Córdoba Joven",
+  "activo": "true",
+  "orden": "180",
+  "descripcion": null
+}, {
+  "id": "MIN_SALUD",
+  "nombre": "Ministerio de Salud",
+  "activo": "true",
+  "orden": "20",
+  "descripcion": null
+}]

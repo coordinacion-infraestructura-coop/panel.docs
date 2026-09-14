@@ -99,6 +99,15 @@ proyecto GCP personal `essential-haiku-482815-u4`, y sumar las mejoras pedidas (
 - [x] **Tablero nativo** — `TableroPage.tsx` sin iframe Looker (KPIs + donut por tema + barras por
       depto + evolución + mapa, sobre `informe/cooperativas/**`). **Falta paridad numérica vs el
       Looker** para un rango de control antes de apagar BigQuery.
+- [x] **Vinculación DGV → Privada** (2026-09-14, ADR-020) — al crear/editar un caso en Cordón
+      Cuneta, Córdoba Hogar o Mi Lugar, `svc-vivienda` crea o vincula/sincroniza una gestión en
+      `svc-privada` vía `POST /internal/privada/gestiones/sync` (IAM-only, idempotente por
+      `id_legacy`). Genera alertas en el panel de notificaciones (ADR-019) cuando corrige campos
+      de una gestión ya vinculada o cuando el match queda ambiguo. Backend implementado,
+      testeado y activado en prod (migración `0029` en svc-vivienda;
+      `ministerio_agencia_id="MIN_GOBIERNO"` confirmado contra el catálogo real;
+      `PRIVADA_SYNC_GESTIONES_ENABLED=true` vía `cloudbuild.yaml`). Spec
+      `spec-vinculacion-vivienda-privada.md`.
 
 ### Decommission (post T+30d estable)
 

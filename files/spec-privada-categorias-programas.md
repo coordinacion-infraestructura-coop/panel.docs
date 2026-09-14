@@ -167,7 +167,10 @@ los programas de Vivienda (ADR-011) y un reporte de "programa sin categoría / h
 ## 7. Decisiones abiertas (para el área / relevamiento)
 
 - `orden` y colores de las 9 categorías; sugerencia inicial de programa/área por categoría
-  (opcional, no obligatoria) — **Anexo A**.
+  (opcional, no obligatoria) — **Anexo A**. La única instancia concreta de esta sugerencia
+  implementada hasta ahora no es la tabla general que se dejó abierta acá, sino un mapeo
+  puntual y hardcodeado (`caso_tipo` de Vivienda → categoría/programa/área), como parte de
+  `docs/files/spec-vinculacion-vivienda-privada.md` (ADR-020).
 - Semántica de `Ok Gobernador`/`Ok Ministro`: default = tri-estado `SI/NO/PENDIENTE`, seteable por
   Admin+Supervisor, independientes, en filtros. Confirmar.
 - ¿`priv_programas.codigo` obligatorio o sólo para los que correlacionan con Vivienda?
