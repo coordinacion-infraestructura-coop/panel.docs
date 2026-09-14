@@ -150,9 +150,12 @@ mismo servicio (`svc-vivienda`), `privada_sync.py` llama a
 `notificaciones_service.crear(...)` **en proceso** (import directo, misma
 sesión de DB) en vez de un loopback HTTP contra su propio endpoint interno.
 
-Se generan dos tipos de alerta, ambos con `destino_tipo="secretaria"`,
-`destino_valor="privada"` (para que el área de Privada vea que Vivienda tocó su
-gestión, o que hay un caso sin poder vincularse):
+Se generan tres tipos de alerta, todas con `destino_tipo="secretaria"`,
+`destino_valor="privada"` (para que el área de Privada vea que Vivienda creó o
+tocó una gestión, o que hay un caso sin poder vincularse):
+- **Gestión nueva creada** (`LINKED_NEW`) — nivel `info`. Agregada 2026-09-14
+  tras el primer test end-to-end en prod, a pedido del usuario (el diseño
+  original sólo cubría corrección/revisión pendiente).
 - **Corrección de campos** (`LINKED_EXISTING` con diff no vacío) — nivel
   `info`, detalla qué campos cambiaron.
 - **Pendiente de revisión manual** (`PENDING_REVIEW`) — nivel `advertencia`.
@@ -309,7 +312,8 @@ paneles DGV mantienen su protección actual (`ROLES_ESCRITURA`).
 
 - [x] Crear un caso CC con expediente que no matchea ninguna gestión existente
       → se crea una gestión nueva con `categoria_id=1756700000003`,
-      `programa_id=1756700001003`, `area_id=1756700002001`, `id_legacy` seteado.
+      `programa_id=1756700001003`, `area_id=1756700002001`, `id_legacy` seteado,
+      y se notifica (`LINKED_NEW`, `destino_valor="privada"`).
 - [x] Crear/editar un caso con expediente que matchea una gestión existente sin
       `id_legacy` → se vincula, se sincronizan los 7 campos derivados, queda un
       diff persistido y una notificación con `destino_valor="privada"`.
