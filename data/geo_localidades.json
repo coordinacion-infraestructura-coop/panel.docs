@@ -2967,11 +2967,11 @@
   "lon_centro": "-62.718800475",
   "activo": "true"
 }, {
-  "id_geo": "489",
+  "id_geo": "291",
   "departamento": "SAN JUSTO",
-  "localidad": "LUXARDO",
-  "lat_centro": "-31.304857978",
-  "lon_centro": "-62.133513867",
+  "localidad": "PLAZA LUXARDO",
+  "lat_centro": "-31.301752498",
+  "lon_centro": "-62.229167307",
   "activo": "true"
 }, {
   "id_geo": "296",
