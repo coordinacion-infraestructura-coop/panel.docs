@@ -2764,13 +2764,6 @@
   "lon_centro": "-62.004443798",
   "activo": "true"
 }, {
-  "id_geo": "488",
-  "departamento": "SAN JUSTO",
-  "localidad": "PLAZA SAN FRANCISCO",
-  "lat_centro": "-31.370707615",
-  "lon_centro": "-62.097644781",
-  "activo": "true"
-}, {
   "id_geo": "486",
   "departamento": "SAN JUSTO",
   "localidad": "PLAZA GENERAL DEHEZA",
