@@ -3855,4 +3855,53 @@
   "lat_centro": "-32.630330189",
   "lon_centro": "-62.481967049",
   "activo": "true"
+}, {
+  "id_geo": "561",
+  "departamento": "SAN JUSTO",
+  "localidad": "Brinkmann",
+  "lat_centro": "-30.866944",
+  "lon_centro": "-62.033611",
+  "activo": "true"
+}, {
+  "id_geo": "562",
+  "departamento": "TERCERO ARRIBA",
+  "localidad": "James Craik",
+  "lat_centro": "-32.161389",
+  "lon_centro": "-63.467778",
+  "activo": "true"
+}, {
+  "id_geo": "563",
+  "departamento": "SANTA MARÍA",
+  "localidad": "Bouwer",
+  "lat_centro": "-31.558333",
+  "lon_centro": "-64.192222",
+  "activo": "true"
+}, {
+  "id_geo": "564",
+  "departamento": "TULUMBA",
+  "localidad": "Lucio Victorio Mansilla",
+  "lat_centro": "-29.807222",
+  "lon_centro": "-64.712778",
+  "activo": "true"
+}, {
+  "id_geo": "565",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "Capitán General Bernardo O'Higgins",
+  "lat_centro": "-33.2485",
+  "lon_centro": "-62.2692",
+  "activo": "true"
+}, {
+  "id_geo": "566",
+  "departamento": "RÍO PRIMERO",
+  "localidad": "Kilómetro 658",
+  "lat_centro": "-31.37",
+  "lon_centro": "-63.529722",
+  "activo": "true"
+}, {
+  "id_geo": "567",
+  "departamento": "MARCOS JUAREZ",
+  "localidad": "Colonia Barge",
+  "lat_centro": "-33.255833",
+  "lon_centro": "-62.604167",
+  "activo": "true"
 }]
