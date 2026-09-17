@@ -867,13 +867,6 @@
   "lon_centro": "-64.668553794",
   "activo": "true"
 }, {
-  "id_geo": "415",
-  "departamento": "ISCHILÍN",
-  "localidad": "VILLA QUILINO",
-  "lat_centro": "-30.209655002",
-  "lon_centro": "-64.477209653",
-  "activo": "true"
-}, {
   "id_geo": "78",
   "departamento": "ISCHILÍN",
   "localidad": "CAÑADA DE RIO PINTO (la Verde)",
@@ -928,13 +921,6 @@
   "localidad": "CERRO NEGRO",
   "lat_centro": "-30.654654246",
   "lon_centro": "-64.356168297",
-  "activo": "true"
-}, {
-  "id_geo": "79",
-  "departamento": "ISCHILÍN",
-  "localidad": "CHUÑ‘A",
-  "lat_centro": "-30.468725251",
-  "lon_centro": "-64.671232811",
   "activo": "true"
 }, {
   "id_geo": "413",
@@ -2414,13 +2400,6 @@
   "lon_centro": "-63.683682209",
   "activo": "true"
 }, {
-  "id_geo": "471",
-  "departamento": "RÍO SEGUNDO",
-  "localidad": "PLAZA COLAZO",
-  "lat_centro": "-31.944609954",
-  "lon_centro": "-63.367052719",
-  "activo": "true"
-}, {
   "id_geo": "230",
   "departamento": "RÍO SEGUNDO",
   "localidad": "LAGUNA LARGA",
@@ -2869,13 +2848,6 @@
   "lon_centro": "-62.302628086",
   "activo": "true"
 }, {
-  "id_geo": "291",
-  "departamento": "SAN JUSTO",
-  "localidad": "PLAZA LUXARDO",
-  "lat_centro": "-31.301752498",
-  "lon_centro": "-62.229167307",
-  "activo": "true"
-}, {
   "id_geo": "273",
   "departamento": "SAN JUSTO",
   "localidad": "COLONIA PROSPERIDAD",
@@ -2923,13 +2895,6 @@
   "localidad": "JERONIMO CORTES",
   "lat_centro": "-30.985177364",
   "lon_centro": "-62.542985287",
-  "activo": "true"
-}, {
-  "id_geo": "484",
-  "departamento": "SAN JUSTO",
-  "localidad": "VILLA DEL TRANSITO",
-  "lat_centro": "-31.450525994",
-  "lon_centro": "-63.193975526",
   "activo": "true"
 }, {
   "id_geo": "266",
@@ -3581,13 +3546,6 @@
   "localidad": "EL TALITA (Villa Gutierrez)",
   "lat_centro": "-30.677906593",
   "lon_centro": "-64.161782523",
-  "activo": "true"
-}, {
-  "id_geo": "351",
-  "departamento": "TULUMBA",
-  "localidad": "V. ROSARIO DEL SALADILLO",
-  "lat_centro": "-30.431487468",
-  "lon_centro": "-63.473785514",
   "activo": "true"
 }, {
   "id_geo": "349",
