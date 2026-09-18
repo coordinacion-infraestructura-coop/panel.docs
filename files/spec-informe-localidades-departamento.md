@@ -1,11 +1,12 @@
 # Spec: Informe "Localidades por Departamento" (Cordón Cuneta / Córdoba Hogar / Habitantes)
 
-**Estado**: ✅ approved
-**Versión**: 1.0.0
+**Estado**: ✅ approved — implementado, ver §10 para el cierre del caso de completitud
+de `Cant. Habitantes`
+**Versión**: 1.1.0
 **Servicios**: `svc-vivienda` (módulo nuevo `app/informe_localidades/`), `svc-privada`
 (endpoint interno nuevo en `app/internal/router.py`, sin servicio nuevo en ninguno de los
 dos)
-**Última actualización**: 2026-09-16
+**Última actualización**: 2026-09-17
 
 ---
 
@@ -151,3 +152,61 @@ Nuevo módulo `app/informe_localidades/` (un módulo por recurso, convención de
   (`:8001`/`:8002`), `npm run dev`, click en el botón desde `/vivienda/programas`,
   verificar el `.xlsx` descargado contra los datos cargados en las tres bases.
 - `npm run build` sin errores de tipos.
+
+## 10. Cierre del caso — completitud de `Cant. Habitantes` (2026-09-16/17)
+
+En el primer uso real del informe, `priv_localidades_info` tenía huecos de `habitantes`
+para varias localidades — se hizo un trabajo de backfill y limpieza de datos que terminó
+tocando, además de `priv_localidades_info`, el propio padrón geográfico
+(`geo_localidades.json`/`viv_geo_localidades`/`priv_geo_localidades`) y el matching del
+informe. Se documenta acá el resultado final para no repetir la investigación.
+
+### 10.1 Backfill con el Censo Nacional 2022
+
+`services/svc-privada/scripts/cargar_habitantes_censo2022.py` (RE-1, re-ejecutable) cruza
+`docs/data/c2022_cordoba_gobierno_local_c1 (5).xlsx` (Cuadro 1.6 INDEC — población por
+"gobierno local", no trae departamento) contra `priv_geo_localidades` por nombre
+normalizado con alias de paréntesis/guion. De los 427 gobiernos locales del censo, el
+matching automático resolvía 390 solo; los 37 restantes (10 ambiguos por nombre duplicado
+en 2 departamentos + 27 "sin match") se resolvieron a mano — ver el docstring del script
+para el detalle caso por caso. Conclusión relevante: **ninguna de las 13 candidatas
+originales a "localidad nueva" resultó serlo** — las 13 ya existían en el padrón bajo un
+typo viejo, abreviatura, nombre histórico o alias, detectado recién con
+`services/svc-privada/scripts/buscar_habitantes_faltantes.py` (diagnóstico de similitud de
+texto). De paso se corrigieron 2 errores reales preexistentes del padrón (departamento
+incorrecto de Monte Cristo — COLÓN → RÍO PRIMERO, confirmado por fuente externa y por las
+coordenadas ya cargadas) y se borraron **20 filas duplicadas** de `geo_localidades.json`
+que representaban el mismo lugar dos veces con grafías distintas (ej. "PLAZA COLAZO" /
+"COLAZO", "LUXARDO" / "PLAZA LUXARDO", "SAN FRANCISCO" / "PLAZA SAN FRANCISCO").
+
+### 10.2 Matching con alias también en el informe (no sólo en la carga)
+
+El match de habitantes en `app/informe_localidades/service.py` usaba comparación exacta
+por nombre normalizado — insuficiente para las localidades con alias entre paréntesis/guion
+del propio `viv_geo_localidades`. Se agregó `candidatos_localidad()` a
+`app/geo/matching.py` (misma lógica de alias que el script de carga) y se la usa en ambos
+lados del match (geo ↔ `priv_localidades_info`). Esto solo mejora el match de
+**habitantes** — CC/CH siguen con comparación exacta, sin cambios.
+
+### 10.3 Resultado final y límite real de la fuente
+
+Tras el backfill + la limpieza de duplicados + el matching con alias: de **544 localidades
+activas**, **~110 quedan sin dato de población**, y esto **no es un problema de datos
+faltantes por completar** sino un límite estructural de cómo Argentina mide población:
+
+- El Censo 2022 (Cuadro 1.6, INDEC) solo publica población a nivel **gobierno local**
+  (municipio/comuna), no por cada localidad/paraje nombrado dentro de su jurisdicción.
+- Se investigó exhaustivamente buscando una fuente más granular: no existe una tabla INDEC
+  "por localidad" (todas las tablas temáticas del Censo 2022 llegan como máximo a
+  departamento, salvo el propio Cuadro 1.6); un archivo histórico propio con **radios
+  censales** (`P14Rad.xlsx`, la unidad geográfica más chica que mide el INDEC) solo tiene
+  población hasta el **Censo 2010**, y aun así ninguno de estos ~110 nombres aparece como
+  categoría propia — su población queda disuelta dentro del radio de la localidad vecina
+  más grande. El catálogo de "Parajes" del INDEC/Mapa Educativo (carpeta `parajes/` del
+  archivo histórico) confirma independientemente que estos lugares están clasificados como
+  "Paraje", no como unidad con población propia.
+- Conclusión: **no hay ninguna fuente oficial, actual ni histórica, que permita completar
+  estos ~110 sin inventar el dato.** Quedan correctamente en `null` — no es una tarea
+  pendiente, es el piso real de la fuente. Si en el futuro se necesita este dato, la única
+  vía sería una fuente no-oficial por localidad (ej. relevamiento propio o de cada
+  municipio/comuna), no un backfill automatizable.
