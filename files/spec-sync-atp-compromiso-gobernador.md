@@ -224,18 +224,44 @@ requerir un cambio de configuración cada pocos meses.
 
 ## 9. Criterios de aceptación (esta entrega)
 
-- [ ] Servicio `svc-gralgob` nuevo, scaffold completo (`pyproject.toml`,
+- [x] Servicio `svc-gralgob` nuevo, scaffold completo (`pyproject.toml`,
       `app/`, `alembic/`, `tests/`, `docker-compose.dev.yml`, `Dockerfile`,
       `README.md`).
-- [ ] Migración `0001` crea las 3 tablas nuevas.
-- [ ] `pytest` en verde sobre SQLite in-memory, sin requerir Postgres.
-- [ ] `POST /internal/sync/atp-compromiso-gobernador` no usa
+- [x] Migración `0001` crea las 3 tablas nuevas.
+- [x] `pytest` en verde sobre SQLite in-memory, sin requerir Postgres (14/14).
+- [x] `POST /internal/sync/atp-compromiso-gobernador` no usa
       `Depends(get_current_user)`; no se declara en `openapi.yaml`.
-- [ ] Corridas repetidas no duplican filas (UPSERT verificado en tests).
-- [ ] Una fila con error real de DB no frena el resto del batch ni impide el
+- [x] Corridas repetidas no duplican filas (UPSERT verificado en tests **y**
+      en producción — ver corrida real más abajo).
+- [x] Una fila con error real de DB no frena el resto del batch ni impide el
       log final (test de regresión con `IntegrityError` forzado).
-- [ ] Deploy real a Cloud Run — fuera de esta entrega, sesión aparte vía
-      `/deploy-servicio` (mismo criterio que `svc-gasifera`).
+- [x] Migración `0001` verificada contra Postgres real: local (Docker,
+      `docker-compose.dev.yml`, `upgrade head` / `downgrade base` / `upgrade
+      head` limpios, constraints y `ON DELETE CASCADE` verificados con `\d`)
+      **y contra `db_gralgob` en Cloud SQL real** (vía `cloud-sql-proxy`
+      local con `--gcloud-auth`, sin tocar el ADC compartido de la máquina
+      que otra sesión usa para `svc-gasifera`).
+- [x] Deploy real a Cloud Run (2026-09-21, `gcloud run deploy --source .`,
+      revisión `svc-gralgob-00001-b7r`, 100% tráfico, servicio en
+      `https://svc-gralgob-276787280674.southamerica-east1.run.app`,
+      `--no-allow-unauthenticated` — verificado: sin token da 403, con
+      identity token da 200). Infra creada en esta sesión: SA
+      `svc-gralgob@gestorcooperativo.iam.gserviceaccount.com` (roles
+      `cloudsql.client`, `secretmanager.secretAccessor`, `pubsub.publisher`
+      — mismo set que `svc-gasifera`), `db_gralgob` + `user_gralgob` en
+      `ministerio-postgres`, secret `svc-gralgob-db-url`.
+- [x] **Corrida real contra el Sheet en vivo** (2026-09-21, vía el endpoint
+      recién desplegado): 1104 filas leídas, 1104 insertadas, 0 errores. El
+      Sheet ya estaba accesible para la identidad de runtime de Cloud Run sin
+      pasos adicionales de compartición. Segunda corrida inmediata para
+      verificar idempotencia: 0 insertadas, 1104 actualizadas, 0 errores —
+      sin duplicados.
+- [ ] Cloud Scheduler — no configurado todavía. Sin eso, nadie tiene
+      `roles/run.invoker` sobre el servicio (mismo estado pendiente que
+      `svc-gasifera`, ver `spec-sync-gasifera-pit.md §11`) — el sync no corre
+      solo en producción hasta que se configure.
+- [ ] `infra/gateway/openapi.yaml` — no aplica en esta fase (endpoint
+      IAM-only, sin exposición pública).
 
 ## 10. Pendiente / preguntas abiertas para la reunión con el área
 
