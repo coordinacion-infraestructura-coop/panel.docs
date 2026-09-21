@@ -380,11 +380,32 @@ lookup de auth); `api-gateway-sa@` necesita `roles/run.invoker` sobre
 - [x] Frontend: `src/modules/gralgob/` (API client + `AtpPage.tsx`),
       activación en `DashboardPage.tsx`/`Layout.tsx`/`App.tsx`/
       `AdminUsuariosPage.tsx`. `npm run build` verde.
-- [ ] Redeploy de `svc-gralgob` con el código nuevo.
-- [ ] IAM: los 2 `run.invoker` otorgados (requiere ejecución paso a paso,
-      mismo criterio que el resto de los grants IAM de esta sesión).
-- [ ] Gateway actualizado con los 2 paths nuevos, nueva config activa.
-- [ ] Frontend deployado a producción.
-- [ ] Verificación end-to-end en navegador: login, ver panel ATP, conteos
-      coinciden con la corrida de sync real (1104 compromisos), 403 para un
-      usuario sin la secretaría `gralgob` asignada.
+- [x] Redeploy de `svc-gralgob` con el código nuevo (2026-09-21, revisión
+      `svc-gralgob-00002-2f4`, 100% tráfico, `SVC_VIVIENDA_INTERNAL_URL`
+      agregado a las env vars).
+- [x] IAM: los 2 `run.invoker` otorgados — `svc-gralgob@` sobre `svc-vivienda`
+      (lookup de auth) y `api-gateway-sa@` sobre `svc-gralgob` (ruteo del
+      gateway).
+- [x] Gateway actualizado con los 2 paths nuevos, config
+      `ministerio-config-v20260921b` activa. **Nota de proceso**: la config se
+      generó a propósito **sin** los paths de `svc-gasifera` (también
+      pendientes de deploy, trabajados en otra sesión en paralelo) — se
+      excluyeron de una copia temporal del `openapi.yaml` usada solo para
+      generar esta config puntual, sin tocar el archivo real del repo ni
+      avanzar el deploy de Gasífera sin permiso. Verificado:
+      `GET /api/v1/gralgob/compromisos` sin token → `401 Jwt is missing` (no
+      404 — confirma que el path está bien enrutado), vía
+      `https://ministerio-gateway-3j5k00ma.uc.gateway.dev`.
+- [x] Frontend deployado a producción (Firebase Hosting,
+      `https://gestorcooperativo.web.app`). **Nota de proceso**: el build de
+      producción se generó con los cambios de Gasífera apartados
+      temporalmente (`git stash`) para no desplegar ese trabajo en curso sin
+      permiso — verificado con `grep` sobre el bundle que no incluía
+      `GasiferaPitPage`/`gasifera/pit` antes del deploy, y los cambios de
+      Gasífera se restauraron (sin commitear) inmediatamente después.
+- [ ] Verificación end-to-end en navegador con un usuario real: falta que un
+      Admin le asigne la secretaría `gralgob` a un usuario de prueba desde
+      `AdminUsuariosPage` y confirme visualmente el panel — no se hizo desde
+      esta sesión para no usar la cuenta de test compartida de
+      `agentes_test/` contra producción (esa cuenta es solo para QA contra
+      backend local, ver `CLAUDE.md` raíz).
