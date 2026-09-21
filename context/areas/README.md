@@ -26,6 +26,7 @@ Deploy + UAT con operador del área
 | `Privada Ministro/` | Secretaría Privada del Ministro | ✅ hecha | ✅ sistema productivo existente |
 | `secretaria_Vivienda/` | Secretaría de Vivienda | ✅ hecha | ✅ svc-vivienda implementado |
 | `secretaria_Gasifera/` | Secretaría de Infraestructura Gasífera | ⏳ pendiente | ⏳ pendiente |
+| `secretaria_Gral_Gobierno/` | Secretaría General de Gobierno (programa ATP) | ⏳ pendiente | ⏳ sync Fase 0 en desarrollo (svc-gralgob) — no estaba en el plan original, agregado 2026-09-21 |
 | `secretaria_Infraestructura/` | Sec. de Gestión y Vinculación de Infraestructura (Luis Molinari) | ⏳ pendiente | ⏳ pendiente |
 | `secretaria_Territorial/` | Sec. de Planificación y Articulación Territorial (Gabriel Fizza) | ⏳ pendiente | ⏳ pendiente |
 | `secretaria_Desarrollo/` | Secretaría de Desarrollo (Domingo Benso) — requiere contrato API UTN | ⏳ pendiente | ⏳ pendiente |

@@ -176,10 +176,11 @@ Para cada área, el ciclo es:
 
 | Área | Titular | Spec actual | Prioridad |
 |------|---------|-------------|-----------|
-| Infraestructura Gasífera | — | draft | 2 |
+| Infraestructura Gasífera | — | `spec-sync-gasifera-pit.md` approved (Fase 0 sync desplegada 2026-09-21); `spec-svc-gasifera.md` draft | 2 |
 | Infraestructura Eléctrica/Agua | Luis Molinari | draft | 3 |
 | Territorial | Gabriel Fizza | draft | 4 |
 | Desarrollo (UTN) | Domingo Benso | draft — pendiente contrato UTN | 5 |
+| General de Gobierno (ATP) | — | `spec-sync-atp-compromiso-gobernador.md` approved (Fase 0 sync en desarrollo); `spec-svc-gralgob.md` draft | **no estaba en este plan** — agregado 2026-09-21 a pedido del usuario, mismo patrón que Gasifera |
 
 ---
 
