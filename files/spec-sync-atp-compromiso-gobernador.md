@@ -1,14 +1,20 @@
 # Spec: Sincronización Google Sheet "ATP - Compromiso Gobernador" → `svc-gralgob` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.0.0
-**Servicio**: `svc-gralgob` (nuevo — solo el módulo de sync en esta entrega, sin panel de negocio)
+**Versión**: 1.1.0
+**Servicio**: `svc-gralgob` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
 **Última actualización**: 2026-09-21
 
 ---
 
 ## Changelog
 
+- **1.1.0** (2026-09-21): agrega §12 — panel de visualización de solo lectura
+  (2 endpoints públicos + página frontend) sobre los datos ya sincronizados.
+  **Excepción explícita y documentada** a la regla de `CLAUDE.md` ("no agregar
+  `/api/v1/gralgob/**` sin `spec-svc-gralgob.md` `approved`") — mismo carve-out
+  ya usado para `svc-gasifera` (`spec-sync-gasifera-pit.md §12`), extendido acá
+  con el mismo sign-off explícito del usuario. Ver §12 para el detalle.
 - **1.0.0** (2026-09-21): aprobado con el alcance descrito (espejo de solo
   lectura de la hoja `BD` únicamente, sin reglas de negocio nuevas, sin
   pantallas — ver §0/§2). Aprobación puntual de este spec angosto, **no**
@@ -289,3 +295,96 @@ para el detalle completo. Las más relevantes para este sync en particular:
 5. Alcance real del archivo: ¿"ATP - Compromiso Gobernador" es solo `BD`, o
    el sistema debería terminar cubriendo también `Estado de exp` y/o los
    otros programas de fondos del mismo libro?
+
+## 12. Panel de visualización de solo lectura (agregado 2026-09-21, v1.1.0)
+
+### 12.1 Por qué esto es una excepción documentada, no una violación silenciosa
+
+`CLAUDE.md` (raíz) tiene la regla: *"Don't add `/api/v1/gralgob/**` ... endpoints
+without that domain spec [`spec-svc-gralgob.md`] going `approved` first."* — y,
+tras el carve-out de Gasífera, una nota explícita: *"Don't extend that carve-out
+to writes, other resources, or `svc-gralgob` without the same explicit
+sign-off."* Antes de implementar, se le señaló el conflicto al usuario
+(siguiendo el hard rule de Spec Driven Development), explicando en qué consiste
+el mismo camino ya recorrido para `svc-gasifera` (`spec-sync-gasifera-pit.md
+§12`). El usuario, con conocimiento del conflicto, **pidió explícitamente
+seguir ese mismo camino** ("sigamos ese mismo camino 'preliminar de solo
+lectura'"). Mismo criterio de acotamiento que ya usa este spec para el sync en
+sí (§0): endpoints de **solo lectura**, sobre datos que **ya están
+sincronizados** (`atp_*`, ya cubiertos por este spec `approved`), **sin
+interpretar ninguna regla de negocio nueva**. No autoriza ningún endpoint de
+escritura, catálogo administrable, ni nada que dependa de las preguntas
+todavía abiertas del §10.
+
+### 12.2 Alcance
+
+**Incluido**: 2 endpoints GET públicos (vía API Gateway, con auth JWT estándar)
+que leen `atp_compromisos` tal cual está, más una página frontend que los
+muestra. La única cifra que no viene 1:1 del Sheet es `total_pagado` — un
+`SUM(atp_cronograma_pagos.monto)` agrupado por compromiso, no una regla de
+negocio nueva (mismo criterio que el `SUM` de KPIs del Tablero PIT Gas). Sin
+filtros de negocio nuevos más allá de los de UI (departamento/localidad/
+ministerio destino, client-side).
+
+**Fuera de alcance**: cualquier escritura, el panel de negocio completo
+(`spec-svc-gralgob.md`, sigue `draft`), el detalle del cronograma de pago mes
+a mes (`atp_cronograma_pagos` se usa solo para el agregado `total_pagado`, no
+se expone fila por fila en esta versión — se puede agregar después si se pide,
+mismo criterio de iterar sobre lo mínimo que ya se usó con Gasífera),
+resolución de localidad/departamento contra un catálogo canónico (se muestra
+el texto crudo del Sheet), gráficos/mapas (primera versión solo KPI strip +
+tabla filtrable, igual que terminó el Tablero PIT Gas).
+
+### 12.3 Auth (nuevo — Fase 0 no tenía ningún endpoint público)
+
+`app/auth.py` nuevo, calcado de `services/svc-gasifera/app/auth.py` (ADR-015)
+— `svc-gralgob` **no se conecta a `db_vivienda`**, resuelve rol + secretarías
+llamando a `GET {SVC_VIVIENDA_INTERNAL_URL}/internal/portal/usuarios/{email}`
+con un ID token (audience = esa URL), degradando a rol `invitado` ante
+cualquier falla (nunca 500). Roles: `ROLES_LECTURA = ("Admin","Supervisor",
+"Operador","Consulta")` + pertenencia a la secretaría `"gralgob"` — agregada a
+`SECRETARIAS_VALIDAS` en `services/svc-vivienda/app/portal/schemas.py` (no
+estaba, a diferencia de `"gasifera"` que ya estaba presente) y a la lista de
+checkboxes de `AdminUsuariosPage.tsx`. Sin roles acotados nuevos tipo
+`TecnicoDGV`/`Autoridad`.
+
+### 12.4 Endpoints
+
+```
+GET /api/v1/gralgob/compromisos?limit=1200&offset=0
+GET /api/v1/gralgob/sync-estado
+```
+Router nuevo `app/atp/router.py`, montado con prefijo `/api/v1/gralgob` en
+`main.py`. Los 2 requieren `Depends(get_current_user)` + rol de lectura +
+secretaría `gralgob`. `sync-estado` envuelve `atp_sync.get_last_sync_status`
+(mismo dato que el endpoint interno de sync, expuesto de forma pública y de
+solo lectura para mostrar "Sincronizado hace X" en el panel).
+
+### 12.5 Gateway e IAM (deploy real, pasos separados — ver criterios de aceptación)
+
+Se agregan a `infra/gateway/openapi.yaml` (patrón idéntico a
+`/api/v1/gasifera/**`) + nueva config de gateway. Dos grants IAM nuevos:
+`svc-gralgob@` necesita `roles/run.invoker` sobre `svc-vivienda` (para el
+lookup de auth); `api-gateway-sa@` necesita `roles/run.invoker` sobre
+`svc-gralgob` (para poder enrutarle tráfico).
+
+### 12.6 Criterios de aceptación
+
+- [x] `app/auth.py` + tests (mock de `get_current_user` vía
+      `dependency_overrides`, casos Consulta/sin-secretaría/invitado/sin-token
+      — 22/22 tests en verde incluyendo los 8 nuevos de `test_atp_router.py`).
+- [x] `app/atp/router.py` con los 2 endpoints + `response_model`.
+- [x] `"gralgob"` agregado a `SECRETARIAS_VALIDAS`
+      (`services/svc-vivienda/app/portal/schemas.py`) — suite completa de
+      `svc-vivienda` verificada en verde (289/289) tras el cambio.
+- [x] Frontend: `src/modules/gralgob/` (API client + `AtpPage.tsx`),
+      activación en `DashboardPage.tsx`/`Layout.tsx`/`App.tsx`/
+      `AdminUsuariosPage.tsx`. `npm run build` verde.
+- [ ] Redeploy de `svc-gralgob` con el código nuevo.
+- [ ] IAM: los 2 `run.invoker` otorgados (requiere ejecución paso a paso,
+      mismo criterio que el resto de los grants IAM de esta sesión).
+- [ ] Gateway actualizado con los 2 paths nuevos, nueva config activa.
+- [ ] Frontend deployado a producción.
+- [ ] Verificación end-to-end en navegador: login, ver panel ATP, conteos
+      coinciden con la corrida de sync real (1104 compromisos), 403 para un
+      usuario sin la secretaría `gralgob` asignada.
