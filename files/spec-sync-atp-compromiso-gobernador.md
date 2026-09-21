@@ -256,10 +256,20 @@ requerir un cambio de configuración cada pocos meses.
       pasos adicionales de compartición. Segunda corrida inmediata para
       verificar idempotencia: 0 insertadas, 1104 actualizadas, 0 errores —
       sin duplicados.
-- [ ] Cloud Scheduler — no configurado todavía. Sin eso, nadie tiene
-      `roles/run.invoker` sobre el servicio (mismo estado pendiente que
-      `svc-gasifera`, ver `spec-sync-gasifera-pit.md §11`) — el sync no corre
-      solo en producción hasta que se configure.
+- [x] **Cloud Scheduler configurado** (2026-09-21): job
+      `sync-atp-compromiso-gobernador` (`southamerica-east1`, `0 * * * *`,
+      cada hora) invoca el endpoint vía OIDC usando la propia identidad del
+      servicio (`svc-gralgob@...` con `roles/run.invoker` sobre sí mismo —
+      mismo patrón que `sync-cc-checklist-tecnico` en `svc-vivienda`).
+      **Detalle no obvio**: el binding `run.invoker` en el Cloud Run no
+      alcanza por sí solo — el agente de servicio de Cloud Scheduler
+      (`service-{project_number}@gcp-sa-cloudscheduler.iam.gserviceaccount.com`)
+      necesita además `roles/iam.serviceAccountTokenCreator` **sobre la
+      propia SA `svc-gralgob@...`** para poder emitir el token OIDC en su
+      nombre; sin ese segundo binding la corrida falla con 403 aunque el
+      `run.invoker` esté bien puesto (diagnosticado y corregido en esta
+      sesión). Corrida automática real verificada:
+      `triggered_by: "cloud-scheduler"`, 1104 filas, 0 errores.
 - [ ] `infra/gateway/openapi.yaml` — no aplica en esta fase (endpoint
       IAM-only, sin exposición pública).
 

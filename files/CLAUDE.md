@@ -39,7 +39,7 @@ Servicios backend (uno por secretaría):
 - `svc-territorial` — Secretaría de Planificación y Articulación Territorial (pendiente)
 - `svc-desarrollo` — Secretaría de Desarrollo (pendiente)
 - `svc-gasifera` — Secretaría de Infraestructura Gasífera — **Fase 0 (sync de solo lectura) desplegada** en Cloud Run (2026-09-21); panel de negocio pendiente (spec en `draft`)
-- `svc-gralgob` — Secretaría General de Gobierno — **nuevo, agregado 2026-09-21, no estaba en el plan original.** Fase 0 (módulo `atp`, sync de solo lectura) **desplegada en Cloud Run** (2026-09-21) — corrida real contra el Sheet sincronizó 1104 compromisos con 0 errores; panel de negocio pendiente (spec en `draft`)
+- `svc-gralgob` — Secretaría General de Gobierno — **nuevo, agregado 2026-09-21, no estaba en el plan original.** Fase 0 (módulo `atp`, sync de solo lectura) **desplegada en Cloud Run y automatizada** (2026-09-21) — Cloud Scheduler cada hora, corrida real contra el Sheet sincronizó 1104 compromisos con 0 errores; panel de negocio pendiente (spec en `draft`)
 - `svc-privada` ✅ **EN PRODUCCIÓN** — Sistema existente en proyecto GCP `essential-haiku-482815-u4` con BigQuery
 
 ## Convenciones de código
