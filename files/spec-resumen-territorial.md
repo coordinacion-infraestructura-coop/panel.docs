@@ -1,12 +1,19 @@
 # Spec: Resumen Territorial — panel consolidado por localidad y departamento
 
 **Estado**: approved
-**Versión**: 0.3.0
+**Versión**: 0.4.0
 **Aprobado**: 2026-08-28 (Pedro Bonafe) — decisiones de arquitectura, alcance con Privada,
 enmascarado de comunicaciones, coordinación de gateway y número de migración confirmados.
 **Servicio**: `svc-vivienda` (módulo nuevo `app/resumen_territorial/`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-09-04
+**Última actualización**: 2026-09-23
+
+> **Cambio 0.4.0 (2026-09-23)**: se suma **Gasífera** como tercera área federada, mismo patrón
+> que Privada (ADR-016) — ver **ADR-021**. `fetch_gasifera_lineas()` federa
+> `gas_pit_acciones_territorio` de `svc-gasifera` vía `GET /internal/gasifera/rollup-territorial`
+> (spec `spec-sync-gasifera-pit.md §15`). No cambia ningún criterio de matching territorial
+> existente (sigue siendo texto normalizado `(departamento, localidad)`), ni la regla de
+> visibilidad (`filtrar_por_visibilidad` ya filtraba genéricamente por área).
 
 > **Cambio 0.2.0 (2026-08-28)**: la v1 incluye **también las gestiones de la Secretaría
 > Privada del Ministro**, no sólo los 3 programas de Vivienda. El panel debe mostrar *todos*

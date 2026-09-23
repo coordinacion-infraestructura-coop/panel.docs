@@ -1,14 +1,18 @@
 # Spec: Sincronización Google Sheet "SEC. GAS PIT" → `svc-gasifera` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.4.0
-**Servicio**: `svc-gasifera` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
+**Versión**: 1.5.0
+**Servicio**: `svc-gasifera` (sync + panel preliminar de solo lectura + rollup territorial, sin panel de negocio)
 **Última actualización**: 2026-09-23
 
 ---
 
 ## Changelog
 
+- **1.5.0** (2026-09-23): agrega §15 — endpoint interno
+  `GET /internal/gasifera/rollup-territorial`, consumido por `resumen_territorial`
+  de `svc-vivienda` (ADR-021, mismo patrón que ADR-016 usó para Privada). Ver
+  §15 para el detalle completo.
 - **1.4.0** (2026-09-23): **incidente encontrado y resuelto** — la sesión en
   paralelo que trabajó `svc-gralgob` generó una config de Gateway nueva
   (`ministerio-config-v20260922`) a partir de una copia de
@@ -315,3 +319,34 @@ en producción. Pedido explícito: "más similar al excel", usando **vivienda
 - Sin cambios de alcance respecto a §12.1/§12.2 — sigue siendo puramente
   visualización de datos ya sincronizados, cero lógica de negocio nueva (los
   filtros son client-side sobre datos ya traídos, no nuevos endpoints).
+
+## 15. Rollup territorial — federación a `resumen_territorial` (agregado 2026-09-23, v1.5.0, ADR-021)
+
+### 15.1 Endpoint
+
+```
+GET /internal/gasifera/rollup-territorial
+```
+`app/internal/router.py`, IAM-only (sin `Depends(get_current_user)`, no declarado en `infra/gateway/openapi.yaml`) — mismo criterio que el resto de este router. Consumido exclusivamente por `svc-vivienda` (`app/resumen_territorial/service.py::fetch_gasifera_lineas`), nunca por el frontend.
+
+### 15.2 Qué agrega
+
+`app/gas_pit/rollup.py::rollup_territorial(db)` — `GROUP BY UPPER(TRIM(departamento)), UPPER(TRIM(localidad))` sobre `gas_pit_acciones_territorio` (calcado de `services/svc-privada/app/gestiones/service.py::rollup_territorial`). **No incluye `gas_pit_obras`** — mismo alcance acotado que el rollup de Privada, que tampoco trae todas sus tablas, solo `gestiones`. Por fila: `departamento`, `localidad`, `total_acciones`, `cumplidas` (`estado = "CUMPLIDO"`), `en_curso` (resto), `monto_solicitado_sum`, `monto_usd_sum`, `fecha_max`.
+
+### 15.3 Por qué texto normalizado y no un id de catálogo geográfico
+
+Investigado antes de implementar (no asumido): **ni Vivienda ni Privada usan hoy `id_geo` como llave de join** para el matching territorial — todo el pipeline existente (`app/geo/matching.normalize_name` del lado Vivienda, `UPPER(TRIM(...))` en SQL del lado Privada) agrupa por texto normalizado `(departamento, localidad)`. Replicar "el mismo patrón" significa seguir ese criterio tal cual está hoy, no introducir una resolución por id que el resto del sistema tampoco tiene — eso queda fuera de alcance de este cambio (ver ADR-021 "Razón").
+
+### 15.4 IAM
+
+`roles/run.invoker` de `svc-vivienda@gestorcooperativo.iam.gserviceaccount.com` sobre el servicio Cloud Run `svc-gasifera` — dirección **inversa** al grant de ADR-015 (`svc-gasifera@` invoker sobre `svc-vivienda`, para que Gasífera resuelva `portal_usuarios`). Los dos grants coexisten sin conflicto (son sobre servicios distintos).
+
+### 15.5 Criterios de aceptación
+
+- [x] `app/gas_pit/rollup.py` + endpoint interno + tests (`tests/test_gas_pit_rollup.py`, 6 tests: agregación, normalización de estado, vacío, fecha máxima, endpoint sin JWT).
+- [x] `svc-vivienda`: `fetch_gasifera_lineas`/`_map_gasifera_payload` (calcados de los de Privada) + `resumen_gasifera_estado`/`detalle_gasifera` en `aggregations.py` + tests (`tests/test_resumen_territorial.py`, 5 tests nuevos) — suite completa de `svc-vivienda` (294 tests) sigue en verde.
+- [x] Frontend `ResumenTerritorialPage.tsx`: badge de área `gasifera` (label + color propio, `gov-orange`).
+- [ ] IAM real otorgado (`svc-vivienda@` invoker sobre `svc-gasifera`) — pendiente, requiere confirmación antes de ejecutar (infra real).
+- [ ] `services/cloudbuild.yaml`: sustituciones `_GASIFERA_FETCH_ENABLED`/`_SVC_GASIFERA_INTERNAL_URL` — pendiente.
+- [ ] Redeploy de `svc-gasifera` (endpoint nuevo) y `svc-vivienda` (fetch nuevo) — pendiente, el de `svc-vivienda` es el de mayor riesgo por ser el servicio productivo principal.
+- [ ] Verificación end-to-end: una localidad con obras/acciones de gas reales aparece en el snapshot de Resumen Territorial con `area: "gasifera"`, respetando visibilidad por secretaría.
