@@ -1,7 +1,7 @@
 # Spec: Sincronización Google Sheet "ATP - Compromiso Gobernador" → `svc-gralgob` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.4.0
+**Versión**: 1.5.0
 **Servicio**: `svc-gralgob` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
 **Última actualización**: 2026-09-23
 
@@ -9,6 +9,9 @@
 
 ## Changelog
 
+- **1.5.0** (2026-09-23): agrega §13 — rollup territorial y federación
+  server-side a `resumen_territorial` de svc-vivienda (ADR-022, mismo patrón
+  que ADR-016/ADR-021 usaron para Privada/Gasífera). Ver §13.
 - **1.4.0** (2026-09-23): agrega §12.9 — vinculación manual confirmada para
   las 17 localidades del §12.8 sin match automático. 16 resueltas contra
   `viv_geo_localidades` real (typos/abreviaturas/formato), 1 documentada
@@ -642,3 +645,42 @@ persistir el `id_geo` resuelto en `atp_compromisos` (sigue siendo una
 vinculación de presentación, no de datos). Si más adelante se persiste
 (por ejemplo para la federación a Resumen Territorial), este mapa es el
 punto de partida natural para poblar esa migración.
+
+## 13. Rollup territorial — federación a `resumen_territorial` (agregado 2026-09-23, v1.5.0, ADR-022)
+
+### 13.1 Endpoint
+
+```
+GET /internal/atp/rollup-territorial
+```
+`app/internal/router.py`, IAM-only (sin `Depends(get_current_user)`, no declarado en `infra/gateway/openapi.yaml`) — mismo criterio que el resto de este router. Consumido exclusivamente por `svc-vivienda` (`app/resumen_territorial/service.py::fetch_atp_lineas`), nunca por el frontend.
+
+### 13.2 Qué agrega
+
+`app/atp/rollup.py::rollup_territorial(db)` — `GROUP BY UPPER(TRIM(departamento)), UPPER(TRIM(localidad))` sobre `atp_compromisos` + un `outerjoin` a la suma agrupada de `atp_cronograma_pagos` (calcado de `gas_pit_rollup.rollup_territorial`, ADR-021). Por fila: `departamento`, `localidad`, `total_compromisos`, `derivados` (`derivado = true`), `monto_total_sum`, `entregado_sum` (valor absoluto de la suma del cronograma — el signo se mirror-ea del Sheet, negativo = pagado, mismo criterio que `total_pagado` en `atp/sync.listar_compromisos`), `fecha_max` (`MAX(fecha_anuncio)`).
+
+### 13.3 Por qué texto normalizado y no el `id_geo` de la vinculación manual (§12.9)
+
+`VINCULACION_MANUAL` (§12.9) es 100% frontend, sólo para el panel de solo lectura — no persiste `id_geo` en `atp_compromisos`, así que el rollup del lado backend no tiene ese dato disponible. Mismo criterio que ADR-021 confirmó para Gasífera: ni Vivienda ni Privada usan hoy `id_geo` como llave de join para el matching territorial en `resumen_territorial` — agrupar por texto normalizado `(departamento, localidad)` es consistente con el resto del pipeline, no una excepción. Las ~17 localidades que necesitaron vinculación manual en el panel de ATP (§12.9) van a aparecer en `resumen_territorial` bajo el texto tal cual está en el Sheet, no bajo el nombre oficial del padrón — mismo riesgo de colisión ya documentado en ADR-016/`spec-resumen-territorial-ficha-localidad.md` para las demás áreas.
+
+### 13.4 IAM
+
+`roles/run.invoker` de `svc-vivienda@gestorcooperativo.iam.gserviceaccount.com` sobre el servicio Cloud Run `svc-gralgob` — dirección **inversa** al grant de ADR-015 (`svc-gralgob@` invoker sobre `svc-vivienda`, para que Gralgob resuelva `portal_usuarios`). Otorgado 2026-09-23. Los dos grants coexisten sin conflicto (son sobre servicios distintos).
+
+### 13.5 Criterios de aceptación
+
+- [x] `app/atp/rollup.py` + endpoint interno + tests (`tests/test_atp_rollup.py`, 6 tests: agregación, entregado en valor absoluto, sin cronograma, vacío, fecha máxima, endpoint sin JWT) — suite completa de `svc-gralgob` (31 tests) en verde.
+- [x] `svc-vivienda`: `fetch_atp_lineas`/`_map_atp_payload` (calcados de los de Gasífera) + `resumen_atp_estado`/`detalle_atp` en `aggregations.py` + tests (`tests/test_resumen_territorial.py`, 5 tests nuevos) — suite completa de `svc-vivienda` (299 tests) sigue en verde.
+- [x] IAM real otorgado (`svc-vivienda@` invoker sobre `svc-gralgob`).
+- [x] `services/cloudbuild.yaml`: sustituciones `_ATP_FETCH_ENABLED`/`_SVC_GRALGOB_INTERNAL_URL`.
+- [x] Redeploy de `svc-gralgob` (revisión `svc-gralgob-00004-82z`, endpoint nuevo) y `svc-vivienda`
+  (revisión `svc-vivienda-00166-tw9`, fetch nuevo + `ATP_FETCH_ENABLED=true`/`SVC_GRALGOB_INTERNAL_URL`
+  agregados con `--update-env-vars`, sin tocar el resto del set de env vars).
+- [x] Verificación end-to-end: `POST /internal/resumen-territorial/actualizar` en producción
+  devolvió `"generado_para_areas":["vivienda","privada","gasifera","gralgob"]` — `"gralgob"` sólo
+  se agrega si `fetch_atp_lineas()` trajo al menos una línea real, así que confirma el fetch +
+  mapeo end-to-end contra datos reales. No se verificó visualmente una localidad puntual en el
+  payload completo (requiere JWT de portal real, fuera de lo que esta sesión puede hacer sin
+  credenciales) — pendiente de confirmación visual por un Admin, mismo criterio que el resto del
+  panel ATP (spec §12.6).
+- [ ] Frontend `ResumenTerritorialPage.tsx`: badge de área `gralgob` (label + color propio) — no evaluado en esta entrega, el badge se renderiza igual de genérico que las otras áreas hasta que se pida un color distintivo.

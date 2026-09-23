@@ -1,12 +1,21 @@
 # Spec: Resumen Territorial — panel consolidado por localidad y departamento
 
 **Estado**: approved
-**Versión**: 0.4.0
+**Versión**: 0.5.0
 **Aprobado**: 2026-08-28 (Pedro Bonafe) — decisiones de arquitectura, alcance con Privada,
 enmascarado de comunicaciones, coordinación de gateway y número de migración confirmados.
 **Servicio**: `svc-vivienda` (módulo nuevo `app/resumen_territorial/`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-09-23
+
+> **Cambio 0.5.0 (2026-09-23)**: se suma **ATP / Secretaría Gral. de Gobierno** como cuarta área
+> federada, mismo patrón que Privada/Gasífera (ADR-016/ADR-021) — ver **ADR-022**.
+> `fetch_atp_lineas()` federa `atp_compromisos` + `atp_cronograma_pagos` de `svc-gralgob` vía
+> `GET /internal/atp/rollup-territorial` (spec `spec-sync-atp-compromiso-gobernador.md §13`). El
+> badge de ATP no se basa en un catálogo de estados (no existe) sino en cuánto del monto anunciado
+> ya fue entregado (`Pendiente`/`Parcial`/`Pagado`). No cambia ningún criterio de matching
+> territorial existente (sigue siendo texto normalizado `(departamento, localidad)`), ni la regla
+> de visibilidad (`filtrar_por_visibilidad` ya filtraba genéricamente por área).
 
 > **Cambio 0.4.0 (2026-09-23)**: se suma **Gasífera** como tercera área federada, mismo patrón
 > que Privada (ADR-016) — ver **ADR-021**. `fetch_gasifera_lineas()` federa
