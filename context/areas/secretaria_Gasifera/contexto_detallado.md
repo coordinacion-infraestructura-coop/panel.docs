@@ -1,12 +1,15 @@
 # Contexto detallado — Secretaría de Infraestructura Gasífera
 
-> **⚠️ BORRADOR SIN VALIDAR CON EL ÁREA.** Según `docs/context/areas/README.md`, este
-> archivo debería surgir de una reunión con el responsable del área — esa reunión
-> **todavía no se hizo** (estado "⏳ pendiente"). Todo lo que sigue es inferido
-> únicamente del análisis del archivo `SEC. GAS PIT.xlsx` que el usuario proveyó,
-> sin confirmar con nadie del área. Está pensado como punto de partida concreto
-> para esa reunión, no como sustituto de ella. No se debe avanzar el spec de
-> `svc-gasifera` a estado `approved` en base a este documento solo.
+> **⚠️ BORRADOR PARCIALMENTE VALIDADO.** La **primera reunión** con el área ya se
+> hizo (2026-09-21) y confirmó 2 puntos puntuales (marcados `✅ confirmado en
+> reunión` más abajo: alcance y catálogo geográfico). El resto de este documento
+> (responsable del área, procesos, funcionalidades, estados reales, usuarios,
+> prioridades — §1, §3, §5, §6, §8) **sigue sin relevar** — no hubo tiempo/agenda
+> para cubrirlo en esa primera reunión. `SPIP` (§7.1) quedó sin respuesta, a
+> re-consultar. **No se debe avanzar el spec de `svc-gasifera` a estado
+> `approved` todavía** — falta demasiado para eso. Lo que sí se aprobó, como
+> excepción puntual y documentada, es un panel de solo lectura sobre los datos ya
+> sincronizados (`gas_pit_*`) — ver `docs/files/spec-sync-gasifera-pit.md §12`.
 
 ## 1. Responsable del área
 
@@ -32,7 +35,13 @@ Se observan al menos tres procesos distintos mezclados en el mismo libro:
    de prensa y eventos de agenda de funcionarios, con links a notas de prensa.
 
 No sabemos si estos tres procesos los lleva la misma persona/equipo o distintas áreas
-que comparten el mismo Sheet — **pregunta para la reunión**.
+que comparten el mismo Sheet — **pregunta para la próxima reunión** (no cubierta en la primera).
+
+**✅ confirmado en reunión (2026-09-21)**: el alcance del sistema, por ahora, es
+**solo obras de gas** — coincide con lo ya sincronizado/construido. Las otras 4
+categorías del tablero (vial, agua/cloaca, eléctrica, arquitectura) "probablemente"
+se aborden en el futuro (palabras del usuario), pero no está comprometido ni tiene
+fecha — no corresponde empezar a construirlas todavía.
 
 ## 3. Funcionalidades requeridas
 
@@ -93,14 +102,22 @@ Ninguna integración automática hoy (100% carga manual). Preguntas concretas qu
 conviene llevar a la reunión, surgidas de problemas de calidad de datos reales
 detectados en el Excel:
 
-1. ¿Qué es `SPIP` y por qué se repite entre varias filas (obras multi-tramo)? ¿Existe
-   un identificador de obra realmente único en algún sistema del área (SPIP en su
-   sentido pleno — "Sistema Provincial de Inversión Pública" es una hipótesis, no
-   confirmado)?
-2. Hay **dos catálogos distintos de Departamento** y **dos de Localidad** dentro de la
-   misma hoja `Desplegables` (14 vs 27 departamentos; ~437 vs ~450 localidades), cada
-   uno usado por una pestaña distinta y no sincronizados entre sí. ¿Cuál es el
-   vigente/correcto?
+1. **⏳ preguntado en la reunión, sin respuesta todavía** — ¿qué es `SPIP` y por qué
+   se repite entre varias filas (obras multi-tramo)? ¿Existe un identificador de obra
+   realmente único en algún sistema del área (SPIP en su sentido pleno — "Sistema
+   Provincial de Inversión Pública" es una hipótesis, no confirmado)? El usuario va
+   a re-consultarlo con el área.
+2. **✅ confirmado en reunión**: el catálogo de Departamento/Localidad vigente **no**
+   es ninguno de los dos que trae el propio Sheet (hoja `Desplegables`, 14 vs 27
+   departamentos, ~437 vs ~450 localidades, no sincronizados entre sí) — el
+   catálogo real y correcto es **`geo_localidades`/`info_localidades`** (los
+   catálogos ya existentes en el sistema — `viv_geo_localidades` de `svc-vivienda`
+   y `priv_localidades_info`/`priv_departamentos_info` de `svc-privada`, ADR-012).
+   Implicancia para el diseño futuro: cualquier resolución de localidad/departamento
+   debe apoyarse en esos catálogos canónicos (vía federación cross-service, mismo
+   patrón que ADR-012/016), no en los catálogos internos del Sheet ni en uno nuevo
+   propio de `svc-gasifera`. No implementado todavía (fuera de alcance del panel
+   preliminar de solo lectura, que muestra el texto crudo del Sheet tal cual).
 3. La columna `ALERTA_LOCALIDAD` (validación cruzada de localidad contra catálogo)
    está calculada solo en 277 de 1077 filas — parece haberse corrido una vez y no
    recalculado más. ¿Sigue siendo relevante?
@@ -111,9 +128,7 @@ detectados en el Excel:
 6. ¿Las otras ~14 planillas que mantiene el área tienen una estructura similar (misma
    familia de columnas) o son heterogéneas? Esto determina si el patrón de esta
    primera sync es reutilizable directamente o si cada una necesita su propio análisis.
-7. Confirmar el alcance: ¿el objetivo es un sistema solo para obras de **gas**, o el
-   área espera que esto termine cubriendo las 5 categorías de obra del tablero
-   general (lo cual correspondería más a una futura `svc-infraestructura`)?
+7. **✅ resuelto** — ver la confirmación de alcance en §2 (solo gas por ahora).
 
 ## 8. Prioridades
 

@@ -1,14 +1,28 @@
 # Spec: Sincronización Google Sheet "SEC. GAS PIT" → `svc-gasifera` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.0.0
-**Servicio**: `svc-gasifera` (nuevo — solo el módulo de sync en esta entrega, sin panel de negocio)
+**Versión**: 1.2.0
+**Servicio**: `svc-gasifera` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
 **Última actualización**: 2026-09-21
 
 ---
 
 ## Changelog
 
+- **1.2.0** (2026-09-21): primera corrida real contra el Sheet en vivo, exitosa
+  (316 filas leídas = 17 obras + 299 acciones, 0 errores — ver §9). Se agregan
+  `ministerio` y `area` a `gas_pit_acciones_territorio` (migración `0002`) y se
+  rediseña la tabla de acciones del panel siguiendo el esquema de
+  vivienda (CC/CH: filtros por Departamento/Localidad/Estado + tabla), a pedido
+  del usuario tras ver la primera versión (KPI + tablas planas) — no era
+  práctica para trabajar con el dataset real. Ver §12.7.
+- **1.1.0** (2026-09-21): agrega §12 — panel de visualización de solo lectura
+  (3 endpoints públicos + página frontend) sobre los datos ya sincronizados.
+  **Excepción explícita y documentada** a la regla de `CLAUDE.md` agregada el
+  mismo día ("no agregar `/api/v1/gasifera/**` sin `spec-svc-gasifera.md`
+  `approved`") — autorizada expresamente por el usuario, acotada a endpoints
+  de solo lectura sin lógica de negocio nueva. Ver §12 para el detalle y el
+  razonamiento completo.
 - **1.0.0** (2026-09-21): aprobado con el alcance descrito (espejo de solo
   lectura, sin reglas de negocio nuevas, sin pantallas — ver §0/§2). Aprobación
   puntual de este spec angosto, **no** sustituye la reunión real con el área ni
@@ -158,18 +172,85 @@ Router `app/internal/router.py`, montado en `main.py` sin prefijo `/api/v1` y si
 - [x] Una fila con error real de DB no frena el resto del batch ni impide el log final (test de regresión con `IntegrityError` forzado).
 - [x] Migración `0001` verificada contra Postgres real (Docker local, `docker-compose.dev.yml`): `upgrade head` / `downgrade base` / `upgrade head` limpios, tablas y constraints (`uq_gas_pit_obra_nombre_depto`, `uq_gas_pit_obra_localidad`, `sheet_row_number` UNIQUE, FK con `ON DELETE CASCADE`) verificadas con `\d`.
 - [x] Deploy real a Cloud Run (2026-09-21, build manual `gcloud builds submit`, revisión `svc-gasifera-00001-9zv`, 100% tráfico, `Ready=True`). Infra (SA `svc-gasifera@`, roles IAM, `db_gasifera`, `user_gasifera`, secret `svc-gasifera-db-url`) ya estaba pre-provisionada de una corrida anterior — solo faltó correr la migración `0001` contra Cloud SQL real (vía `cloud-sql-proxy` local) y el build/deploy. Servicio en `https://svc-gasifera-iwni7vc2qq-rj.a.run.app`, `--no-allow-unauthenticated` (IAM-only, verificado: llamadas sin `roles/run.invoker` devuelven 401). **No se otorgó `run.invoker` a nadie todavía** (ni a `api-gateway-sa` — no aplica, no hay paths en el Gateway en esta fase — ni a Cloud Scheduler — no configurado todavía) — el servicio está desplegado pero no hay ningún caller autorizado a disparar el sync en producción hasta el próximo paso.
-- [ ] Corrida real contra el Sheet en vivo — **bloqueada en el equipo local** por política de organización de GCP (OAuth de apps no verificadas + impersonation de Service Accounts, ambas restringidas para `infraestructura.coop@gmail.com`/`pedrobonafe.data@gmail.com`). El Sheet ya está compartido como Viewer con `svc-gasifera@gestorcooperativo.iam.gserviceaccount.com`, así que una vez que exista un caller autorizado (Cloud Scheduler u otro) debería funcionar sin este problema (la SA usa su identidad nativa en Cloud Run, no impersonation).
-- [ ] Cloud Scheduler — no configurado todavía (pendiente, ver §11).
-- [ ] `infra/gateway/openapi.yaml` — no aplica en esta fase (endpoint IAM-only, sin exposición pública).
+- [x] Corrida real contra el Sheet en vivo (2026-09-21, disparada manualmente desde Cloud Shell con `gcloud auth print-identity-token` + `curl`, usando el `roles/run.invoker` otorgado a `infraestructura.coop@gmail.com` sobre `svc-gasifera`): `{"filas_leidas":316,"filas_insertadas":0,"filas_actualizadas":316,"filas_error":0,"errores":[]}` — **316 = 17 obras + 299 acciones, coincide exacto con el análisis manual del Excel**. Bloqueante real resuelto: el Sheet no estaba compartido con la SA correcta (`svc-gasifera@gestorcooperativo.iam.gserviceaccount.com`) — el primer intento devolvió 403 de la API de Sheets hasta compartirlo bien. La restricción de OAuth/impersonation del equipo local (§11, resuelta como no-bloqueante) nunca aplicó a Cloud Run en sí, solo a probar localmente.
+- [ ] Cloud Scheduler — no configurado todavía. El sync corre bien manualmente pero no está automatizado (pendiente, ver §11).
+- [x] `infra/gateway/openapi.yaml` — **sí aplica**: el alcance creció en v1.1.0/§12 (panel de solo lectura), que sí expone 3 paths públicos. Agregados y verificados (`ministerio-config-v20260921`, 401 no 404 sin token).
 
-## 11. Pendiente inmediato tras el deploy
+## 11. Pendiente
 
-- Otorgar `roles/run.invoker` sobre `svc-gasifera` a quien vaya a disparar el sync (Cloud Scheduler con su propia SA, siguiendo el patrón de `sync-cc-checklist-tecnico` — ver `spec-sync-cc-checklist-tecnico.md §9`) — no se hizo en esta sesión porque requiere una acción de otorgamiento de permisos IAM que el harness bloqueó por precaución; queda para una sesión donde el usuario la autorice explícitamente paso a paso.
-- Con eso configurado, correr una primera sincronización real y comparar conteos contra el análisis manual (17 obras de gas + 299 acciones territoriales).
+- **Cloud Scheduler**: otorgar `roles/run.invoker` sobre `svc-gasifera` a una SA de Scheduler dedicada (patrón `sync-cc-checklist-tecnico` — ver `spec-sync-cc-checklist-tecnico.md §9`, y el troubleshooting de `svc-gralgob` en `.claude/skills/deploy-servicio.md`: además de `run.invoker` hace falta `roles/iam.serviceAccountTokenCreator` sobre la SA para el agente de servicio de Cloud Scheduler, si no falla en runtime con 403 aunque el invoker esté bien). Hoy el sync solo corre a mano (ver criterio de aceptación arriba) — sin Scheduler, los datos del panel quedan desactualizados hasta la próxima corrida manual.
+- Backfill de `ministerio`/`area` en filas ya sincronizadas: no hace falta acción manual — la próxima corrida del sync los completa solo (UPSERT), ya verificado (316/316 actualizadas en la corrida del §9).
 
 ## 10. Pendiente / preguntas abiertas para la reunión con el área
 
-Ver `docs/context/areas/secretaria_Gasifera/contexto_detallado.md` §7 para la lista completa. Las más relevantes para este sync en particular:
-- ¿Qué es `SPIP` realmente y por qué no es único? ¿Hay una clave de negocio mejor que `(nombre_obra, departamento)`?
-- ¿El área reordena manualmente las filas de `ACCIONES TERRITORIO`? (afecta la estabilidad de la clave `sheet_row_number`).
-- ¿Cuál de los dos catálogos de Departamento/Localidad de la hoja `Desplegables` es el vigente?
+Ver `docs/context/areas/secretaria_Gasifera/contexto_detallado.md` §7 para la lista completa. Actualizado tras la primera reunión (2026-09-21):
+- **⏳ sin resolver**: ¿qué es `SPIP` realmente y por qué no es único? ¿Hay una clave de negocio mejor que `(nombre_obra, departamento)`? (se preguntó, el usuario va a re-consultar).
+- ⏳ sin resolver: ¿el área reordena manualmente las filas de `ACCIONES TERRITORIO`? (afecta la estabilidad de la clave `sheet_row_number`).
+- **✅ resuelto**: el catálogo de Departamento/Localidad vigente es `geo_localidades`/`info_localidades` (catálogos ya existentes del sistema), no ninguno de los dos que trae la hoja `Desplegables` del Sheet. No se integra todavía (ver §12).
+- **✅ resuelto**: alcance confirmado como solo obras de gas por ahora (ver `contexto_detallado.md §2`).
+
+## 12. Panel de visualización de solo lectura (agregado 2026-09-21, v1.1.0)
+
+### 12.1 Por qué esto es una excepción documentada, no una violación silenciosa
+
+El mismo día (2026-09-21), otra sesión de trabajo en paralelo agregó a `CLAUDE.md` (raíz) la regla: *"Don't add `/api/v1/gasifera/**` ... endpoints without that domain spec [`spec-svc-gasifera.md`] going `approved` first."* Al descubrir el conflicto, se le señaló explícitamente al usuario (siguiendo el hard rule de Spec Driven Development: señalar conflictos con specs/ADRs antes de implementar). El usuario, con conocimiento del conflicto, **decidió explícitamente anular esa regla para este caso puntual**: endpoints de **solo lectura**, sobre datos que **ya están sincronizados** (`gas_pit_*`, ya cubiertos por este spec `approved`), **sin interpretar ninguna regla de negocio nueva** — mismo criterio de acotamiento que ya usa este spec para el sync en sí (§0). No autoriza ningún endpoint de escritura, catálogo administrable, ni nada que dependa de las preguntas todavía abiertas del §10.
+
+### 12.2 Alcance
+
+**Incluido**: 3 endpoints GET públicos (vía API Gateway, con auth JWT estándar) que leen `gas_pit_obras`, `gas_pit_obras_localidades` y `gas_pit_acciones_territorio` tal cual están, más una página frontend que los muestra. Sin filtros de negocio nuevos, sin cálculos más allá de KPIs simples (conteos, sumas, promedios) sobre los mismos datos.
+
+**Fuera de alcance**: cualquier escritura, el panel de negocio completo (`spec-svc-gasifera.md`, sigue `draft`), resolución de localidad/departamento contra el catálogo canónico `geo_localidades`/`info_localidades` (se muestra el texto crudo del Sheet — ver `contexto_detallado.md §7.2`), gráficos/mapas (decisión explícita del usuario, primera versión solo KPI strip + tablas).
+
+### 12.3 Auth (nuevo — Fase 0 no tenía ningún endpoint público)
+
+`app/auth.py` nuevo, modelado sobre `services/svc-privada/app/auth.py` (ADR-015) — `svc-gasifera` **no se conecta a `db_vivienda`**, resuelve rol + secretarías llamando a `GET {SVC_VIVIENDA_INTERNAL_URL}/internal/portal/usuarios/{email}` con un ID token (audience = esa URL), degradando a rol `invitado` ante cualquier falla (nunca 500). Roles: `ROLES_LECTURA = ("Admin","Supervisor","Operador","Consulta")` + pertenencia a la secretaría `"gasifera"` (ya presente en `SECRETARIAS_VALIDAS`, no requiere migración). Sin roles acotados nuevos tipo `TecnicoDGV`/`Autoridad`.
+
+### 12.4 Endpoints
+
+```
+GET /api/v1/gasifera/obras?limit=200&offset=0
+GET /api/v1/gasifera/acciones-territorio?limit=500&offset=0
+GET /api/v1/gasifera/sync-estado
+```
+Router nuevo `app/gas_pit/router.py`, montado con prefijo `/api/v1/gasifera` en `main.py`. Los 3 requieren `Depends(get_current_user)` + rol de lectura + secretaría `gasifera`. `sync-estado` envuelve `gas_pit_sync.get_last_sync_status` (mismo dato que el endpoint interno de sync, expuesto de forma pública y de solo lectura para mostrar "Sincronizado hace X" en el panel).
+
+### 12.5 Gateway e IAM (deploy real, pasos separados — ver criterios de aceptación)
+
+Se agregan a `infra/gateway/openapi.yaml` (patrón idéntico a `/api/v1/vivienda/checklist-tecnico/catalogos`) + nueva config de gateway. Dos grants IAM nuevos: `svc-gasifera@` necesita `roles/run.invoker` sobre `svc-vivienda` (para el lookup de auth); `api-gateway-sa@` necesita `roles/run.invoker` sobre `svc-gasifera` (para poder enrutarle tráfico).
+
+### 12.6 Criterios de aceptación
+
+- [x] `app/auth.py` + tests — 21/21 en verde (`tests/test_gas_pit_router.py`): 200 con datos, 403 sin secretaría `gasifera`, 403 `invitado`, 401 sin token (vía dependency-override para los positivos, y un cliente sin override para el 401 real de JWT).
+- [x] `app/gas_pit/router.py` con los 3 endpoints + `response_model`.
+- [x] Frontend: `src/modules/gasifera/` (API client + `GasiferaPitPage.tsx`), activación en `DashboardPage.tsx`/`Layout.tsx`/`App.tsx`.
+- [x] Redeploy de `svc-gasifera` con el código nuevo (revisión `svc-gasifera-00003-5lt` al cierre de esta entrega, tras el redeploy de §12.7).
+- [x] IAM: los 2 `run.invoker` otorgados por el usuario (`svc-gasifera@`→`svc-vivienda`, `api-gateway-sa@`→`svc-gasifera`) — confirmados en la política IAM real.
+- [x] Gateway actualizado con los 3 paths nuevos, config `ministerio-config-v20260921` activa (verificado: 401 no 404 en `/api/v1/gasifera/sync-estado` sin token).
+- [x] Frontend deployado a producción (`gestorcooperativo.web.app`), 2 veces (versión inicial + rediseño de §12.7).
+- [x] Verificación end-to-end en navegador por el usuario: login, panel visible con datos reales (316 filas). **No verificado por separado**: el 403 para un usuario sin la secretaría `gasifera` asignada — cubierto solo por el test automatizado (`test_sin_secretaria_gasifera_devuelve_403`), no repetido a mano en el navegador.
+
+### 12.7 Rediseño de la tabla de acciones (2026-09-21, tras feedback del usuario)
+
+La primera versión del panel (KPI strip + 2 tablas planas, sin filtros) resultó
+poco práctica para trabajar con el dataset real, según el usuario tras probarlo
+en producción. Pedido explícito: "más similar al excel", usando **vivienda
+(CC/CH)** como modelo — filtros arriba + tabla, no gráficos.
+
+- **Backend**: se agregan `ministerio`/`area` a `gas_pit_acciones_territorio`
+  (migración `0002`, columnas nullable) — existían en el Sheet (`ACCIONES
+  TERRITORIO`) pero la Fase 0 original no las persistía. `sync.py` las
+  completa desde las columnas "Ministerio"/"Área"; el backfill de las 299
+  filas ya sincronizadas fue automático (UPSERT) en la corrida siguiente, sin
+  script aparte.
+- **Frontend**: `GasiferaPitPage.tsx` rediseñada — la tabla de **acciones de
+  seguimiento territorial** pasa a ser la información principal (antes era
+  secundaria respecto a "obras"), con filtro bar (Departamento/Localidad/Estado,
+  `<select>` con opciones derivadas de los datos vía `useMemo`, botón "Limpiar
+  filtros") + tabla con columnas exactas: Fecha, Departamento, Localidad,
+  Ministerio, Área, Acción, Detalle de la acción, Estado, Monto solicitado,
+  Comentarios, Monto USD — mismo patrón visual (header navy, `font-size: 12px`,
+  badges de estado) que `CordonCunetaPage.tsx`/`CordobaHogarPage.tsx`. La tabla
+  de obras se mantiene debajo, sin cambios funcionales.
+- Sin cambios de alcance respecto a §12.1/§12.2 — sigue siendo puramente
+  visualización de datos ya sincronizados, cero lógica de negocio nueva (los
+  filtros son client-side sobre datos ya traídos, no nuevos endpoints).
