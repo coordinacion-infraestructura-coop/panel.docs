@@ -1,14 +1,18 @@
 # Spec: Sincronización Google Sheet "ATP - Compromiso Gobernador" → `svc-gralgob` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.3.0
+**Versión**: 1.4.0
 **Servicio**: `svc-gralgob` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
-**Última actualización**: 2026-09-22
+**Última actualización**: 2026-09-23
 
 ---
 
 ## Changelog
 
+- **1.4.0** (2026-09-23): agrega §12.9 — vinculación manual confirmada para
+  las 17 localidades del §12.8 sin match automático. 16 resueltas contra
+  `viv_geo_localidades` real (typos/abreviaturas/formato), 1 documentada
+  como pendiente real (falta en el padrón). Ver §12.9.
 - **1.3.0** (2026-09-22): agrega §12.8 — cruce de Departamento/Localidad
   contra el padrón geográfico canónico `viv_geo_localidades`, 100%
   client-side sobre un endpoint público ya existente de `svc-vivienda`, sin
@@ -578,3 +582,63 @@ ejemplo, para la federación a Resumen Territorial), es un cambio de sync en
 desde el backend (vía un endpoint interno IAM-only nuevo de `svc-vivienda`,
 mismo patrón que ADR-015/ADR-016) — no implementado, evaluar cuando se
 aborde esa federación.
+
+## 12.9 Vinculación manual de las localidades sin match (2026-09-23)
+
+### Investigación
+
+Con los 57 falsos-positivo de matching resueltos (§12.8: abreviaturas de
+departamento, alias entre paréntesis/guion), quedaban 17 discrepancias
+reales. Se investigó cada una contra `viv_geo_localidades` real (consulta
+directa a `db_gralgob`/`db_vivienda` vía `cloud-sql-proxy`, solo lectura,
+sin tocar producción) para determinar si eran typos/variantes de nombre o
+localidades genuinamente ausentes del padrón.
+
+**Resultado — 16 de 17 tenían coincidencia real**, todas confirmadas con el
+usuario:
+
+| ATP (Sheet) | Depto | Padrón real (`viv_geo_localidades`) | Motivo |
+|---|---|---|---|
+| Paso del Durazno | Juárez Celman (Sheet) | Río Cuarto (`id_geo=443`) | límite departamental — el usuario confirmó usar el depto del padrón oficial |
+| Nicolás Bruzzone | Gral Roca | `Nicolas Bruzone` (`id_geo=55`) | una sola "z" |
+| Huanchilla | Juárez Celman | `Huanchillas` (`id_geo=92`) | plural |
+| Capitán General Bernardo O'Higgins | Marcos Juárez | `Cap. Gral. B.Ohiggins` (`id_geo=103`) | abreviado |
+| Colonia Barge | Marcos Juárez | `Castro Urdiales - Colonia 25 de Mayo` (`id_geo=105`) | nombre distinto (confirmado por el usuario, conocimiento local) |
+| General Levalle | Pte Roque Saenz Peña | `General Le Valle` (`id_geo=128`) | con espacio |
+| Villa Río Icho Cruz | Punilla | `Icho Cruz` (`id_geo=158`) | nombre más corto |
+| La Carolina El Potosí | Río Cuarto | `La Carolina (El Potosí)` (`id_geo=170`) | mismo dato, el padrón usa paréntesis y el Sheet no (el alias genérico de §12.8 no lo detecta porque el paréntesis está del lado del padrón sin separador) |
+| Las Peñas Sud | Río Cuarto | `Las Peñas Sur` (`id_geo=175`) | Sud/Sur |
+| Santa Catalina Holmberg | Río Cuarto | `Santa Catalina (Est. Holmberg)` (`id_geo=182`) | mismo motivo que La Carolina |
+| Montecristo | Río Primero | `Monte Cristo` (`id_geo=392`) | con espacio |
+| Villa de María | Río Seco | `Villa de Maria de Rio Seco` (`id_geo=221`) | nombre completo |
+| San Javier y Yacanto | San Javier | `San Javier` (`id_geo=261`) | el padrón no lista "Yacanto" aparte — el usuario confirmó que es la forma abreviada de la misma localidad |
+| Miramar de Ansenuza | San Justo | `Miramar` (`id_geo=289`) | nombre más corto |
+| Saturnino María Laspiur | San Justo | `Saturnino M. Laspiur` (`id_geo=296`) | abreviado |
+| Dalmacio Vélez | Tercero Arriba | `Dalmacio Velez Sarsfield` (`id_geo=324`) | nombre completo |
+| James Craik | Tercero Arriba | `James Craick` (`id_geo=327`) | con "c" |
+
+**1 de 17 queda sin vincular, documentada como pendiente real**: **Santiago
+Temple** (Río Segundo) — localidad real conocida que **falta directamente**
+en `viv_geo_localidades` (se revisó el departamento completo, no aparece
+bajo ningún nombre similar). No es un problema del Sheet de ATP ni de este
+panel — el usuario confirmó que debería estar en el padrón y que se
+documenta para que el área de Vivienda la agregue más adelante. **No se
+inserta en `viv_geo_localidades` desde acá** (esa tabla es propiedad de
+`svc-vivienda`, fuera del alcance de `svc-gralgob`).
+
+### Implementación
+
+`VINCULACION_MANUAL` en `AtpPage.tsx`: `Record<string_normalizado, id_geo>`.
+`matchGeo()` la consulta primero (antes del matching algorítmico genérico) —
+si la localidad del compromiso tiene una entrada ahí, se resuelve directo
+por `id_geo` sin depender de que el nombre coincida en absoluto. Santiago
+Temple no está en el mapa a propósito, para que el panel lo siga marcando
+como "sin match" hasta que exista de verdad en el padrón.
+
+### Alcance
+
+100% frontend, mismo criterio que §12.8 — sin cambios de backend, sin
+persistir el `id_geo` resuelto en `atp_compromisos` (sigue siendo una
+vinculación de presentación, no de datos). Si más adelante se persiste
+(por ejemplo para la federación a Resumen Territorial), este mapa es el
+punto de partida natural para poblar esa migración.
