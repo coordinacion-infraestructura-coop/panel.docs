@@ -1,14 +1,24 @@
 # Spec: Sincronización Google Sheet "SEC. GAS PIT" → `svc-gasifera` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.2.0
+**Versión**: 1.3.0
 **Servicio**: `svc-gasifera` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
-**Última actualización**: 2026-09-21
+**Última actualización**: 2026-09-23
 
 ---
 
 ## Changelog
 
+- **1.3.0** (2026-09-23): Cloud Scheduler configurado (`sync-gasifera-pit`, cada
+  hora, self-invoke OIDC) — el sync deja de ser manual. Hicieron falta 2 grants
+  IAM: `roles/run.invoker` de `svc-gasifera@` sobre sí mismo, y
+  `roles/iam.serviceAccountTokenCreator` sobre esa misma SA para el agente de
+  servicio de Cloud Scheduler (`service-276787280674@gcp-sa-cloudscheduler.iam.gserviceaccount.com`)
+  — sin el segundo, la corrida falla en runtime con 403
+  (`run.routes.invoke` denegado) aunque el invoker esté bien puesto; mismo
+  gotcha ya documentado para `svc-gralgob`. Verificado end-to-end: disparo
+  manual del job → `200 OK` en los logs de Cloud Run, próxima corrida
+  programada sola. Ver §11.
 - **1.2.0** (2026-09-21): primera corrida real contra el Sheet en vivo, exitosa
   (316 filas leídas = 17 obras + 299 acciones, 0 errores — ver §9). Se agregan
   `ministerio` y `area` a `gas_pit_acciones_territorio` (migración `0002`) y se
@@ -178,8 +188,42 @@ Router `app/internal/router.py`, montado en `main.py` sin prefijo `/api/v1` y si
 
 ## 11. Pendiente
 
-- **Cloud Scheduler**: otorgar `roles/run.invoker` sobre `svc-gasifera` a una SA de Scheduler dedicada (patrón `sync-cc-checklist-tecnico` — ver `spec-sync-cc-checklist-tecnico.md §9`, y el troubleshooting de `svc-gralgob` en `.claude/skills/deploy-servicio.md`: además de `run.invoker` hace falta `roles/iam.serviceAccountTokenCreator` sobre la SA para el agente de servicio de Cloud Scheduler, si no falla en runtime con 403 aunque el invoker esté bien). Hoy el sync solo corre a mano (ver criterio de aceptación arriba) — sin Scheduler, los datos del panel quedan desactualizados hasta la próxima corrida manual.
+- ~~Cloud Scheduler~~ — **hecho (2026-09-23)**, ver §13.
 - Backfill de `ministerio`/`area` en filas ya sincronizadas: no hace falta acción manual — la próxima corrida del sync los completa solo (UPSERT), ya verificado (316/316 actualizadas en la corrida del §9).
+- Sigue pendiente: `SPIP` sin respuesta del área, y la segunda reunión para completar `contexto_detallado.md` y poder aprobar `spec-svc-gasifera.md`.
+
+## 13. Cloud Scheduler (agregado 2026-09-23, v1.3.0)
+
+Mismo patrón self-invoke que `sync-cc-checklist-tecnico` (`spec-sync-cc-checklist-tecnico.md §9`) y `sync-atp-compromiso-gobernador`:
+
+```bash
+# 1) svc-gasifera@ necesita invoker sobre sí mismo (self-invoke)
+gcloud run services add-iam-policy-binding svc-gasifera \
+  --region=southamerica-east1 --project=gestorcooperativo \
+  --member="serviceAccount:svc-gasifera@gestorcooperativo.iam.gserviceaccount.com" \
+  --role="roles/run.invoker"
+
+# 2) el agente de servicio de Cloud Scheduler necesita poder emitir tokens
+#    en nombre de esa SA — sin esto, la corrida falla en runtime con 403
+#    (run.routes.invoke denegado) aunque el paso 1 esté bien hecho.
+gcloud iam service-accounts add-iam-policy-binding \
+  svc-gasifera@gestorcooperativo.iam.gserviceaccount.com \
+  --member="serviceAccount:service-276787280674@gcp-sa-cloudscheduler.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountTokenCreator" \
+  --project=gestorcooperativo
+
+# 3) el job en sí
+gcloud scheduler jobs create http sync-gasifera-pit \
+  --location=southamerica-east1 \
+  --schedule="0 * * * *" \
+  --uri="https://svc-gasifera-iwni7vc2qq-rj.a.run.app/internal/sync/gasifera-pit" \
+  --http-method=POST \
+  --oidc-service-account-email="svc-gasifera@gestorcooperativo.iam.gserviceaccount.com" \
+  --oidc-token-audience="https://svc-gasifera-iwni7vc2qq-rj.a.run.app" \
+  --project=gestorcooperativo
+```
+
+Corre cada hora en punto (`0 * * * *`). Verificado con `gcloud scheduler jobs run sync-gasifera-pit` + logs de Cloud Run (`POST /internal/sync/gasifera-pit HTTP/1.1 200 OK`) — el primer disparo, inmediatamente después de otorgar los permisos, falló con 403 por demora de propagación de IAM (~60-90s); el segundo intento fue exitoso. `gcloud scheduler jobs describe sync-gasifera-pit` confirma `status.code` vacío (éxito) y la próxima corrida programada.
 
 ## 10. Pendiente / preguntas abiertas para la reunión con el área
 
