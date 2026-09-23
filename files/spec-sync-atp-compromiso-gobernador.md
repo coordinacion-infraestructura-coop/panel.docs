@@ -1,14 +1,19 @@
 # Spec: Sincronización Google Sheet "ATP - Compromiso Gobernador" → `svc-gralgob` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.1.0
+**Versión**: 1.2.0
 **Servicio**: `svc-gralgob` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
-**Última actualización**: 2026-09-21
+**Última actualización**: 2026-09-22
 
 ---
 
 ## Changelog
 
+- **1.2.0** (2026-09-22): agrega §12.7 — rediseño del panel tras probarlo con
+  datos reales (filtro de Localidad no dependía del Departamento elegido,
+  layout poco funcional) + endpoint nuevo
+  `GET /compromisos/{id}/cronograma` para el panel lateral de detalle por
+  localidad. Ver §12.7.
 - **1.1.0** (2026-09-21): agrega §12 — panel de visualización de solo lectura
   (2 endpoints públicos + página frontend) sobre los datos ya sincronizados.
   **Excepción explícita y documentada** a la regla de `CLAUDE.md` ("no agregar
@@ -409,3 +414,89 @@ lookup de auth); `api-gateway-sa@` necesita `roles/run.invoker` sobre
       esta sesión para no usar la cuenta de test compartida de
       `agentes_test/` contra producción (esa cuenta es solo para QA contra
       backend local, ver `CLAUDE.md` raíz).
+
+## 12.7 Rediseño del panel (2026-09-22)
+
+### Por qué
+
+El usuario probó la v1 del panel (KPI strip + tabla plana con filtros
+Departamento/Localidad/Ministerio destino, todos independientes) y reportó
+dos problemas concretos:
+
+1. **"Los filtros no funcionan bien, no filtra correctamente las
+   localidades"** — causa real: el desplegable de Localidad listaba las 246
+   localidades de toda la provincia sin filtrar por el Departamento ya
+   elegido. Elegir una combinación Departamento+Localidad que no coexiste en
+   los datos reales devolvía 0 resultados, lo que se percibía como "el
+   filtro está roto" cuando en realidad la lógica de filtrado (AND de ambas
+   condiciones) siempre fue correcta — el problema era la falta de cascada
+   en las *opciones* del desplegable.
+2. **Estética/funcionalidad**: pidió ver en la tabla principal el monto del
+   compromiso y lo entregado hasta el momento, y — copiando el esquema de
+   `CordonCunetaPage.tsx` en `svc-vivienda` — que un clic en la localidad
+   abra un panel lateral con el detalle de las entregas de dinero y sus
+   fechas.
+
+Mismo patrón que el pedido de rediseño que tuvo el Tablero PIT Gas de
+`svc-gasifera` el mismo día (`spec-sync-gasifera-pit.md §12.7`): primera
+versión mínima, ajuste real una vez que el usuario la prueba con datos de
+producción.
+
+### Qué cambió
+
+- **Filtro Localidad en cascada**: sus opciones ahora se recalculan a partir
+  del Departamento seleccionado (`compromisos.filter(c => c.departamento ===
+  deptoFilter)` antes de derivar el set de localidades); si el Departamento
+  cambia y la Localidad elegida deja de pertenecer a él, se limpia
+  automáticamente. El filtro Ministerio destino queda independiente (no es
+  una jerarquía geográfica).
+- **Columnas de la tabla principal**: se agrega `N° Expediente` (ya estaba
+  sincronizado y expuesto por la API, pero no se mostraba). Se reemplaza la
+  columna cruda `Saldo ATP` (la fórmula del Sheet la fuerza a 0 para
+  compromisos derivados, ver §3.2) por dos columnas calculadas en el
+  frontend a partir de `total_pagado` (ya expuesto desde v1): `Entregado`
+  (`abs(total_pagado)`) y `Pendiente` (`monto - Entregado`), útiles para
+  **todas** las filas, no solo las que quedan en "Gobierno". Nuevos KPIs:
+  "Entregado a la fecha" y "Pendiente de entrega" (sumas sobre todo el
+  dataset, no solo lo filtrado).
+- **Panel lateral por localidad** (nuevo, mismo esquema visual que el
+  `DetailPanel` de `CordonCunetaPage.tsx` — header navy, botón cerrar,
+  timeline con punto+línea): al hacer clic en la Localidad de una fila se
+  abre con el resumen del compromiso (expediente, fecha, monto, ministerio
+  destino, entregado, pendiente, destino, alerta si está derivado) y un
+  timeline de "Entregas de dinero" (mes/año + monto), cargado bajo demanda
+  vía el endpoint nuevo del §12.4 — **no** se trae el cronograma completo de
+  los ~1100 compromisos en el listado principal, solo el del compromiso que
+  se abre.
+
+### Endpoint nuevo
+
+```
+GET /api/v1/gralgob/compromisos/{compromiso_id}/cronograma
+```
+Ver §12.4 (agregado ahí). 404 si el compromiso no existe; lista vacía
+(`200 []`) si existe pero no tiene cronograma cargado. Mismo auth que el
+resto del panel (`require_gralgob(*ROLES_LECTURA)`).
+
+### Deploy
+
+Redeploy de `svc-gralgob` (revisión con el router actualizado), gateway
+actualizado a `ministerio-config-v20260922` (agrega
+`/api/v1/gralgob/compromisos/{compromiso_id}/cronograma`, GET + OPTIONS) y
+frontend redeployado a `gestorcooperativo.web.app`. **Detalle técnico no
+obvio**: la primera creación de esta config falló con
+`INVALID_ARGUMENT: ... undefined field 'compromiso_id' on message
+google.protobuf.Empty` — el bloque `options:` de un path con parámetro
+(`{compromiso_id}`) también necesita declarar ese `parameters: - in: path`,
+no solo el `get:` (mismo patrón ya usado en
+`/api/v1/privada/gestiones/{gestion_id}`); si falta, la traducción a
+gRPC/HTTP transcoding no encuentra dónde mapear el parámetro del path para
+esa operación. Corregido y verificado (config activa, `GET .../cronograma`
+sin token → 401, no 404).
+
+**Nota de proceso** (igual criterio que el resto de esta sesión): tanto la
+config de gateway como el build de frontend se generaron excluyendo
+temporalmente el trabajo en curso de `svc-gasifera` (otra sesión en
+paralelo) — copias temporales sin ese código, verificadas con `grep`/diff
+antes de cada deploy, y el trabajo de Gasífera restaurado sin commitear
+inmediatamente después en los 4 repos afectados.
