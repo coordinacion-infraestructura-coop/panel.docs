@@ -1,13 +1,30 @@
 # Spec: Sincronización Google Sheet "SEC. GAS PIT" → `svc-gasifera` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.3.0
+**Versión**: 1.4.0
 **Servicio**: `svc-gasifera` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
 **Última actualización**: 2026-09-23
 
 ---
 
 ## Changelog
+
+- **1.4.0** (2026-09-23): **incidente encontrado y resuelto** — la sesión en
+  paralelo que trabajó `svc-gralgob` generó una config de Gateway nueva
+  (`ministerio-config-v20260922`) a partir de una copia de
+  `infra/gateway/openapi.yaml` que **no tenía** los paths de `/api/v1/gasifera/**`
+  (habían quedado sin commitear en `infra/` desde §12.5). Esa config quedó
+  activa, dejando el panel de Gasífera respondiendo `404` en producción sin
+  que nadie lo notara hasta que el usuario pidió confirmar el estado del
+  deploy. Fix: se commitearon los paths de gasifera a `infra/` (commit
+  `195e735`, sin tocar los de gralgob, ya commiteados aparte), se generó
+  `ministerio-config-v20260923` desde el archivo ya completo (gasifera +
+  gralgob) y se actualizó el gateway — verificado con `curl` que los 3 paths
+  de gasifera vuelven a dar `401` (no `404`) y que gralgob/vivienda no se
+  rompieron. **Lección**: las configs de Gateway no son incrementales — cada
+  config nueva se genera del `openapi.yaml` completo en ese momento, así que
+  cualquier cambio sin commitear/pushear a `infra/` se pierde en el próximo
+  deploy de gateway que haga *cualquier* sesión, no solo la propia.
 
 - **1.3.0** (2026-09-23): Cloud Scheduler configurado (`sync-gasifera-pit`, cada
   hora, self-invoke OIDC) — el sync deja de ser manual. Hicieron falta 2 grants
