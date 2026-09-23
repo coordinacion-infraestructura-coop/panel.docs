@@ -1,13 +1,18 @@
 # Spec: Sincronización Google Sheet "ATP - Compromiso Gobernador" → `svc-gralgob` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.2.0
+**Versión**: 1.3.0
 **Servicio**: `svc-gralgob` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
 **Última actualización**: 2026-09-22
 
 ---
 
 ## Changelog
+
+- **1.3.0** (2026-09-22): agrega §12.8 — cruce de Departamento/Localidad
+  contra el padrón geográfico canónico `viv_geo_localidades`, 100%
+  client-side sobre un endpoint público ya existente de `svc-vivienda`, sin
+  cambios de backend en `svc-gralgob`. Ver §12.8.
 
 - **1.2.0** (2026-09-22): agrega §12.7 — rediseño del panel tras probarlo con
   datos reales (filtro de Localidad no dependía del Departamento elegido,
@@ -500,3 +505,76 @@ temporalmente el trabajo en curso de `svc-gasifera` (otra sesión en
 paralelo) — copias temporales sin ese código, verificadas con `grep`/diff
 antes de cada deploy, y el trabajo de Gasífera restaurado sin commitear
 inmediatamente después en los 4 repos afectados.
+
+## 12.8 Cruce contra el padrón geográfico canónico (2026-09-22)
+
+### Por qué
+
+Pedido explícito del usuario en el planning original: "Departamento y
+localidad (luego cruzarlo con nuestra base geo_localidades)". El Sheet trae
+texto libre tipeado a mano por el área — mismo riesgo de calidad de dato que
+`SPIP`/enums casi-duplicados en Gasífera — así que conviene detectar cuándo
+una localidad no coincide con el catálogo canónico antes de usarla para
+federar a Resumen Territorial (que busca por localidad).
+
+### Qué se cruza y contra qué
+
+`viv_geo_localidades` (propiedad de `svc-vivienda`, ADR-001) — no se duplica
+el catálogo en `db_gralgob` ni se agrega un endpoint interno IAM-only nuevo
+para esto. En cambio, el frontend llama directamente al endpoint público que
+ya existe para el propio uso de Cordón Cuneta/Córdoba Hogar:
+
+```
+GET /api/v1/vivienda/cordon-cuneta/geo
+```
+
+Este endpoint gatea por **rol** (`ROLES_LECTURA` = Admin/Supervisor/Operador/
+Consulta), **no por secretaría** — así que un usuario con la secretaría
+`gralgob` asignada (sin `vivienda`) también puede leerlo. Verificado
+revisando `app/cordon_cuneta/router.py`/`app/auth.py` de `svc-vivienda`
+(usa `require_roles(*ROLES_LECTURA)`, no un chequeo de secretaría). Se
+decidió no agregar un endpoint interno IAM-only nuevo (mismo patrón que
+`priv_localidades_info`/ADR-012) porque el catálogo ya es de solo lectura,
+público, y estático (cambia poquísimo) — el costo de una llamada cross-
+secretaría extra a un endpoint que ya existe es menor que el de coordinar un
+cambio en `svc-vivienda` para esto.
+
+### Cómo matchea
+
+`src/modules/gralgob/pages/AtpPage.tsx`: matching por nombre normalizado
+(`shared/utils/normalizeName.ts`, mismo criterio que `app/geo/matching.py`
+del backend — sin acentos, minúsculas). Para cada compromiso:
+- **`ok`**: la localidad existe en el padrón y coincide también el
+  departamento.
+- **`depto-distinto`**: la localidad existe en el padrón pero bajo otro
+  departamento al cargado en `BD`.
+- **`sin-match`**: la localidad no aparece en absoluto en el padrón.
+- **`sin-dato`**: el compromiso no tiene localidad cargada (no es un error
+  de cruce, no se marca).
+
+**No** resuelve alias entre paréntesis ni nombres separados por guion como sí
+hace `candidatos_localidad()` del lado del backend (`app/geo/matching.py`) —
+es un primer cruce best-effort para exponer problemas de calidad de dato, no
+una normalización exhaustiva. Si el volumen de falsos positivos resulta alto
+en la práctica, extenderlo es la siguiente iteración natural.
+
+### UI
+
+Ícono "!" con tooltip junto al nombre de la localidad (solo para
+`depto-distinto`/`sin-match`, no para `ok`/`sin-dato`), mismo aviso repetido
+en el panel lateral de detalle, KPI nuevo "Sin coincidencia en el padrón geo"
+y un filtro (checkbox) para aislar esas filas y facilitar que el área
+corrija el Sheet.
+
+### Alcance
+
+100% frontend, sin cambios de backend en `svc-gralgob` ni en `svc-vivienda`,
+sin nuevo deploy de servicios — solo el redeploy de frontend ya cubierto en
+"Deploy" más arriba. No resuelve el dato en la base (`atp_compromisos` sigue
+guardando el texto crudo del Sheet) — el cruce es puramente de presentación,
+para ahora. Si más adelante hace falta persistir el `id_geo` resuelto (por
+ejemplo, para la federación a Resumen Territorial), es un cambio de sync en
+`svc-gralgob` que requeriría que `svc-gralgob` sí lea `viv_geo_localidades`
+desde el backend (vía un endpoint interno IAM-only nuevo de `svc-vivienda`,
+mismo patrón que ADR-015/ADR-016) — no implementado, evaluar cuando se
+aborde esa federación.
