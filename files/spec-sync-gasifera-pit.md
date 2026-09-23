@@ -1,7 +1,7 @@
 # Spec: Sincronización Google Sheet "SEC. GAS PIT" → `svc-gasifera` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.5.0
+**Versión**: 1.6.0
 **Servicio**: `svc-gasifera` (sync + panel preliminar de solo lectura + rollup territorial, sin panel de negocio)
 **Última actualización**: 2026-09-23
 
@@ -9,6 +9,24 @@
 
 ## Changelog
 
+- **1.6.0** (2026-09-23): **bug real encontrado y corregido** —
+  `monto_inversion_usd` (`app/gas_pit/sync.py`) **multiplicaba**
+  `monto_inversion_solicitado` por `settings.tipo_cambio_usd` (1460) en vez de
+  **dividir**, desde la Fase 0 original. Pasó desapercibido porque nadie había
+  mirado ese campo con datos reales hasta federarlo a `resumen_territorial`
+  (ADR-021) — ahí saltaron montos "USD" en billones. Confirmado con datos
+  reales: `monto_inversion_solicitado` está en ARS (mismo orden de magnitud
+  que `importe_obra_actualizado` de `gas_pit_obras`, ej. obras de ~1.900
+  millones de ARS) — dividir por 1460 da cifras de USD plausibles (ej. la
+  mayor pasó de "2.48 billones" a ~1.16 millones de USD). El test
+  correspondiente (`test_sync_inserta_accion_territorio_y_calcula_usd`)
+  codificaba el cálculo erróneo como si fuera correcto — también corregido.
+  Redeployado (`svc-gasifera-00005-svw`), sync real re-corrido para recalcular
+  las 296 filas con monto, `resumen_territorial` recomputado con los valores
+  correctos. **Lección**: un test que sólo verifica "la fórmula que escribí
+  hace lo que escribí" no detecta un error de signo/dirección — hace falta
+  contrastar contra una magnitud de referencia independiente (acá,
+  `gas_pit_obras`) al menos una vez con datos reales.
 - **1.5.0** (2026-09-23): agrega §15 — endpoint interno
   `GET /internal/gasifera/rollup-territorial`, consumido por `resumen_territorial`
   de `svc-vivienda` (ADR-021, mismo patrón que ADR-016 usó para Privada). Ver
