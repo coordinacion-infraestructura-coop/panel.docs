@@ -1,7 +1,7 @@
 # Spec: Sincronización Google Sheet "ATP - Compromiso Gobernador" → `svc-gralgob` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.5.0
+**Versión**: 1.6.0
 **Servicio**: `svc-gralgob` (módulo de sync + panel preliminar de solo lectura, sin panel de negocio)
 **Última actualización**: 2026-09-23
 
@@ -9,6 +9,8 @@
 
 ## Changelog
 
+- **1.6.0** (2026-09-23): agrega §14 — notificación a svc-vivienda cuando el
+  sync detecta un compromiso NUEVO (ADR-023). Ver §14.
 - **1.5.0** (2026-09-23): agrega §13 — rollup territorial y federación
   server-side a `resumen_territorial` de svc-vivienda (ADR-022, mismo patrón
   que ADR-016/ADR-021 usaron para Privada/Gasífera). Ver §13.
@@ -684,3 +686,34 @@ GET /internal/atp/rollup-territorial
   credenciales) — pendiente de confirmación visual por un Admin, mismo criterio que el resto del
   panel ATP (spec §12.6).
 - [ ] Frontend `ResumenTerritorialPage.tsx`: badge de área `gralgob` (label + color propio) — no evaluado en esta entrega, el badge se renderiza igual de genérico que las otras áreas hasta que se pida un color distintivo.
+
+## 14. Notificación a svc-vivienda cuando hay un compromiso nuevo (agregado 2026-09-23, v1.6.0, ADR-023)
+
+### 14.1 Qué dispara la alerta
+
+Cada vez que `sync_from_sheet` detecta un compromiso **nuevo** (`is_new = True` en `_upsert_compromiso` — no una fila que ya existía y se actualizó), se llama, después de loguear la corrida en `AtpSyncLog` y fuera del `SAVEPOINT` por fila, a `POST /internal/notificaciones` de `svc-vivienda` (ADR-019) con:
+
+```
+"La localidad {localidad}, {departamento} fue visitada por el gobernador el día {fecha_anuncio}."
+```
+
+`destino_tipo="secretaria"`, `destino_valor="gralgob"`, `nivel="info"`, `origen="atp_sync"`. Si falta `localidad`/`departamento`/`fecha_anuncio`, se sustituye por `"(sin localidad)"`/`"(sin departamento)"`/`"(sin fecha)"` — nunca se omite el envío por datos parciales.
+
+### 14.2 Por qué después del loop, no dentro del SAVEPOINT
+
+Atar la llamada HTTP a `svc-vivienda` a la transacción de cada fila arriesgaría: (a) sumarle latencia de red al batch completo, fila por fila; (b) que un fallo de red dispare el `except Exception` del loop y la fila se registre como error aunque el upsert haya sido válido. Se acumulan las filas nuevas en una lista (`localidad`, `departamento`, `fecha_anuncio`) durante el loop y se notifican todas al final, ya con el log de sync persistido.
+
+### 14.3 Implementación
+
+`app/integrations/notificaciones_vivienda.py::notificar_visita_gobernador(...)` — best-effort, nunca lanza (mismo criterio que el resto de las integraciones salientes del proyecto: `resumen_territorial.fetch_privada_lineas`, `privada_sync.sync_gestion_privada`). Reusa `settings.svc_vivienda_internal_url` (ya sembrada para el lookup de `portal_usuarios`, ADR-015) — no hace falta una URL nueva. Gate propio: `settings.notificar_fila_nueva_enabled` (default `False` en `config.py`, `True` en prod vía `services/cloudbuild.yaml` — sustitución `_NOTIFICAR_FILA_NUEVA_ENABLED`, compartida con Gasífera porque ambos servicios leen la misma env var). ID token de la SA de runtime, audiencia = URL base de `svc-vivienda` — mismo patrón que `app/auth.py::_fetch_portal_user`, pero en sentido inverso: acá `svc-gralgob` es quien llama.
+
+### 14.4 IAM
+
+Mismo grant que ya usa ADR-015 (`svc-gralgob@gestorcooperativo.iam.gserviceaccount.com` con `roles/run.invoker` sobre `svc-vivienda`) — no es un permiso nuevo, el mismo grant habilita tanto `GET /internal/portal/usuarios/{email}` como este `POST /internal/notificaciones`, porque ambos apuntan al mismo servicio destino.
+
+### 14.5 Criterios de aceptación
+
+- [x] `app/integrations/notificaciones_vivienda.py` + wiring en `app/atp/sync.py::sync_from_sheet`.
+- [x] Tests (`tests/test_atp_notificaciones.py`, 3): compromiso nuevo notifica con localidad/fecha correctas; un compromiso ya existente no vuelve a notificar en una corrida posterior; con el flag apagado no se instancia el cliente HTTP. Suite completa de `svc-gralgob` (34 tests) en verde.
+- [x] `services/cloudbuild.yaml`: sustitución `_NOTIFICAR_FILA_NUEVA_ENABLED` (compartida con Gasífera).
+- [ ] Verificación end-to-end en producción (corrida real de sync con un compromiso nuevo + confirmación visual de la alerta en el panel de notificaciones) — pendiente, análoga a la ya hecha para la vinculación Privada (`spec-vinculacion-vivienda-privada.md`).

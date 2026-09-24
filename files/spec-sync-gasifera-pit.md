@@ -1,7 +1,7 @@
 # Spec: Sincronización Google Sheet "SEC. GAS PIT" → `svc-gasifera` (Fase 0)
 
 **Estado**: approved
-**Versión**: 1.6.0
+**Versión**: 1.7.0
 **Servicio**: `svc-gasifera` (sync + panel preliminar de solo lectura + rollup territorial, sin panel de negocio)
 **Última actualización**: 2026-09-23
 
@@ -9,6 +9,8 @@
 
 ## Changelog
 
+- **1.7.0** (2026-09-23): agrega §16 — notificación a svc-vivienda cuando el
+  sync detecta una acción territorial NUEVA (ADR-023). Ver §16.
 - **1.6.0** (2026-09-23): **bug real encontrado y corregido** —
   `monto_inversion_usd` (`app/gas_pit/sync.py`) **multiplicaba**
   `monto_inversion_solicitado` por `settings.tipo_cambio_usd` (1460) en vez de
@@ -368,3 +370,34 @@ Investigado antes de implementar (no asumido): **ni Vivienda ni Privada usan hoy
 - [ ] `services/cloudbuild.yaml`: sustituciones `_GASIFERA_FETCH_ENABLED`/`_SVC_GASIFERA_INTERNAL_URL` — pendiente.
 - [ ] Redeploy de `svc-gasifera` (endpoint nuevo) y `svc-vivienda` (fetch nuevo) — pendiente, el de `svc-vivienda` es el de mayor riesgo por ser el servicio productivo principal.
 - [ ] Verificación end-to-end: una localidad con obras/acciones de gas reales aparece en el snapshot de Resumen Territorial con `area: "gasifera"`, respetando visibilidad por secretaría.
+
+## 16. Notificación a svc-vivienda cuando hay una acción territorial nueva (agregado 2026-09-23, v1.7.0, ADR-023)
+
+### 16.1 Qué dispara la alerta
+
+Cada vez que `sync_from_sheet` detecta una fila **nueva** en la hoja "ACCIONES TERRITORIO" (`is_new = True` en `_upsert_accion` — no una fila que ya existía y se actualizó), se llama, después de loguear la corrida en `GasPitSyncLog` y fuera del `SAVEPOINT` por fila, a `POST /internal/notificaciones` de `svc-vivienda` (ADR-019) con:
+
+```
+"La localidad {localidad}, {departamento} sumó obra de gas {accion}."
+```
+
+`destino_tipo="secretaria"`, `destino_valor="gasifera"`, `nivel="info"`, `origen="gas_pit_sync"`. Si falta `localidad`/`departamento`/`accion`, se sustituye por `"(sin localidad)"`/`"(sin departamento)"`/`"(sin detalle)"` — nunca se omite el envío por datos parciales. **Sólo la hoja "ACCIONES TERRITORIO" dispara esta alerta** — una obra nueva en "MATRIZ (NO TOMAR)" (`gas_pit_obras`) no notifica, porque el campo "acción" pedido no existe en esa tabla (`gas_pit_obras` no tiene un concepto de "acción", sólo estado/avance de obra).
+
+### 16.2 Por qué después del loop, no dentro del SAVEPOINT
+
+Atar la llamada HTTP a `svc-vivienda` a la transacción de cada fila arriesgaría: (a) sumarle latencia de red al batch completo, fila por fila; (b) que un fallo de red dispare el `except Exception` del loop y la fila se registre como error aunque el upsert haya sido válido. Se acumulan las acciones nuevas en una lista (`localidad`, `departamento`, `accion`) durante el loop de ACCIONES TERRITORIO y se notifican todas al final, ya con el log de sync persistido.
+
+### 16.3 Implementación
+
+`app/integrations/notificaciones_vivienda.py::notificar_accion_nueva(...)` — best-effort, nunca lanza (mismo criterio que el resto de las integraciones salientes del proyecto). Reusa `settings.svc_vivienda_internal_url` (ya sembrada para el lookup de `portal_usuarios`, ADR-015) — no hace falta una URL nueva. Gate propio: `settings.notificar_fila_nueva_enabled` (default `False` en `config.py`, `True` en prod vía `services/cloudbuild.yaml` — sustitución `_NOTIFICAR_FILA_NUEVA_ENABLED`, compartida con ATP/gralgob porque ambos servicios leen la misma env var). ID token de la SA de runtime, audiencia = URL base de `svc-vivienda` — mismo patrón que `app/auth.py::_fetch_portal_user`, pero en sentido inverso: acá `svc-gasifera` es quien llama.
+
+### 16.4 IAM
+
+Mismo grant que ya usa ADR-015 (`svc-gasifera@gestorcooperativo.iam.gserviceaccount.com` con `roles/run.invoker` sobre `svc-vivienda`) — no es un permiso nuevo, el mismo grant habilita tanto `GET /internal/portal/usuarios/{email}` como este `POST /internal/notificaciones`, porque ambos apuntan al mismo servicio destino.
+
+### 16.5 Criterios de aceptación
+
+- [x] `app/integrations/notificaciones_vivienda.py` + wiring en `app/gas_pit/sync.py::sync_from_sheet` (sólo en el loop de ACCIONES TERRITORIO).
+- [x] Tests (`tests/test_gas_pit_notificaciones.py`, 4): acción nueva notifica con localidad/acción correctas; una acción ya existente no vuelve a notificar en una corrida posterior; una obra nueva en MATRIZ no dispara esta alerta; con el flag apagado no se instancia el cliente HTTP. Suite completa de `svc-gasifera` (30 tests) en verde.
+- [x] `services/cloudbuild.yaml`: sustitución `_NOTIFICAR_FILA_NUEVA_ENABLED` (compartida con ATP/gralgob).
+- [ ] Verificación end-to-end en producción (corrida real de sync con una acción nueva + confirmación visual de la alerta en el panel de notificaciones) — pendiente, análoga a la ya hecha para la vinculación Privada (`spec-vinculacion-vivienda-privada.md`).
