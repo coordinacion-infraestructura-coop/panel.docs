@@ -1,9 +1,9 @@
 # Spec: Resumen Territorial — Ficha de localidad + federación server-side de Privada
 
-**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · exportables del RT rediseñados 2026-09-03
-**Versión**: 0.3.0
+**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · exportables del RT rediseñados 2026-09-03 · E5c (Gasífera + ATP en la ficha de municipio) y E5d (filtro "Visita del gobernador") IMPLEMENTADOS 2026-09-23
+**Versión**: 0.4.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-09-03
+**Última actualización**: 2026-09-23
 
 > **Implementado 2026-09-01 (E5b, drawer)** — `panel.front`:
 > `src/modules/resumen-territorial/api/fichaLocalidad.api.ts` + componente `FichaDemografica`
@@ -54,6 +54,43 @@
 >   el front (los consumía el export viejo). El endpoint backend se conserva por si vuelve a hacer
 >   falta un bulk.
 > - **Sin tocar**: botón "Ficha (Excel)" / `fichaMunicipioXlsx` (rework en un paso siguiente).
+
+> **Implementado 2026-09-23 (E5c — Gasífera + ATP en la Ficha de municipio, y E5d — filtro
+> "Visita del gobernador")** — `panel.front`, pedido directo del usuario (Pedro Bonafe, también
+> responsable de spec). Extiende la "Ficha de municipio" (`fichaMunicipio.ts`, PDF + Excel) más
+> allá de lo que cubría §2 originalmente (demografía + CH/CC/ML + Gestiones Privada) para sumar
+> las dos fuentes que se agregaron al sistema después de escrita esta spec (`svc-gasifera`,
+> `svc-gralgob` — ver `../CLAUDE.md` § Servicios). Ambas son **client-side, contra los carve-outs
+> de solo lectura ya aprobados** de cada servicio (`spec-sync-gasifera-pit.md §12`,
+> `spec-sync-atp-compromiso-gobernador.md §12`) — sin endpoints nuevos, sin lógica de negocio
+> nueva en el backend.
+> - **Gasífera** (`GET /api/v1/gasifera/acciones-territorio`, dataset completo — el endpoint no
+>   filtra por departamento/localidad — filtrado client-side): Área, Acción, Etapa
+>   (`detalle_accion`), Estado, Monto solicitado. Una entrada por acción en el municipio.
+> - **ATP** (`GET /api/v1/gralgob/compromisos` + `.../compromisos/{id}/cronograma`, mismo
+>   criterio de filtrado client-side): Ministerio Destino, Fecha de anuncio, Destino, Monto, y
+>   las entregas (cronograma de pagos: período + monto, más el total entregado ya calculado con
+>   el mismo criterio que `AtpPage.tsx` — `abs(total_pagado)`).
+> - **Matching (departamento, localidad)**: como ninguno de los dos servicios expone filtro por
+>   ubicación en su endpoint de lectura, se trae la lista completa y se filtra en el cliente por
+>   localidad normalizada **y** departamento normalizado cuando la fuente lo trae — no sólo por
+>   localidad, a propósito: evita repetir el bug documentado más arriba (join viejo del RT por
+>   sólo-nombre que "siempre cargaba Villa Sarmiento" al cruzar `priv_localidades_info`).
+> - **E5d — filtro "Visita del gobernador" (SI/NO) en `ResumenTerritorialPage.tsx`**: estar en
+>   ATP (`programas` con `area === 'gralgob'`) para una localidad implica que el gobernador la
+>   visitó y anunció algo ahí — mismo hecho que ya usa el badge ATP del panel (`resumen_atp_estado`
+>   en `aggregations.py`, ADR-022). El filtro es de **localidad**, no de programa: filtra qué
+>   localidades aparecen en la tabla sin ocultar sus otros programas (CH/CC/ML/Privada/Gasífera)
+>   cuando "SI" está activo — se evalúa contra los `programas` originales de la localidad, antes
+>   del filtro por área/programa/estado/checklist, para no dar falsos "NO" cuando el usuario ya
+>   tiene otro filtro de área puesto. Sin cambios de backend: los datos ya estaban en el snapshot
+>   desde la federación ATP (ADR-022, 2026-09-23, ver `../CLAUDE.md`).
+> - **Fix de paso**: `AREA_LABEL`/`AREA_DOT_COLOR` (`ResumenTerritorialPage.tsx`) y el tipo
+>   `AreaResumen` (`types/resumenTerritorial.types.ts`) no tenían la entrada `gralgob` — omisión
+>   de la sesión que desplegó ADR-022 (la propia nota de `../CLAUDE.md` decía "no confirmado
+>   visualmente en la UI del RT"). El badge de área ATP mostraba el string crudo `"gralgob"` sin
+>   color propio; corregido de paso (`'Sec. Gral. de Gobierno'`, `#172c3f`) porque el filtro nuevo
+>   lo hacía visible de inmediato.
 **Servicio**: `svc-vivienda` (módulo `app/resumen_territorial/`) + frontend
 `src/modules/resumen-territorial/`
 **Depende de**: `spec-migracion-svc-privada.md` Fase 2 (endpoints `rollup-territorial` y
@@ -112,6 +149,25 @@ de las líneas de Privada pasa del browser al servidor.
   no por join cross-DB. Se cachea con el snapshot (append-only) o se consulta on-demand — decidir
   según coste (551 localidades).
 
+### E5c — Gasífera y ATP en la Ficha de municipio
+- Fuera del alcance original de esta spec (Gasífera/`svc-gralgob` no existían al escribirla) —
+  agregado 2026-09-23 a pedido directo del usuario. Ver nota de cabecera para el detalle completo.
+- `fichaMunicipio.ts` suma dos bloques nuevos (PDF y Excel), client-side, sobre los carve-outs de
+  solo lectura ya aprobados de cada servicio — sin endpoints ni lógica de negocio nueva:
+  - **Gasífera**: Área, Acción, Etapa, Estado, Monto solicitado (`GET /api/v1/gasifera/acciones-territorio`).
+  - **ATP**: Ministerio Destino, Fecha de anuncio, Destino, Monto, entregas/cronograma
+    (`GET /api/v1/gralgob/compromisos` + `.../cronograma`).
+- Filtrado por `(departamento, localidad)` client-side (ninguno de los dos endpoints lo ofrece
+  server-side) — localidad normalizada **y** departamento normalizado cuando la fuente lo trae.
+
+### E5d — Filtro "Visita del gobernador" (ATP) en el Resumen Territorial
+- Agregado 2026-09-23, mismo pedido. Nuevo filtro SI/NO en `ResumenTerritorialPage.tsx`: una
+  localidad "visitada por el gobernador" es una que tiene al menos una línea ATP (`area === 'gralgob'`)
+  en el snapshot — mismo hecho de negocio que ya usa el badge ATP (`resumen_atp_estado`).
+- Sin cambios de backend — los datos ya estaban federados desde ADR-022 (2026-09-23). Filtro de
+  **localidad**, evaluado contra los `programas` originales antes de aplicarse los filtros de
+  área/programa/estado/checklist (para no dar falsos "NO" con otro filtro de área activo).
+
 ### Fuera de alcance
 - Edición de `localidades_info`/`departamentos_info` desde el panel transversal (el `PUT` de
   `svc-privada` sigue siendo la única vía de edición; `tipo_localidad`/`color_semaforo` read-only).
@@ -136,6 +192,25 @@ de las líneas de Privada pasa del browser al servidor.
 - `departamentos_info`: read-only (default) o se agrega edición.
 
 ## 5. Criterios de aceptación
+
+**E5c — Gasífera + ATP en la Ficha de municipio** — implementado 2026-09-23:
+- [x] El PDF y el Excel de "Ficha de municipio" incluyen un bloque Gasífera (Área, Acción, Etapa,
+      Estado, Monto solicitado) y un bloque ATP (Ministerio Destino, Fecha de anuncio, Destino,
+      Monto, entregas/cronograma) por cada acción/compromiso del municipio.
+- [x] El match `(departamento, localidad)` es client-side, exige localidad normalizada y
+      departamento normalizado cuando la fuente lo trae (evita el bug de cruce documentado en E5b).
+- [x] `npm run build` sin errores de tipos.
+- [ ] Verificación visual en el navegador con un municipio real con acciones de gas y/o
+      compromisos ATP conocidos — pendiente.
+
+**E5d — filtro "Visita del gobernador"** — implementado 2026-09-23:
+- [x] Nuevo `<select>` en la barra de filtros del RT (SI/NO/cualquiera), integrado a
+      `hayFiltros`/`limpiar`/`filtrosTexto` como el resto de los filtros existentes.
+- [x] El filtro es de localidad (no oculta programas de otras áreas de una localidad que sí
+      visitó el gobernador) y no se ve afectado por otros filtros de área/programa activos.
+- [x] Fix de paso: `AREA_LABEL`/`AREA_DOT_COLOR`/`AreaResumen` no tenían `gralgob` — el badge de
+      área ATP mostraba el string crudo sin color propio.
+- [ ] Verificación visual en el navegador — pendiente (mismo pendiente que ADR-022 traía arrastrado).
 
 **E5b — ficha (drawer)** — implementado 2026-09-01:
 - [x] La ficha muestra electores, `color_semaforo` (con chip de color), intendente + partido,
