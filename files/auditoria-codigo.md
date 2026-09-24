@@ -215,6 +215,20 @@ Fixes aplicados en el mismo commit que la bitácora de observaciones de obra:
 - Asignación automática de `secretaria` en `crear_pedido` (CC y CH, 3 tests cada uno): prioridad `supervision` > `infraestructura` > primera secretaría del actor.
 - Total: 175/175 tests backend verdes (160 de la corrección de bugs + 15 de estos gaps de cobertura).
 
+### 2026-09-23 — `svc-gasifera` (fuera del alcance de la auditoría 2026-07-23, hallazgo incidental durante la federación a `resumen_territorial`)
+
+28. **[Medio] `svc-gasifera`: `monto_inversion_usd` multiplicaba en vez de dividir por el tipo de cambio.**
+    `app/gas_pit/sync.py` calculaba `monto_solicitado * settings.tipo_cambio_usd` (1460) en vez
+    de dividir — presente desde la Fase 0 original, invisible hasta que apareció en
+    `resumen_territorial` (montos del orden de billones de "USD"). Confirmado el sentido correcto
+    comparando contra `gas_pit_obras.importe_obra_actualizado` (mismo orden de magnitud conocido
+    en ARS): `monto_inversion_solicitado` está en ARS, dividir da un USD plausible (la obra más
+    grande pasó de "2,48 billones" a ~1,16M USD). El test que cubría el campo tenía la fórmula
+    incorrecta codificada como "correcta" — se corrigió junto con el fix.
+    **Fix**: división en vez de multiplicación; re-sync real + recómputo de `resumen_territorial`
+    verificados con los valores corregidos en producción. Detalle completo en
+    `spec-sync-gasifera-pit.md` changelog v1.6.0.
+
 ---
 
 ## ❌ Descartado / Won't fix
