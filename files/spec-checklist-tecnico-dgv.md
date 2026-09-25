@@ -1,12 +1,30 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
 **Estado**: approved
-**Versión**: 1.4.0
+**Versión**: 1.5.0
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
-**Última actualización**: 2026-09-09
+**Última actualización**: 2026-09-25
 
 ### Changelog
+- **1.5.0 (2026-09-25)** — Se retira el espejo viejo de Google Sheet ("Checklist Técnico" dentro
+  del panel de Cordón Cuneta, `spec-sync-cc-checklist-tecnico.md`): el Sheet `DGV Programas 2026`
+  perdió el acceso compartido (con la cuenta que usa el equipo y, con altísima probabilidad, con
+  `svc-vivienda@gestorcooperativo.iam.gserviceaccount.com`) en algún momento entre el 2026-09-18
+  14:30 y 14:45 UTC — el sync automático (`sync-cc-checklist-tecnico`, cada 15 min) viene
+  fallando el 100% de las corridas desde entonces con `SheetReadError` → 502, sin que nadie lo
+  notara. Coincide con que el área técnica migró a cargar los datos acá, en este módulo, en vez
+  de en esa planilla.
+  1. **La pestaña "Checklist Técnico" de `CordonCunetaPage.tsx` ahora lee de este módulo**
+     (`GET /checklist-tecnico/cc/{municipio_id}` — mismo id que `viv_cordon_cuneta.id`, sin
+     tabla de vínculo nueva) en vez del viejo `GET /cordon-cuneta/{municipio_id}/checklist-tecnico`
+     (`viv_cc_checklist_tecnico`, sync de Sheet). Es un **resumen de solo lectura** para el área
+     administrativa — se sigue editando únicamente desde `/vivienda/checklist-tecnico`. Sin
+     cambios de backend ni de gateway: reutiliza endpoints ya existentes desde v1.0.0-v1.4.0.
+  2. Pendiente de decisión (no resuelto en esta versión, ver `auditoria-codigo.md` #29):
+     restaurar el acceso al Sheet viejo (si todavía hace falta ese espejo para algo más) vs.
+     dar de baja el Cloud Scheduler `sync-cc-checklist-tecnico` y el indicador "🔄 Actualizar
+     ahora" del panel de Cordón Cuneta, que siguen apuntando al sync roto.
 - **1.4.0 (2026-09-09)** — El stepper de "Estado del expediente" ponía ✓ a TODOS los estados
   anteriores al actual, aunque el expediente nunca hubiera estado en ellos. `RECHAZADO por M/C`
   y `SIN AUTORIZACION MIN.GOB` **no son parte obligatoria del camino** — algunos expedientes

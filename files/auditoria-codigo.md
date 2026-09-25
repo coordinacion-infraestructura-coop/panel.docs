@@ -229,6 +229,35 @@ Fixes aplicados en el mismo commit que la bitácora de observaciones de obra:
     verificados con los valores corregidos en producción. Detalle completo en
     `spec-sync-gasifera-pit.md` changelog v1.6.0.
 
+### 2026-09-25 — `checklist_tecnico` / sync CC (fuera del alcance de la auditoría 2026-07-23)
+
+29. **[Alto] El sync de Cordón Cuneta (`sync-cc-checklist-tecnico`, Cloud Scheduler cada 15 min)
+    lleva desde el 2026-09-18 fallando el 100% de las corridas, en silencio.**
+    El Google Sheet `DGV Programas 2026` (id `1U8-Rck1fgQHpQptC4hcqhTNzPxsIBixljBt3DB3Dn9U`)
+    perdió el acceso compartido en algún momento entre 2026-09-18 14:30 y 14:45 UTC — probado
+    abriendo el Sheet con la cuenta `infraestructura.coop@gmail.com` (tenía acceso, usada varias
+    veces antes en este proyecto) y obteniendo "Acceso denegado". Cada corrida del scheduler
+    devuelve `502` (`SheetReadError` → comportamiento esperado del código cuando falla la
+    lectura completa, no un bug de código: confirmado que no hubo ningún deploy de
+    `svc-vivienda` en esa ventana horaria). Coincide con que el área técnica migró a cargar los
+    datos en el módulo nuevo (`checklist_tecnico`) en vez de en esa planilla — probablemente se
+    dejó de compartir/mantener el Sheet como efecto colateral.
+    **Síntoma para el usuario**: la pestaña "Checklist Técnico" del panel de Cordón Cuneta
+    (espejo de ese Sheet, módulo viejo y separado de `checklist_tecnico`) dejó de mostrar datos
+    — quedó congelada en lo último sincronizado el 2026-09-18 14:30 UTC.
+    **Fix aplicado (spec-checklist-tecnico-dgv.md v1.5.0)**: esa pestaña ahora lee del módulo
+    nuevo (`ChecklistTecnicoResumenTab` en `CordonCunetaPage.tsx`, resumen de solo lectura sobre
+    `GET /checklist-tecnico/cc/{municipio_id}` — mismo `entidad_id`, sin backend nuevo).
+    **Sin resolver, pendiente de decisión del usuario**: el Cloud Scheduler `sync-cc-checklist-tecnico`
+    sigue corriendo cada 15 min y fallando (no se detuvo); el indicador "🔄 Actualizar ahora" /
+    "Checklist técnico: sincronizado hace X" en el header del panel de Cordón Cuneta (separado de
+    la pestaña, no tocado en este fix) sigue apuntando al sync roto y seguirá fallando si se lo
+    usa. Opciones: (a) restaurar el acceso del Sheet a la cuenta de servicio
+    `svc-vivienda@gestorcooperativo.iam.gserviceaccount.com` si ese espejo todavía hace falta
+    para algo más, o (b) dar de baja el scheduler + ese indicador si ya no tiene sentido
+    mantenerlo. `viv_cc_checklist_tecnico`/`viv_cc_checklist_items` (las tablas del sync viejo)
+    no se tocaron ni se borraron.
+
 ---
 
 ## ❌ Descartado / Won't fix
