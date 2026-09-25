@@ -1,12 +1,20 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
 **Estado**: approved
-**Versión**: 1.5.0
+**Versión**: 1.5.1
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
 **Última actualización**: 2026-09-25
 
 ### Changelog
+- **1.5.1 (2026-09-25)** — Resuelto el pendiente de la 1.5.0: se decidió dar de baja el sync
+  viejo (no restaurar el acceso al Sheet). Se eliminó el Cloud Scheduler
+  `sync-cc-checklist-tecnico` (`gcloud scheduler jobs delete`) y se sacó del panel de Cordón
+  Cuneta el indicador "Checklist técnico: sincronizado hace X" + botón "🔄 Actualizar ahora"
+  (apuntaban al sync roto). **No se tocaron** los endpoints (`GET/POST /cordon-cuneta-checklist-tecnico/*`,
+  `GET /cordon-cuneta/{municipio_id}/checklist-tecnico`), `checklist_sync.py`, ni las tablas
+  `viv_cc_checklist_tecnico`/`viv_cc_checklist_items`/`viv_cc_sync_log` — quedan como código y
+  datos muertos pero inofensivos, recuperables si hiciera falta retomar el espejo del Sheet.
 - **1.5.0 (2026-09-25)** — Se retira el espejo viejo de Google Sheet ("Checklist Técnico" dentro
   del panel de Cordón Cuneta, `spec-sync-cc-checklist-tecnico.md`): el Sheet `DGV Programas 2026`
   perdió el acceso compartido (con la cuenta que usa el equipo y, con altísima probabilidad, con

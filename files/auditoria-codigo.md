@@ -248,15 +248,15 @@ Fixes aplicados en el mismo commit que la bitácora de observaciones de obra:
     **Fix aplicado (spec-checklist-tecnico-dgv.md v1.5.0)**: esa pestaña ahora lee del módulo
     nuevo (`ChecklistTecnicoResumenTab` en `CordonCunetaPage.tsx`, resumen de solo lectura sobre
     `GET /checklist-tecnico/cc/{municipio_id}` — mismo `entidad_id`, sin backend nuevo).
-    **Sin resolver, pendiente de decisión del usuario**: el Cloud Scheduler `sync-cc-checklist-tecnico`
-    sigue corriendo cada 15 min y fallando (no se detuvo); el indicador "🔄 Actualizar ahora" /
-    "Checklist técnico: sincronizado hace X" en el header del panel de Cordón Cuneta (separado de
-    la pestaña, no tocado en este fix) sigue apuntando al sync roto y seguirá fallando si se lo
-    usa. Opciones: (a) restaurar el acceso del Sheet a la cuenta de servicio
-    `svc-vivienda@gestorcooperativo.iam.gserviceaccount.com` si ese espejo todavía hace falta
-    para algo más, o (b) dar de baja el scheduler + ese indicador si ya no tiene sentido
-    mantenerlo. `viv_cc_checklist_tecnico`/`viv_cc_checklist_items` (las tablas del sync viejo)
-    no se tocaron ni se borraron.
+    **Resuelto (spec v1.5.1, mismo día)**: el usuario eligió dar de baja el sync en vez de
+    restaurar el acceso al Sheet. Se borró el Cloud Scheduler `sync-cc-checklist-tecnico`
+    (`gcloud scheduler jobs delete`, confirmado con `jobs list` que ya no aparece) y se sacó del
+    header del panel de Cordón Cuneta el indicador "Checklist técnico: sincronizado hace X" +
+    botón "🔄 Actualizar ahora" (`CordonCunetaPage.tsx`). Deliberadamente **no** se tocaron los
+    endpoints `GET/POST /cordon-cuneta-checklist-tecnico/*`, `GET /cordon-cuneta/{municipio_id}/checklist-tecnico`,
+    `checklist_sync.py`, ni las tablas `viv_cc_checklist_tecnico`/`viv_cc_checklist_items`/`viv_cc_sync_log`
+    — quedan como código y datos muertos pero inofensivos, recuperables si hiciera falta retomar
+    el espejo del Sheet más adelante (no se pidió esa limpieza más profunda).
 
 ---
 
