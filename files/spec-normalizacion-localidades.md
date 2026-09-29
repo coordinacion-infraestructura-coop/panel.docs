@@ -1,16 +1,47 @@
 # Spec: Normalización de nombres de localidad (transversal)
 
 **Estado**: approved
-**Versión**: 0.3.0
+**Versión**: 0.4.0
 **Servicios**: `svc-vivienda` (padrón + endpoint interno de resolución + fixes de
-matching), `svc-gasifera` (sync), `svc-gralgob` (sync), `frontend` (retira el
-matching hardcodeado de `AtpPage.tsx`)
-**Última actualización**: 2026-09-28
+matching), `svc-gasifera` (sync), `svc-gralgob` (sync), `svc-privada` (rollup
+territorial), `frontend` (retira el matching hardcodeado de `AtpPage.tsx`)
+**Última actualización**: 2026-09-29
 
 ---
 
 ## Changelog
 
+- **0.4.0** (2026-09-29): deploy real completado (las 3 migraciones —
+  `svc-vivienda` 0030, `svc-gasifera` 0003, `svc-gralgob` 0002 — corridas
+  contra Cloud SQL tras una interrupción por facturación/suspensión de la
+  instancia, resuelta por el usuario; los 3 servicios redeployados; gateway
+  actualizado con `GET /api/v1/vivienda/geo/duplicados`). Verificación en
+  producción de Resumen Territorial encontró KPIs inflados (708 localidades
+  en vez de ~426, 30 departamentos en vez de 26) por variantes de
+  departamento no cubiertas por `normalize_name` (ej. "GENERAL" vs "Gral",
+  "PRESIDENTE" vs "PTE") — se agrega `normalize_departamento()` y se usa
+  también para desambiguar homónimos en `_elegir()` (migración 0031, además
+  de 2 alias puntuales: General Baldissera, Plaza Luxardo). Investigación
+  caso por caso de los ~30 residuales restantes (pedida explícitamente por
+  el usuario, corrida con el resolver real de producción, no una heurística
+  offline): 6 resultaron typos/variantes con alias agregado (migración
+  0032 — Eufrasio Loza, Brinckmann, Capilla de Sitón, Estación General Paz,
+  Villa Quilino, Chuña/carácter espurio), 7 resultaron ser **duplicados
+  dentro del propio padrón** (`viv_geo_localidades` con dos `id_geo` para la
+  misma localidad real, confirmados por el usuario y desactivados con
+  `activo=false` en migración 0033 — nunca borrados, para no romper
+  referencias históricas) y 2 quedan genuinamente sin resolver (localidades
+  reales ausentes del padrón, mismo criterio que "Santiago Temple"). KPI
+  final tras las 4 migraciones: 413 localidades / 26 departamentos. Además,
+  a pedido explícito del usuario ("cerremos el gap de Mi Lugar ahora, y
+  armemos notificaciones"): (a) se extiende la resolución in-process de
+  §4.9 a Mi Lugar, que hasta ahora aceptaba `localidad_id` sin validar desde
+  el cliente (cierra el último módulo sin resolución automática — ver
+  §4.10); (b) se agrega un mecanismo de notificación + log para
+  localidades que no resuelven (`match_tipo = "sin_match"`), centralizado en
+  el propio resolver para cubrir las 5 fuentes con un solo cambio — ver
+  §4.11. Explícitamente **no** se construye un frontend de asignación
+  manual en esta entrega (ver §9).
 - **0.3.0** (2026-09-28, ADR-024): el usuario señaló que "localidad +
   departamento" es la unidad de análisis central de toda la plataforma (la
   razón de ser del sistema es centralizar información de distintas áreas a
@@ -393,6 +424,67 @@ función de resolución. Es una operación aditiva y segura — nunca cambia el
 texto visible, sólo completa un puntero derivado — a diferencia de la fusión
 de duplicados (§4.4), que sigue siendo manual.
 
+### 4.10 Mi Lugar: cierre del gap de resolución in-process (2026-09-29)
+
+Mi Lugar ya tenía las columnas `localidad_id`/`localidad_match_tipo` desde la
+migración 0030 (backfill incluido), pero a diferencia de Cordón Cuneta/
+Córdoba Hogar, `crear_proyecto_ml`/`actualizar_proyecto_ml` nunca llamaban al
+resolver — `localidad_id` se persistía tal cual lo mandaba el cliente
+(`data.localidad_id`), sin validar contra el padrón. Se cierra con el mismo
+patrón exacto que §4.9: en creación se resuelve siempre server-side
+(`geo_service.resolver_uno(db, data.departamento, data.localidad_nombre,
+origen="mi_lugar")`) y el `localidad_id` que mande el cliente se ignora — en
+edición, sólo se re-resuelve cuando cambia `localidad_nombre` o
+`departamento`. No requiere migración nueva (las columnas ya existían); sólo
+cambio de código en `app/mi_lugar/service.py` + `localidad_match_tipo` sumado
+a `ProyectoMLOut`. Con esto, los 3 módulos de `svc-vivienda` (CC/CH/ML)
+quedan con el mismo comportamiento de resolución-al-escribir.
+
+### 4.11 Notificación + log de localidades sin resolver (2026-09-29)
+
+Pedido explícito del usuario: "por el momento dejemos una notificación con
+log, no es necesario un frontend de asignación manual aún, con que quede el
+log que permita luego corregirlo desde esta sesión es suficiente". Se
+descartó construir un panel de asignación manual ahora (§9) a favor de la
+opción más simple que deja trazabilidad suficiente para una sesión futura.
+
+**Dónde vive**: centralizado en `app/geo/service.py::resolver_lote` — es el
+único punto por el que pasan las 5 fuentes (CC/CH/ML in-process, y
+Gasífera/Gralgob/Privada vía `POST /internal/geo/resolver-localidades`), así
+que un solo cambio cubre todo sin que cada servicio externo tenga que
+construir su propio cliente de notificaciones.
+
+**Diseño**:
+- `resolver_lote`/`resolver_uno` ganan un parámetro `origen: str | None`
+  (identifica quién llama — `"cordon_cuneta"`, `"cordoba_hogar"`,
+  `"mi_lugar"`, `"gas_pit"`, `"atp"`, `"privada"` — sólo para logs/
+  notificación, nunca afecta el matching). Cada caller in-process pasa su
+  propio nombre de módulo; `ResolverRequest` (el body del endpoint interno)
+  suma un campo `origen` opcional que los 3 clientes externos (`app/
+  integrations/geo_resolver.py` en Gasífera/Gralgob/Privada) ya completan.
+- Tras resolver el lote, si hay una o más filas con `match_tipo ==
+  "sin_match"` (y localidad de entrada no vacía), se emite un
+  `logger.warning` con el detalle completo y **una sola notificación
+  batcheada** (no una por fila) vía el módulo `app/notificaciones/`
+  existente (ADR-019, feed de campanita ya en el frontend — no se construye
+  UI nueva): `nivel="advertencia"`, `origen="geo_resolver"`,
+  `destino_tipo="rol"`, `destino_valor="Admin"`, título con la cantidad y el
+  `origen`, mensaje con hasta 10 ejemplos `localidad (departamento)`. Usa un
+  actor sintético `_RESOLVER_ACTOR` (mismo patrón que `_SCHEDULER_ACTOR` en
+  `app/internal/router.py`, no hay JWT real en este flujo).
+- La creación de la notificación está en un `try/except` best-effort: una
+  falla ahí nunca debe abortar la creación/edición de la entidad que disparó
+  el resolver.
+
+**Limitación aceptada explícitamente** (no dedup): no hay tabla de "ya
+notificado" — una localidad persistentemente sin resolver vuelve a generar
+notificación en cada sync/alta hasta que alguien le agregue un alias en
+`viv_geo_alias_manual`. Es la simplificación que el usuario pidió ("por el
+momento... es suficiente") a cambio de no construir un mecanismo de
+deduplicación/estado. Si el volumen de notificaciones repetidas resulta
+molesto en la práctica, es la primera mejora candidata cuando se retome este
+tema (junto con el panel de asignación manual, §9).
+
 ## 5. Modelo de datos — resumen de migraciones nuevas
 
 - **`svc-vivienda`**: migración nueva crea `viv_geo_alias_manual` + seed de
@@ -405,11 +497,22 @@ de duplicados (§4.4), que sigue siendo manual.
   `localidad_id`/`localidad_match_tipo` a `viv_cordon_cuneta` y
   `viv_cordoba_hogar` (§4.9), más el paso de backfill best-effort sobre
   filas activas existentes en CC/CH/ML.
+- **`svc-vivienda`** (0031, 2026-09-28): 2 alias puntuales (General
+  Baldissera, Plaza Luxardo) + re-backfill con `normalize_departamento()`
+  corregido.
+- **`svc-vivienda`** (0032, 2026-09-29): 6 alias de la investigación de
+  residuales + re-backfill (§0.4.0 del changelog).
+- **`svc-vivienda`** (0033, 2026-09-29): desactiva (`activo=false`, sin
+  borrar) 7 filas de `viv_geo_localidades` confirmadas como duplicados
+  internos del propio padrón.
+- **`svc-vivienda`** (código, sin migración — 2026-09-29): Mi Lugar pasa a
+  resolver in-process (§4.10); `resolver_lote`/`resolver_uno` ganan
+  `origen` + notificación de `sin_match` (§4.11).
 
 ## 6. Endpoints — resumen
 
 ```
-POST /internal/geo/resolver-localidades          # svc-vivienda, IAM-only, batch
+POST /internal/geo/resolver-localidades          # svc-vivienda, IAM-only, batch (+ origen opcional)
 GET  /api/v1/vivienda/geo/duplicados              # svc-vivienda, Admin/Supervisor, vía gateway
 ```
 
@@ -433,6 +536,17 @@ proyecto).
   para una fila que solo matchea por la tabla de vinculación manual
   migrada.
 - Frontend: `npm run build` en verde tras retirar `VINCULACION_MANUAL`.
+- `svc-vivienda` (2026-09-29, `test_mi_lugar_geo.py` nuevo): alta/edición de
+  Mi Lugar resuelve y persiste `localidad_id`/`localidad_match_tipo`, ignora
+  un `localidad_id` mandado por el cliente, no bloquea el alta sin match, y
+  no re-resuelve si la edición no toca `localidad_nombre`/`departamento`.
+- `svc-vivienda` (2026-09-29, `test_geo.py`/`test_internal_router.py`): una
+  corrida de `resolver_lote` con `sin_match` crea exactamente una
+  notificación batcheada (no una por fila) con los datos correctos
+  (`nivel`, `destino_tipo`, `destino_valor`, `origen`); una corrida
+  totalmente resuelta no crea ninguna; el `origen` se propaga desde
+  `resolver_uno` y desde el body del endpoint interno hasta el título de la
+  notificación.
 
 ## 8. Criterios de aceptación
 
@@ -464,16 +578,21 @@ proyecto).
       `normalizeDepartamento` hardcodeados — consume `id_geo`/`match_tipo`
       del backend, `npm run build` verde. Verificación visual en navegador
       contra datos reales pendiente del deploy.
-- [ ] Reporte de duplicados de CC/CH/ML corrido contra producción y revisado
-      con el usuario, con las fusiones que se confirmen aplicadas (fuera del
-      alcance automatizado de esta spec).
-- [ ] Deploy real de las 3 migraciones nuevas (`svc-vivienda` 0030,
+- [x] Reporte de duplicados de CC/CH/ML corrido contra producción y revisado
+      con el usuario: los 30 residuales se investigaron uno por uno (2026-09-29)
+      — 6 resueltos con alias nuevos (migración 0032), 7 confirmados como
+      duplicados internos del propio padrón y desactivados (migración 0033,
+      revisados y aprobados por el usuario par por par), 2 genuinamente sin
+      resolver y documentados (mismo criterio que "Santiago Temple").
+- [x] Deploy real de las 3 migraciones nuevas (`svc-vivienda` 0030,
       `svc-gasifera` 0003, `svc-gralgob` 0002) vía Cloud Shell/cloud-sql-proxy,
-      redeploy de los 3 servicios + frontend, `services/cloudbuild.yaml`
-      necesita `_RESOLVER_LOCALIDADES_ENABLED=true` para Gasífera/Gralgob
-      (mismo criterio que `_NOTIFICAR_FILA_NUEVA_ENABLED`), y gateway nuevo
-      (`ministerio-config-v{fecha}`) para `GET /api/v1/vivienda/geo/duplicados`.
-      Sesión aparte, siguiendo `/deploy-servicio` — no hecho todavía.
+      redeploy de los 3 servicios + frontend, `services/cloudbuild.yaml` con
+      `_RESOLVER_LOCALIDADES_ENABLED=true`, y gateway nuevo
+      (`ministerio-config-v20260928`) para `GET /api/v1/vivienda/geo/duplicados`
+      — completado 2026-09-28/29 (incluyó recuperarse de una suspensión de
+      Cloud SQL por facturación, resuelta por el usuario). KPI verificado en
+      vivo en Resumen Territorial tras las 4 migraciones (0030-0033): 413
+      localidades / 26 departamentos.
 - [ ] **Hallazgo no relacionado, detectado al verificar la migración 0030
       contra Postgres real desde cero**: la migración `0008_data_update.py`
       de `svc-vivienda` falla (`ForeignKeyViolationError` en
@@ -483,8 +602,35 @@ proyecto).
       producción ya está migrada y no lo sufre). No se investigó a fondo ni
       se corrigió — fuera de alcance de esta entrega. Reportar/registrar en
       `docs/files/auditoria-codigo.md` en una sesión de auditoría.
+- [x] Mi Lugar resuelve `localidad_id`/`localidad_match_tipo` in-process en
+      alta/edición, mismo criterio que CC/CH (§4.10) — sin migración nueva,
+      tests en `test_mi_lugar_geo.py` (2026-09-29). Pendiente: deploy +
+      verificación contra producción.
+- [x] Notificación + log de `sin_match` centralizado en `resolver_lote`,
+      cubre las 5 fuentes con un solo cambio (§4.11) — tests en `test_geo.py`/
+      `test_internal_router.py` (2026-09-29). Pendiente: deploy + verificar
+      que la notificación aparece en el feed del frontend contra datos
+      reales, y que el volumen de notificaciones repetidas (no hay dedup, ver
+      §4.11) resulta manejable en la práctica.
+- [ ] Deploy de los cambios de Mi Lugar + notificaciones (código nuevo en
+      `svc-vivienda` + los 3 clientes `geo_resolver.py` en Gasífera/Gralgob/
+      Privada pasando `origen`) — no hecho todavía, sesión aparte.
 
 ## 9. Fuera de alcance / decisiones futuras
+
+- **Panel de asignación manual de localidades sin resolver** (2026-09-29,
+  pedido explícito del usuario para más adelante): hoy §4.11 deja
+  trazabilidad vía notificación + log, pero corregir un `sin_match`
+  persistente todavía requiere una sesión de Claude Code escribiendo un
+  alias en `viv_geo_alias_manual` a mano (como se hizo con los ~30
+  residuales de esta entrega). Un futuro panel en el frontend permitiría a
+  un Admin, desde el feed de notificaciones o una pantalla dedicada, ver las
+  localidades sin resolver y vincularlas a una fila del padrón (o marcarlas
+  explícitamente como "confirmada ausente", como "Santiago Temple")
+  directamente, sin pasar por una migración de datos. Requiere: un endpoint
+  de alta en `viv_geo_alias_manual` gateado a Admin (hoy la tabla sólo se
+  escribe desde migraciones), y una pantalla — spec propia cuando se
+  retome, fuera de alcance de esta entrega.
 
 - **Unificar `viv_geo_localidades` y `priv_geo_localidades`/
   `priv_localidades_info` en un solo padrón enriquecido** (censo, catastro,
