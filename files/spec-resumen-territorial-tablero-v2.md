@@ -271,6 +271,33 @@ dejarlos abiertos en la implementación:
 | Indicadores de necesidad (gas, déficit habitacional, entorno urbano) | **Bloqueado** — no confirmado si el Censo 2022 público los trae a nivel gobierno local. **Gatea exclusivamente la Etapa 6** (panel secundario Gini + necesidad-vs-programa); no afecta Etapas 1-5. Se investiga en paralelo al arranque de Etapa 1, sin bloquearla. |
 | Polígonos/radios a nivel localidad | **Bloqueado** — solo hay centroides puntuales en `viv_geo_localidades`. No gatea ninguna etapa del plan actual (Etapa 5 usa centroide, no polígono, por diseño); relevante solo si en el futuro se pide un zoom con polígono real a nivel localidad. |
 
+### 5.1 Qué buscar para destrabar densidad y crecimiento intercensal
+
+Pendiente de una sesión de web search dedicada (no hecha todavía). Apuntes para esa búsqueda,
+para no arrancar de cero:
+
+- **Población 2010 (crecimiento intercensal)**: se necesita el equivalente del Censo 2010 a lo
+  que ya tenemos del Censo 2022 (`docs/data/c2022_cordoba_gobierno_local_c1 (5).xlsx`, "Cuadro
+  1.6" — población por gobierno local con código INDEC). El Censo 2010 se publicó con una
+  estructura de cuadros distinta (por "localidad" censal, no necesariamente por "gobierno local"
+  1:1) — el cuadro equivalente históricamente es el de "Población total por localidad censal" del
+  Censo Nacional 2010, provincia de Córdoba, en la serie de cuadros del INDEC (buscar en
+  redatam.indec.gob.ar o en las publicaciones de resultados definitivos por provincia del Censo
+  2010). Riesgo a verificar: el código INDEC de gobierno local puede no ser estable entre censos
+  (creación/fusión de comunas entre 2010 y 2022) — el join contra `ext_geo_censo` puede no ser
+  1:1 limpio, revisar caso por caso los `sin_match`.
+- **Superficie / densidad por departamento**: se necesita superficie en km² por departamento (26
+  departamentos de Córdoba). Fuentes candidatas a chequear: (a) el IGN (Instituto Geográfico
+  Nacional) publica superficies oficiales por departamento; (b) INDEC también publica superficie
+  por departamento en sus cuadros de "División político-territorial"; (c) si ninguna trae un
+  dataset descargable directo, se puede calcular a partir del mismo polígono ya usado para el
+  mapa (`frontend/public/geo/departamentos_cba.json`) con `shapely`/`pyproj` (el script
+  `frontend/scripts/prepare_departamentos_geojson.py` ya usa esas libs) — probablemente el camino
+  más rápido si las fuentes oficiales no dan un CSV limpio.
+- Ninguno de los dos bloquea nada del tablero ya construido (Etapas 1-3) — son mejoras aditivas a
+  `svc-datos-externos` (una tabla más, ej. `ext_censo_2010` y/o una columna `superficie_km2` en
+  algún catálogo de departamentos) el día que se consiga la fuente.
+
 ## 6. Criterios de aceptación
 
 - [ ] `svc-datos-externos` desplegado (Cloud Run + `db_datos_externos` en la instancia
