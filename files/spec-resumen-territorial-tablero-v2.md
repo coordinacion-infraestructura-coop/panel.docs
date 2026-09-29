@@ -1,10 +1,10 @@
 # Spec: Resumen Territorial v2 — tablero de tres niveles + servicio de datos externos
 
-**Estado**: draft
-**Versión**: 0.1.0
+**Estado**: approved
+**Versión**: 1.0.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-09-29
-**Servicios**: `svc-datos-externos` (nuevo) + `svc-vivienda` (módulo `resumen_territorial` existente, se amplía)
+**Servicios**: `svc-datos-externos` (nuevo, nombre confirmado) + `svc-vivienda` (módulo `resumen_territorial` existente, se amplía)
 
 Spec hijo de `spec-resumen-territorial.md` (v0.5.0, approved) — no lo reemplaza. La decisión de
 ADR-007 (`resumen_territorial` vive en `svc-vivienda`, sin servicio propio) **sigue vigente y no
@@ -39,7 +39,7 @@ el historial de esta conversación) encontró que:
 
 ## 1. Decisión de arquitectura: por qué un servicio nuevo y no un módulo de `svc-vivienda`
 
-**Decisión**: se crea `svc-datos-externos` (nombre a confirmar en esta revisión — no puede ser
+**Decisión**: se crea `svc-datos-externos` (nombre confirmado 2026-09-29 — no puede ser
 `svc-territorial`, reservado en `arquitectura.md` para la futura Secretaría de Planificación y
 Articulación Territorial), microservicio nuevo con el mismo molde que `svc-gasifera`/
 `svc-gralgob`: FastAPI + Alembic + Cloud Run + una base nueva (`db_datos_externos`) en la
@@ -266,10 +266,10 @@ dejarlos abiertos en la implementación:
 |---|---|
 | Código INDEC + categoría MU/CO + población 2022 | **Resuelto** — `docs/data/c2022_cordoba_gobierno_local_c1 (5).xlsx`, 427 filas |
 | Transferencias automáticas | **Resuelto** — ETL prototipado y validado (§2.3) |
-| Población 2010 (crecimiento intercensal) | **Pendiente** — sin fuente identificada todavía |
-| Superficie / densidad | **Pendiente** — sin fuente identificada |
-| Indicadores de necesidad (gas, déficit habitacional, entorno urbano) | **Pendiente de confirmar** si el Censo 2022 los trae a nivel gobierno local |
-| Polígonos/radios a nivel localidad | **Pendiente** — solo hay centroides puntuales en `viv_geo_localidades` |
+| Población 2010 (crecimiento intercensal) | **Bloqueado** — sin fuente identificada. No gatea Etapas 1-5 (el KPI de crecimiento intercensal queda oculto/vacío hasta conseguir la fuente); tampoco gatea Etapa 6. |
+| Superficie / densidad | **Bloqueado** — sin fuente identificada. No gatea Etapas 1-5 (el KPI de densidad queda oculto hasta conseguir la fuente); tampoco gatea Etapa 6. |
+| Indicadores de necesidad (gas, déficit habitacional, entorno urbano) | **Bloqueado** — no confirmado si el Censo 2022 público los trae a nivel gobierno local. **Gatea exclusivamente la Etapa 6** (panel secundario Gini + necesidad-vs-programa); no afecta Etapas 1-5. Se investiga en paralelo al arranque de Etapa 1, sin bloquearla. |
+| Polígonos/radios a nivel localidad | **Bloqueado** — solo hay centroides puntuales en `viv_geo_localidades`. No gatea ninguna etapa del plan actual (Etapa 5 usa centroide, no polígono, por diseño); relevante solo si en el futuro se pide un zoom con polígono real a nivel localidad. |
 
 ## 6. Criterios de aceptación
 
@@ -292,6 +292,16 @@ dejarlos abiertos en la implementación:
 
 ---
 
-**Pendiente antes de pasar a `review`**: confirmar el nombre definitivo de `svc-datos-externos`,
-y decidir si los indicadores de necesidad de §4/Etapa 6 están disponibles en el Censo 2022
-público a nivel gobierno local (bloquea o no el panel secundario).
+## 7. Aprobación
+
+Aprobado 2026-09-29 (mismo día de redacción) por Pedro Bonafe. Decisiones que se confirman al
+aprobar, cerrando los dos puntos que este spec dejaba abiertos en su borrador:
+
+- **Nombre del servicio confirmado**: `svc-datos-externos`.
+- **Los 3 huecos de datos pendientes (población 2010, superficie/densidad, indicadores de
+  necesidad) no gatean el arranque de Etapa 1** — quedan explícitamente marcados como
+  bloqueados en §5, con el alcance exacto de lo que sí bloquean (ver tabla). Se investigan en
+  paralelo, no antes.
+
+Corresponde registrar el ADR de esta decisión en `arquitectura.md` (mirror de ADR-016/021/022,
+en sentido "provee" en vez de "consume") como parte del cierre de Etapa 0.
