@@ -1,7 +1,7 @@
 # Spec: Privada adopta el padrón oficial de localidades
 
-**Estado**: draft
-**Versión**: 0.2.0
+**Estado**: approved
+**Versión**: 1.0.0
 **Servicios**: `svc-privada` (padrón espejo, gestiones, rollup), `svc-vivienda`
 (endpoint interno de lectura del padrón)
 **ADR**: ADR-026 (reemplaza parcialmente ADR-012, cierra el pendiente de ADR-024)
@@ -104,6 +104,23 @@ grafía que no es idéntica a la oficial — todas diferencias de mayúsculas.
 Los 2 proyectos de Mi Lugar sin vínculo son "Barrio Chingolo" y "Santa
 Teresa" — el caso de los loteos por barrio de §0.
 
+## 1.2 Decisiones del usuario (2026-10-07) — cierran las preguntas abiertas
+
+1. **Gestiones ya cargadas: en lote.** Se ordenan todas de una vez (repunteo
+   al `id_geo` oficial + nombre oficial), no una por una desde el panel.
+2. **Lo nuevo que no resuelva: notificación + corrección manual.** Toda
+   localidad nueva que no matchee el padrón se notifica en el panel de
+   notificaciones (ya ocurre, `spec-normalizacion-localidades.md §4.11`) y
+   tiene que poder corregirse a mano desde ahí. Ese panel de asignación manual
+   es el pendiente ya registrado en `spec-normalizacion-localidades.md §9` —
+   **queda como entrega siguiente** (§7), con spec propia.
+3. **Nombre guardado en Cordón Cuneta / Córdoba Hogar / Mi Lugar: no se toca
+   por ahora.** Queda documentado como pendiente para una próxima sesión (§7).
+4. **Barrios de Mi Lugar: "confirmado sin vínculo".** "Barrio Chingolo" y
+   "Santa Teresa" se registran en `viv_geo_alias_manual` con `id_geo = NULL`
+   (mismo mecanismo que "Santiago Temple"), para que dejen de generar avisos.
+   Se suma "Paraje El Barrial" (Privada), ausente del padrón.
+
 ## 2. Decisión de diseño
 
 **`priv_geo_localidades` pasa a ser un espejo de solo lectura del padrón
@@ -132,21 +149,35 @@ cross-DB, la fuente de verdad es una sola y Privada lee una copia local.
    deja de existir se marca `activo=false`, no se borra). Cloud Scheduler
    diario + disparo manual. Si la lectura falla, el espejo queda como estaba
    (nunca se vacía).
-3. **`svc-privada` — migración de datos de gestiones** (una vez, script o
-   migración según volumen, ~2.250 filas): para cada gestión, resolver
-   `(departamento, localidad)` contra el padrón oficial con el mismo algoritmo
-   que el resto (`exacto` / `alias` / `manual`) y:
+3. **`svc-privada` — normalización en lote de las gestiones**:
+   `POST /internal/privada/geo/normalizar-gestiones` (IAM-only, idempotente,
+   `dry_run=true` por defecto: devuelve el resumen de lo que cambiaría sin
+   escribir). No es una migración Alembic porque necesita consultar el
+   resolver de `svc-vivienda` (alias manuales). Para cada gestión activa
+   resuelve `(departamento, localidad)` contra el padrón oficial con el mismo
+   algoritmo que el resto (`exacto` / `alias` / `manual`); si el texto no
+   resuelve pero el `geo_id` guardado es una fila activa del padrón, vale ese
+   `geo_id` (caso "Monte Cristo" cargada con otro departamento). Después:
    - con match: `geo_id` = `id_geo` oficial, `departamento`/`localidad` = nombre
-     oficial, `lat`/`lon` = centroide oficial. El texto anterior queda en un
-     evento de auditoría de la gestión.
+     oficial. Por cada gestión modificada se escribe un evento
+     `ACTUALIZA_DATO` con el valor anterior y el nuevo (mismo criterio que la
+     reasignación masiva de "Otras Obras", `spec-privada-categorias-programas.md`
+     Anexo B). `lat`/`lon` de la gestión no se tocan (son del punto cargado, no
+     del centroide).
    - sin match: `geo_id = NULL`, el texto se conserva tal cual, y se lista para
      revisión (no se inventa un vínculo).
 4. **`priv_localidades_info`**: se agrega la columna `id_geo` (oficial,
    nullable) resuelta con el mismo criterio. La clave primaria por texto no se
    toca en esta entrega (el `PUT` existente sigue funcionando igual).
-5. **Rollup territorial**: agrupa por el `geo_id` persistido; se retira la
-   resolución al vuelo de `geo_resolver.py`.
-6. **Documentar las dos salvedades** de §0 en
+5. **Rollup territorial**: usa el `geo_id` persistido cuando es una fila
+   activa del espejo y consolida en una sola línea las gestiones de un mismo
+   `id_geo`. La resolución al vuelo de `geo_resolver.py` queda sólo como
+   respaldo para las filas sin `geo_id` válido (robusto durante la transición
+   y ante datos nuevos sin vínculo).
+6. **`svc-vivienda` — "confirmado sin vínculo"** (decisión 4 de §1.2):
+   migración que agrega a `viv_geo_alias_manual` "Barrio Chingolo", "Santa
+   Teresa" y "Paraje El Barrial" con `id_geo = NULL`.
+7. **Documentar las dos salvedades** de §0 en
    `spec-normalizacion-localidades.md` (hoy el comportamiento existe pero la
    excepción de los barrios de Mi Lugar no está escrita).
 
@@ -184,25 +215,8 @@ Las rutas, los parámetros y la forma de las respuestas de
 
 ## 5. Preguntas abiertas
 
-1. ~~Localidades de Privada sin equivalente en el oficial~~ — **resuelta**
-   (§1.1): no hay ninguna, son las mismas 544 filas.
-2. ~~¿Mismo espacio de identificadores?~~ — **resuelta** (§1.1): sí. La
-   migración de gestiones es un repunteo: las 325 con id `BOOT|…` y las 7 que
-   apuntan a duplicados pasan al `id_geo` oficial por nombre; las 2 de "Las
-   Higueras" se corrigen a 174.
-3. Las gestiones sin vínculo después de migrar son sólo 2 (§1.1). Propuesta:
-   corregir a mano el departamento de "Monte Cristo" (Colón → Río Primero) y
-   dejar "Paraje El Barrial" sin vínculo, registrado como ausente del padrón.
-   A confirmar.
-4. **Texto libre en Vivienda**: `spec-normalizacion-localidades.md §2.6` dice
-   que el nombre que guarda cada registro de CC/CH/ML no se pisa (se agrega
-   `localidad_id` al lado). El criterio de §0 sugiere ir más lejos: que el
-   nombre guardado sea siempre el oficial cuando hay vínculo, y que sólo quede
-   texto libre en los casos sin vínculo (barrios de Mi Lugar). ¿Se incluye acá,
-   en una entrega propia, o se deja como está?
-5. Los proyectos de Mi Lugar que son barrios de Capital generan hoy una
-   notificación de "localidad sin resolver" (§4.11 del spec de normalización).
-   ¿Se marcan como "confirmado sin vínculo" para que dejen de notificar?
+Ninguna — las cinco de la v0.1.0 quedaron resueltas por la medición (§1.1) y
+las decisiones del usuario (§1.2).
 
 ## 6. Criterios de aceptación
 
@@ -219,3 +233,18 @@ Las rutas, los parámetros y la forma de las respuestas de
       el formulario.
 - [ ] Las salvedades de §0 quedan escritas en
       `spec-normalizacion-localidades.md`.
+
+## 7. Pendientes para próximas entregas
+
+- **Panel de asignación manual de localidades sin resolver** (decisión 2 de
+  §1.2): desde el feed de notificaciones, un Admin ve las localidades que no
+  matchearon y las vincula a una fila del padrón o las marca "confirmado sin
+  vínculo", sin pasar por una migración. Requiere un endpoint de alta en
+  `viv_geo_alias_manual` gateado a Admin y una pantalla. Spec propia.
+- **Nombre guardado en Cordón Cuneta / Córdoba Hogar / Mi Lugar** (decisión 3
+  de §1.2): 36 registros no tienen el texto idéntico al oficial (§1.1), 4 de
+  ellos con diferencia real ("CHARRAS" ×2, "LUXARDO", "GENERAL BALDISERA").
+  Pasarlos al nombre oficial cuando hay vínculo cambia
+  `spec-normalizacion-localidades.md §2.6`.
+- **Clave de `priv_localidades_info`**: sigue siendo texto; evaluar pasarla a
+  `id_geo` cuando la columna nueva esté poblada y estable.
