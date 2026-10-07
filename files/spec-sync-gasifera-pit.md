@@ -288,7 +288,7 @@ El mismo día (2026-09-21), otra sesión de trabajo en paralelo agregó a `CLAUD
 
 ### 12.3 Auth (nuevo — Fase 0 no tenía ningún endpoint público)
 
-`app/auth.py` nuevo, modelado sobre `services/svc-privada/app/auth.py` (ADR-015) — `svc-gasifera` **no se conecta a `db_vivienda`**, resuelve rol + secretarías llamando a `GET {SVC_VIVIENDA_INTERNAL_URL}/internal/portal/usuarios/{email}` con un ID token (audience = esa URL), degradando a rol `invitado` ante cualquier falla (nunca 500). Roles: `ROLES_LECTURA = ("Admin","Supervisor","Operador","Consulta")` + pertenencia a la secretaría `"gasifera"` (ya presente en `SECRETARIAS_VALIDAS`, no requiere migración). Sin roles acotados nuevos tipo `TecnicoDGV`/`Autoridad`.
+`app/auth.py` nuevo, modelado sobre `services/svc-privada/app/auth.py` (ADR-015) — `svc-gasifera` **no se conecta a `db_vivienda`**, resuelve rol + secretarías llamando a `GET {SVC_VIVIENDA_INTERNAL_URL}/internal/portal/usuarios/{email}` con un ID token (audience = esa URL), degradando a rol `invitado` ante cualquier falla (nunca 500). Roles: `ROLES_LECTURA = ("Admin","Supervisor","Operador","Consulta","Autoridad")` (`Autoridad` sumado 2026-10-07, ver `spec-resumen-territorial.md §7.1`) + pertenencia a la secretaría `"gasifera"` (ya presente en `SECRETARIAS_VALIDAS`, no requiere migración). Sin roles acotados nuevos tipo `TecnicoDGV`/`Autoridad`.
 
 ### 12.4 Endpoints
 

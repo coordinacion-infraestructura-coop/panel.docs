@@ -344,6 +344,15 @@ sólo audit log, sin Pub/Sub. Espeja `app/informes/` casi 1:1.
   rango, es acceso de lectura consolidada cross-área. Un usuario `Autoridad` puede además
   tener secretarías asignadas (para los paneles operativos), pero para este panel su alcance
   es "todo", igual que `Admin`.
+- **Revisado 2026-10-03 / 2026-10-07 (pedido directo del usuario)**: `Autoridad` **sí** está en
+  `ROLES_LECTURA` de los cuatro servicios con panel (`svc-vivienda` y `svc-privada` desde
+  2026-10-03, `svc-gasifera` y `svc-gralgob` desde 2026-10-07) — lectura de los paneles
+  operativos de las secretarías que tenga asignadas, nunca escritura. Reemplaza el "NO se
+  agrega a las constantes compartidas" de arriba; las tuplas locales de este módulo quedan
+  redundantes pero inofensivas. En Privada, Gasífera y Gral. de Gobierno la secretaría
+  asignada la exige el backend (`require_privada`/`require_gasifera`/`require_gralgob`); en
+  `svc-vivienda` `require_roles` no mira secretarías (para ningún rol), así que ahí la
+  asignación sólo la filtra la navegación del frontend.
 
 ### 7.2 Regla de filtrado (`filtrar_por_visibilidad`, aplicada en el `GET`)
 - Si `rol in ("Admin", "Autoridad")` → payload sin cambios (ve Vivienda **y** Privada).

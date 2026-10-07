@@ -361,7 +361,8 @@ tabla filtrable, igual que terminó el Tablero PIT Gas).
 llamando a `GET {SVC_VIVIENDA_INTERNAL_URL}/internal/portal/usuarios/{email}`
 con un ID token (audience = esa URL), degradando a rol `invitado` ante
 cualquier falla (nunca 500). Roles: `ROLES_LECTURA = ("Admin","Supervisor",
-"Operador","Consulta")` + pertenencia a la secretaría `"gralgob"` — agregada a
+"Operador","Consulta","Autoridad")` (`Autoridad` sumado 2026-10-07, ver
+`spec-resumen-territorial.md §7.1`) + pertenencia a la secretaría `"gralgob"` — agregada a
 `SECRETARIAS_VALIDAS` en `services/svc-vivienda/app/portal/schemas.py` (no
 estaba, a diferencia de `"gasifera"` que ya estaba presente) y a la lista de
 checkboxes de `AdminUsuariosPage.tsx`. Sin roles acotados nuevos tipo
