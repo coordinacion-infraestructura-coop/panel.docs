@@ -1,7 +1,7 @@
 # Spec: Privada adopta el padrón oficial de localidades
 
 **Estado**: approved
-**Versión**: 1.1.0
+**Versión**: 1.2.0
 **Servicios**: `svc-privada` (padrón espejo, gestiones, rollup), `svc-vivienda`
 (endpoint interno de lectura del padrón)
 **ADR**: ADR-026 (reemplaza parcialmente ADR-012, cierra el pendiente de ADR-024)
@@ -114,8 +114,12 @@ Teresa" — el caso de los loteos por barrio de §0.
    tiene que poder corregirse a mano desde ahí. Ese panel de asignación manual
    es el pendiente ya registrado en `spec-normalizacion-localidades.md §9` —
    **queda como entrega siguiente** (§7), con spec propia.
-3. **Nombre guardado en Cordón Cuneta / Córdoba Hogar / Mi Lugar: no se toca
-   por ahora.** Queda documentado como pendiente para una próxima sesión (§7).
+3. **Nombre guardado en Cordón Cuneta / Córdoba Hogar / Mi Lugar: pasa al
+   nombre oficial.** Primera respuesta del usuario: dejarlo pendiente. Revisada
+   el mismo día a la vista de la medición (§1.1: 36 registros, no es crítico):
+   se hace en esta entrega. Con vínculo, el nombre y el departamento guardados
+   son los del padrón; sin vínculo se conserva el texto. Cambia
+   `spec-normalizacion-localidades.md §2.6`.
 4. **Barrios de Mi Lugar: "confirmado sin vínculo".** "Barrio Chingolo" y
    "Santa Teresa" se registran en `viv_geo_alias_manual` con `id_geo = NULL`
    (mismo mecanismo que "Santiago Temple"), para que dejen de generar avisos.
@@ -206,7 +210,11 @@ Las rutas, los parámetros y la forma de las respuestas de
 ### Implementación (2026-10-07, rama `privada-padron-oficial` de `panel.backend`)
 
 - `svc-vivienda`: `GET /internal/geo/padron` (`geo/service.listar_padron`);
-  migración `0036` (los tres "confirmado sin vínculo").
+  migración `0036` (los tres "confirmado sin vínculo"); migración `0037`
+  (nombre y departamento oficiales en los registros con vínculo de CC/CH/ML,
+  con una fila de `viv_audit_log` por registro modificado, de donde sale el
+  downgrade); alta y edición de CC/CH/ML guardan el nombre oficial cuando el
+  resolver encuentra vínculo.
 - `svc-privada`: `app/territorial/padron_sync.py` (`sync_padron`,
   `normalizar_gestiones`); `POST /internal/privada/geo/sync` y
   `POST /internal/privada/geo/normalizar-gestiones?dry_run=`; migración `0003`
@@ -261,10 +269,5 @@ las decisiones del usuario (§1.2).
   matchearon y las vincula a una fila del padrón o las marca "confirmado sin
   vínculo", sin pasar por una migración. Requiere un endpoint de alta en
   `viv_geo_alias_manual` gateado a Admin y una pantalla. Spec propia.
-- **Nombre guardado en Cordón Cuneta / Córdoba Hogar / Mi Lugar** (decisión 3
-  de §1.2): 36 registros no tienen el texto idéntico al oficial (§1.1), 4 de
-  ellos con diferencia real ("CHARRAS" ×2, "LUXARDO", "GENERAL BALDISERA").
-  Pasarlos al nombre oficial cuando hay vínculo cambia
-  `spec-normalizacion-localidades.md §2.6`.
 - **Clave de `priv_localidades_info`**: sigue siendo texto; evaluar pasarla a
   `id_geo` cuando la columna nueva esté poblada y estable.

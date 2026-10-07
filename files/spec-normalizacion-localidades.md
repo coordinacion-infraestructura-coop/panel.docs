@@ -1,7 +1,7 @@
 # Spec: Normalización de nombres de localidad (transversal)
 
 **Estado**: approved
-**Versión**: 0.6.0
+**Versión**: 0.7.0
 **Servicios**: `svc-vivienda` (padrón + endpoint interno de resolución + fixes de
 matching), `svc-gasifera` (sync), `svc-gralgob` (sync), `svc-privada` (rollup
 territorial), `frontend` (retira el matching hardcodeado de `AtpPage.tsx`)
@@ -11,6 +11,15 @@ territorial), `frontend` (retira el matching hardcodeado de `AtpPage.tsx`)
 
 ## Changelog
 
+- **0.7.0** (2026-10-07): **cambia §2.6.** Hasta ahora el texto de localidad
+  de cada registro de Cordón Cuneta / Córdoba Hogar / Mi Lugar no se pisaba
+  (se resolvía `localidad_id` al lado). Por decisión del usuario (ADR-026),
+  cuando hay vínculo lo que se guarda es **el nombre y el departamento del
+  padrón oficial**; el texto que llegó sólo se conserva cuando la localidad no
+  está en el padrón. Sigue sin bloquearse el alta de una localidad que no
+  matchea. Aplica al alta y la edición (`cordon_cuneta` / `cordoba_hogar` /
+  `mi_lugar` `service.py`) y a lo ya cargado (migración `svc-vivienda` 0037:
+  36 nombres y 3 departamentos, con rastro en `viv_audit_log`).
 - **0.6.0** (2026-10-07): criterio general fijado por el usuario y registrado
   como **ADR-026** — Vivienda, Privada, Gral. de Gobierno, Gasífera y Resumen
   Territorial usan la misma base oficial de localidades. Privada deja de tener
@@ -188,7 +197,8 @@ ADR.
    sin llamada de red: se resuelve en proceso, no vía HTTP). Mismo mecanismo
    de matching que §4.3, sin exponer el endpoint interno para esto (es
    in-process). El campo de texto libre existente **no se toca ni se
-   bloquea** — `id_geo` es un dato adicional resuelto automáticamente, no un
+   bloquea** *(revisado en v0.7.0: no se bloquea, pero con vínculo se guarda
+   el nombre oficial — ver changelog)* — `id_geo` es un dato adicional resuelto automáticamente, no un
    requisito para guardar. Se agrega también un backfill best-effort de
    `id_geo` para las filas activas ya existentes en CC/CH/ML (ver §4.9).
 7. `resumen_territorial/aggregations.py::agrupar_por_localidad` pasa a
