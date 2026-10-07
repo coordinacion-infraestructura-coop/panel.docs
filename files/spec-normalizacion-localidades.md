@@ -1,16 +1,32 @@
 # Spec: Normalización de nombres de localidad (transversal)
 
 **Estado**: approved
-**Versión**: 0.4.0
+**Versión**: 0.5.0
 **Servicios**: `svc-vivienda` (padrón + endpoint interno de resolución + fixes de
 matching), `svc-gasifera` (sync), `svc-gralgob` (sync), `svc-privada` (rollup
 territorial), `frontend` (retira el matching hardcodeado de `AtpPage.tsx`)
-**Última actualización**: 2026-09-29
+**Última actualización**: 2026-10-07
 
 ---
 
 ## Changelog
 
+- **0.5.0** (2026-10-07): grafía única del padrón. De 544 filas de
+  `viv_geo_localidades`, 30 tenían el nombre entero en minúsculas ("Villa de
+  Pocho", casi todas las altas posteriores, id 533–560) y 24 el alias entre
+  paréntesis en minúsculas, varias con una "O"/"I" en lugar de la vocal
+  acentuada ("CHARRAS (Villa ColOn)"). Reportado por el usuario al filtrar el
+  Resumen Territorial por departamento Pocho. Decisión del usuario: el nombre
+  que se muestra tiene que ser el del padrón oficial, así que se corrige el
+  padrón y no la presentación — migración `svc-vivienda` 0035 pasa `localidad`
+  a mayúsculas (en Python, no con `UPPER()` de SQL, por la collation). No
+  cambia ningún `id_geo` ni ningún matching, y no toca el texto libre de
+  CC/CH/ML (§2.6 sigue vigente). De paso, en frontend: los desplegables de
+  localidad de los modales de CC/CH/ML resolvían la opción elegida por
+  igualdad exacta de texto contra el padrón y pasan a comparar sin
+  tildes/mayúsculas, y la Ficha de Localidad deja de filtrar Mi Lugar por
+  nombre exacto en el servidor. **Pendiente**: correr la migración 0035 en
+  producción y recalcular el snapshot de `resumen_territorial`.
 - **0.4.0** (2026-09-29): deploy real completado (las 3 migraciones —
   `svc-vivienda` 0030, `svc-gasifera` 0003, `svc-gralgob` 0002 — corridas
   contra Cloud SQL tras una interrupción por facturación/suspensión de la
