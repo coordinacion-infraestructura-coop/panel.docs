@@ -173,9 +173,11 @@ sync, y cualquier llamada best-effort que haya fallado.
   "geo_alias_manual"`, `resource_id` = id del alias, payload con antes/después,
   motivo y pendiente de origen). El `motivo` es obligatorio en la pantalla.
 - **Deshacer**: baja lógica del alias, reapertura del pendiente y restauración
-  de los registros de CC/CH/ML desde los valores anteriores guardados en
-  `viv_audit_log`. Un registro editado después de la propagación no se
-  restaura (se informa en la respuesta).
+  de los registros de CC/CH/ML desde sus valores anteriores. Esos valores se
+  guardan en una columna propia del alias (`propagacion`, JSON) además de en
+  `viv_audit_log`: el deshacer lee de ahí, no del log de auditoría. Un
+  registro editado después de la propagación no se restaura (se informa en la
+  respuesta).
   - Gasífera/ATP/datos externos se corrigen solos en el siguiente sync.
   - **Privada: limitación documentada.** `normalizar-gestiones` conserva el
     `geo_id` guardado aunque el texto deje de resolver, y el texto original
@@ -223,7 +225,9 @@ activa (§10).
   `dry_run`), "Confirmar sin vínculo", "Descartar". En la vista de resueltas:
   "Deshacer".
 - `NotificacionesPage.tsx` no cambia: ya muestra "Ver" cuando la notificación
-  trae `enlace`. Se agrega un acceso a la pantalla para Admin en `Layout.tsx`.
+  trae `enlace`. El acceso para Admin va en la cabecera de
+  `AdminUsuariosPage.tsx` (donde ya está el de Catálogos Checklist Técnico),
+  no en `Layout.tsx`.
 
 ## 8. Tests y orden de despliegue
 
@@ -260,6 +264,32 @@ gateway; (4) frontend.
   a verificar el día del deploy: otra sesión puede haberla cambiado.
 - **Número de migración**: la última conocida es `0037`; confirmar el head.
 - **Lista de alias globales a acotar** (§3.2), contra datos reales.
+
+## 10.1 Implementación (2026-10-07, rama `geo-asignacion-manual` en `panel.backend`, `panel.front` y `gestor.infra`)
+
+Código escrito y probado en local; **sin desplegar**.
+
+- `svc-vivienda`: `app/geo/models.py` (`GeoPendiente`, columnas nuevas del
+  alias), `app/geo/service.py` (alias por departamento, registro de
+  pendientes, notificación sólo por novedades), `app/geo/asignacion.py`
+  (listar / resolver / descartar / deshacer), `router_transversal` en
+  `app/geo/router.py` montado en `/api/v1`, migración `0038`.
+- `svc-privada` y `svc-datos-externos`: su `geo_resolver` manda `cantidad`.
+- Gateway: los 5 paths con su `options:`. `resolver` y `deshacer` llevan
+  `deadline: 120.0` (llaman a svc-privada y recalculan el Resumen Territorial;
+  el default de 15 s podía cortar la respuesta con el vínculo ya aplicado).
+- Frontend: `LocalidadesSinResolverPage.tsx` + `api/` y `types/` en
+  `src/modules/admin/`.
+- Acotado de alias globales (§3.2): la migración sólo toca los dos barrios de
+  Mi Lugar de la 0036 y toma el departamento de los proyectos cargados; si no
+  comparten un único departamento, el alias queda global.
+- Tests: `svc-vivienda` 405 en verde (29 nuevos en
+  `tests/test_geo_asignacion.py`), `svc-privada` 97, `svc-datos-externos` 30,
+  `npm run build` en verde. Migración `0038` verificada contra Postgres 15
+  real (upgrade, downgrade y upgrade de nuevo).
+
+**Pendiente**: migración en producción → deploy de los tres servicios →
+configuración nueva del gateway → frontend → prueba visual.
 
 ## 11. Criterios de aceptación
 
