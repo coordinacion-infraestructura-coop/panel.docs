@@ -1,9 +1,9 @@
 # Spec: Resumen Territorial — Ficha de localidad + federación server-side de Privada
 
-**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · exportables del RT rediseñados 2026-09-03 · E5c (Gasífera + ATP en la ficha de municipio) y E5d (filtro "Visita del gobernador") IMPLEMENTADOS 2026-09-23
-**Versión**: 0.4.0
+**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · exportables del RT rediseñados 2026-09-03 · E5c (Gasífera + ATP en la ficha de municipio) y E5d (filtro "Visita del gobernador") IMPLEMENTADOS 2026-09-23 · E5e (indicadores como botón al listado) y E5f (indicador "Visita del gobernador" en la ficha) IMPLEMENTADOS 2026-10-07
+**Versión**: 0.5.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-09-23
+**Última actualización**: 2026-10-07
 
 > **Implementado 2026-09-01 (E5b, drawer)** — `panel.front`:
 > `src/modules/resumen-territorial/api/fichaLocalidad.api.ts` + componente `FichaDemografica`
@@ -91,6 +91,16 @@
 >   visualmente en la UI del RT"). El badge de área ATP mostraba el string crudo `"gralgob"` sin
 >   color propio; corregido de paso (`'Sec. Gral. de Gobierno'`, `#172c3f`) porque el filtro nuevo
 >   lo hacía visible de inmediato.
+> **Implementado 2026-10-07 (E5e — indicadores como botón al listado, y E5f — indicador "Visita
+> del gobernador" en la ficha)** — `panel.front`, pedido directo del usuario (Pedro Bonafe). Sólo
+> frontend, sin endpoints ni lógica de negocio nueva. Detalle en §2 y criterios en §5.
+> - **E5e**: las tarjetas de conteo de "Indicadores principales" (Cordón Cuneta, Córdoba Hogar,
+>   Gas, Compromisos Gobernador, Demandas Generales) son links al panel de cada programa, con la
+>   escala activa (provincia / departamento / localidad) como `?departamento=&localidad=`.
+> - **E5f**: la Ficha de Localidad (pantalla, PDF y Excel) dice si el gobernador visitó la
+>   localidad — mismo hecho de negocio que el filtro E5d (figurar en la planilla de ATP).
+> - **Fix de paso**: `fmtFecha` de `fichaMunicipio.ts` parseaba las fechas sin hora como UTC y
+>   mostraba el día anterior en Argentina (afectaba "Fecha de anuncio" de CH y ATP en la ficha).
 **Servicio**: `svc-vivienda` (módulo `app/resumen_territorial/`) + frontend
 `src/modules/resumen-territorial/`
 **Depende de**: `spec-migracion-svc-privada.md` Fase 2 (endpoints `rollup-territorial` y
@@ -168,6 +178,33 @@ de las líneas de Privada pasa del browser al servidor.
   **localidad**, evaluado contra los `programas` originales antes de aplicarse los filtros de
   área/programa/estado/checklist (para no dar falsos "NO" con otro filtro de área activo).
 
+### E5e — Indicadores principales como botón al listado
+- Agregado 2026-10-07. Cada tarjeta de conteo de `IndicadoresPrincipales` (en el Resumen
+  Territorial y en la Ficha de Localidad) navega al listado de su programa: CC →
+  `/vivienda/cordon-cuneta`, CH → `/vivienda/cordoba-hogar`, Gas → `/gasifera/pit`, ATP →
+  `/gralgob/atp`, Demandas Generales → `/privada/gestiones`. "Com. Regionales" (sin fuente) y
+  "Transferencias" (sin listado propio) quedan como indicadores planos.
+- El link lleva la escala activa como `?departamento=&localidad=`. Privada ya leía esos
+  parámetros; CC, CH, Gasífera y ATP los leen ahora con `shared/hooks/useFiltroTerritorialUrl`
+  (se aplica una vez, al cargar los datos, resolviendo contra las opciones reales del panel sin
+  tildes/mayúsculas; lo que no matchea se ignora). En CC/CH la localidad entra por el buscador
+  (no tienen filtro de localidad).
+- Sólo navegación: el link aparece si el usuario es `Admin` o tiene asignada la secretaría del
+  panel (mismo criterio que `DashboardPage.canSee`; `TecnicoDGV` sin links de vivienda). El 403
+  real sigue siendo del backend.
+- **Límite conocido**: ATP filtra por el texto del Sheet; las 16 localidades de
+  `VINCULACION_MANUAL` (`AtpPage.tsx`) tienen grafía distinta a la del padrón, así que el link
+  llega filtrado sólo por departamento.
+
+### E5f — Indicador "Visita del gobernador" en la Ficha de Localidad
+- Agregado 2026-10-07. Mismo criterio que E5d: visitada = tiene al menos una línea ATP
+  (`area === 'gralgob'`) en el snapshot, o compromisos ATP en la consulta de la ficha.
+- Se muestra como chip en el encabezado de `FichaLocalidadPage.tsx` y como fila en "Ficha
+  demográfica y política", en el PDF y en el Excel (`visitaGobernador` en `FichaMunicipio`), con
+  las fechas de anuncio distintas de los compromisos de esa localidad.
+- Si el snapshot del usuario no trae ATP (`generado_para_areas` sin `gralgob`, por la regla de
+  visibilidad por área) el indicador no se muestra en pantalla — no se puede afirmar "No".
+
 ### Fuera de alcance
 - Edición de `localidades_info`/`departamentos_info` desde el panel transversal (el `PUT` de
   `svc-privada` sigue siendo la única vía de edición; `tipo_localidad`/`color_semaforo` read-only).
@@ -211,6 +248,18 @@ de las líneas de Privada pasa del browser al servidor.
 - [x] Fix de paso: `AREA_LABEL`/`AREA_DOT_COLOR`/`AreaResumen` no tenían `gralgob` — el badge de
       área ATP mostraba el string crudo sin color propio.
 - [ ] Verificación visual en el navegador — pendiente (mismo pendiente que ADR-022 traía arrastrado).
+
+**E5e — indicadores como botón al listado** — implementado 2026-10-07:
+- [x] Las 5 tarjetas de conteo navegan al panel de su programa con la escala activa en la URL.
+- [x] CC, CH, Gasífera y ATP precargan departamento/localidad desde la URL.
+- [x] Sin link para paneles que el usuario no tiene asignados.
+- [x] `npm run build` sin errores de tipos.
+- [ ] Verificación visual en el navegador — pendiente.
+
+**E5f — "Visita del gobernador" en la ficha** — implementado 2026-10-07:
+- [x] Chip en el encabezado + fila en la ficha demográfica, PDF y Excel, con fechas de anuncio.
+- [x] Oculto en pantalla si el usuario no ve el área `gralgob`.
+- [ ] Verificación visual en el navegador — pendiente.
 
 **E5b — ficha (drawer)** — implementado 2026-09-01:
 - [x] La ficha muestra electores, `color_semaforo` (con chip de color), intendente + partido,
