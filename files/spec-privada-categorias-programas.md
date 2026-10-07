@@ -3,7 +3,7 @@
 **Estado**: **approved** (backend + migración implementados 2026-09-02; frontend en curso)
 **Versión**: 1.0.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-09-02
+**Última actualización**: 2026-10-06
 **Servicio**: `svc-privada` (módulo `app/catalogos_editables/`)
 **Depende de**: `spec-migracion-svc-privada.md` `approved` + Fase 6 (cutover) completada.
 **ADRs**: ADR-010 (3 catálogos editables), ADR-011 (`priv_programas` propio con `POST`).
@@ -49,6 +49,12 @@
 > **A revisar con Secretaría Privada**: `orden`/colores concretos de los catálogos y el mapa de
 > backfill `categoria_general_id → categoria_id` (RE-1: doble corrida + `--diff-informe` + sign-off
 > antes de que E4 retire el regex).
+>
+> **Reasignación masiva de "Otras Obras" (2026-10-06)** — operación de datos en prod, sin cambios
+> de código ni de schema: 450 de las 484 gestiones que estaban en "Otras Obras" pasaron a su Campo
+> de Trabajo específico, con mapeo validado fila por fila por el responsable. Se creó el campo
+> **PLAYON DEPORTIVO**. Detalle, criterio y reversión en el **Anexo B**. ⚠ Desde esta fecha
+> `scripts/backfill_categorias.py --force` **no debe correrse**: pisaría la reasignación.
 
 ---
 
@@ -221,3 +227,98 @@ terminar en "Vivienda" o "Loteos" en vez de "Cordón Cuneta y adoquinado" si el 
 regex primero (reglas 6-7 de `app/informe/clasificacion.py`, "cualquier categoría"). Esta tabla es el
 mapeo **de respaldo**, no el único criterio — ver `spec-privada-informe-cooperativas-v2.md` para el
 análisis de esta interacción de cara al informe (E4).
+
+## Anexo B — Reasignación masiva de "Otras Obras" (2026-10-06)
+
+Operación de datos sobre `db_privada` (prod). No hubo cambios de código, de schema ni de contrato.
+
+### Por qué
+
+"Otras Obras" concentraba 484 de las 2.243 gestiones activas (el campo más cargado). La mayoría no
+la había elegido el área: la asignó `scripts/backfill_categorias.py`, que manda ahí Gas, Kits
+Solares, Luces LED, Infraestructura Eléctrica y los legacy `CAT_OBRAS_PUBLICAS` /
+`CAT_CULTURA_EVENTOS` / `CAT_DEPORTES` (Anexo A). Después del backfill el área creó campos
+específicos desde el panel (RED ELECTRICA, VEHICULO, infraestructura vial, ANUNCIO GOBERNADOR,
+OBRA DE GAS), pero las gestiones ya cargadas quedaron en "Otras Obras".
+
+### Cómo se hizo
+
+1. **Extracción** de sólo lectura de las gestiones activas y los 3 catálogos editables.
+2. **Propuesta**: se leyeron `detalle`, `observaciones`, `subtipo_detalle` y
+   `acciones_implementadas` de las 484, una por una (no por palabras clave). Se agruparon en 23
+   reglas, cada fila con campo propuesto, confianza y motivo. Donde el texto no alcanzaba se usó
+   `categoria_general_id` como respaldo, bajando la confianza. Para elegir el destino se tomó como
+   precedente cómo el área ya venía usando los campos nuevos (p. ej. kits solares y luminarias ya
+   estaban en RED ELECTRICA; escuelas y salud en Ayudas a instituciones).
+3. **Validación** por el responsable en un Excel (`mapeo_otras_obras_privada.xlsx`), con corrección
+   por regla o por fila. Resultado: 40 correcciones puntuales sobre la propuesta — 39 a PLAYON
+   DEPORTIVO (propuestas en Ayudas a instituciones) y 1 a Pedidos Administrativos (propuesta en
+   Pedidos por ATP).
+4. **Aplicación** en una sola transacción, previa corrida de simulación (rollback). Por cada
+   gestión se replicó lo que hace `gestiones/service.patch_gestion`: `UPDATE` de `categoria_id` /
+   `updated_at` / `updated_by`, evento `ACTUALIZA_DATO` (`campo_modificado = 'categoria_id'`) en
+   `priv_gestiones_eventos` y registro en `priv_audit_log`. Sólo se tocaban gestiones que seguían
+   en "Otras Obras" y no estaban borradas.
+
+### Resultado
+
+450 gestiones reasignadas, 34 se mantienen en "Otras Obras", ninguna salteada.
+
+| Campo de Trabajo destino | `priv_categorias.id` | Gestiones |
+|---|---|---|
+| OBRA DE GAS | 1790167961248 | 178 |
+| RED ELECTRICA | 1788440474308 | 104 |
+| Obras de Recursos Hídricos | 1756700000006 | 43 |
+| **PLAYON DEPORTIVO** (nuevo) | 1791315842588 | 39 |
+| infraestructura vial | 1789737561042 | 36 |
+| Ayudas a instituciones | 1756700000009 | 29 |
+| Pedidos Administrativos | 1756700000007 | 10 |
+| Cordón Cuneta y adoquinado | 1756700000003 | 7 |
+| ANUNCIO GOBERNADOR | 1789749098268 | 2 |
+| Loteos | 1756700000002 | 2 |
+| Otras Obras (sin cambio) | 1756700000008 | 34 |
+
+Cómo reconocer estos cambios en la base: eventos y auditoría con usuario
+`script:mapeo-otras-obras`, `metadata_json.origen = 'mapeo_otras_obras'`, timestamp
+`2026-10-06 19:44:02 UTC`.
+
+### Criterios que quedaron fijados
+
+- **Gas** → OBRA DE GAS. 100 de las 178 no mencionan gas en el texto (sólo estado: "OBRA
+  INAUGURADA", "EXPEDIENTE EN PROCESO"); fueron por su `categoria_general_id = CAT_OBRA_DE_GAS`.
+- **Kits/paneles solares, luminarias, alumbrado, tendido, media tensión** → RED ELECTRICA.
+- **Agua, perforaciones, mangueras, tanques, cloacas, saneamiento** → Obras de Recursos Hídricos.
+- **Pavimento, rutas, accesos, puentes, caminos rurales, ciclovías** → infraestructura vial;
+  cordón cuneta y adoquinado → su campo propio.
+- **Polideportivos, playones, techados deportivos** → PLAYON DEPORTIVO (39). El campo cubre
+  infraestructura deportiva en general, no sólo playones. 9 gestiones deportivas quedaron en Ayudas
+  a instituciones por decisión de la validación.
+- **Escuelas, salud, comisaría, clubes, cooperativas** → Ayudas a instituciones.
+- **Festivales y eventos, trámites** → Pedidos Administrativos.
+- **Se mantienen en "Otras Obras"** (34): plazas, balnearios, SUM, edificios municipales, parques
+  industriales, centros culturales, iglesias (25); y lo que no tiene campo que lo describa —
+  conectividad, residuos/ambiente, minería, o texto insuficiente (9). Criterio no uniforme
+  heredado: hay 6 plazas cargadas por el área en Pedidos Administrativos.
+
+### Consecuencias y advertencias
+
+- **`scripts/backfill_categorias.py --force` no debe volver a correrse**: recalcula `categoria_id`
+  con el mapa viejo y devolvería estas gestiones a "Otras Obras". Sin `--force` es inocuo (sólo
+  escribe donde `categoria_id IS NULL`), pero sus mapas `_TEMA_A_CAT` / `_LEGACY_A_CAT` siguen
+  apuntando Gas y Eléctrica a "Otras Obras": las 104 gestiones aún sin campo, si se backfillean,
+  caerían ahí. Actualizar esos mapas antes de reutilizarlo.
+- **El Anexo A queda desactualizado** para `CAT_OBRA_DE_GAS`, `CAT_OBRA_ELECTRICA_ENERGIA` y
+  `CAT_DEPORTES`: documenta lo que el script decide, no la clasificación vigente en la base.
+- **Sin efecto sobre el Tablero / informe de Cooperativas**: `app/informe/` clasifica por regex
+  sobre `detalle` (`tema_informe`), no por `categoria_id`. Sí es insumo para E4
+  (`spec-privada-informe-cooperativas-v2.md`), que ahora parte de un `categoria_id` más preciso.
+- `updated_at` de las 450 gestiones quedó en la fecha de la operación.
+
+### Reversión
+
+El respaldo `mapeo_otras_obras_respaldo_20261006.json` (raíz del directorio de trabajo, fuera de
+los repos) lista `id`, `categoria_id_anterior` y `categoria_id_nuevo` de las 450. Revertir es
+volver cada `id` a `1756700000008`, registrando evento y auditoría igual que en la aplicación. El
+campo PLAYON DEPORTIVO se puede borrar desde el panel una vez que no tenga gestiones (guard 409
+`CATEGORIA_EN_USO`). Los scripts de extracción y aplicación fueron de un solo uso y no se
+versionaron.
