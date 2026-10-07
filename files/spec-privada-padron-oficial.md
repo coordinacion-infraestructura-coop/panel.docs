@@ -1,7 +1,7 @@
 # Spec: Privada adopta el padrón oficial de localidades
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.1.0
 **Servicios**: `svc-privada` (padrón espejo, gestiones, rollup), `svc-vivienda`
 (endpoint interno de lectura del padrón)
 **ADR**: ADR-026 (reemplaza parcialmente ADR-012, cierra el pendiente de ADR-024)
@@ -160,10 +160,11 @@ cross-DB, la fuente de verdad es una sola y Privada lee una copia local.
    `geo_id` (caso "Monte Cristo" cargada con otro departamento). Después:
    - con match: `geo_id` = `id_geo` oficial, `departamento`/`localidad` = nombre
      oficial. Por cada gestión modificada se escribe un evento
-     `ACTUALIZA_DATO` con el valor anterior y el nuevo (mismo criterio que la
-     reasignación masiva de "Otras Obras", `spec-privada-categorias-programas.md`
-     Anexo B). `lat`/`lon` de la gestión no se tocan (son del punto cargado, no
-     del centroide).
+     `NORMALIZACION_LOCALIDAD` con el valor anterior y el nuevo. Es un tipo de
+     evento **oculto** en el timeline de Movimientos (como `CORRECCION_DETALLE`):
+     queda como auditoría, pero ~335 gestiones no muestran un "movimiento" que
+     nadie cargó. Por lo mismo no se tocan `updated_at`/`updated_by`.
+     `lat`/`lon` de la gestión tampoco (son del punto cargado, no del centroide).
    - sin match: `geo_id = NULL`, el texto se conserva tal cual, y se lista para
      revisión (no se inventa un vínculo).
 4. **`priv_localidades_info`**: se agrega la columna `id_geo` (oficial,
@@ -201,6 +202,25 @@ Las rutas, los parámetros y la forma de las respuestas de
   registrado en `spec-normalizacion-localidades.md §9`).
 - Reescribir el texto libre de Cordón Cuneta / Córdoba Hogar / Mi Lugar con el
   nombre oficial — ver pregunta abierta 4.
+
+### Implementación (2026-10-07, rama `privada-padron-oficial` de `panel.backend`)
+
+- `svc-vivienda`: `GET /internal/geo/padron` (`geo/service.listar_padron`);
+  migración `0036` (los tres "confirmado sin vínculo").
+- `svc-privada`: `app/territorial/padron_sync.py` (`sync_padron`,
+  `normalizar_gestiones`); `POST /internal/privada/geo/sync` y
+  `POST /internal/privada/geo/normalizar-gestiones?dry_run=`; migración `0003`
+  (`priv_localidades_info.id_geo`); `rollup_territorial` por `geo_id`;
+  `GET /catalogos/localidades` deja de ofrecer las filas desactivadas.
+- Si `svc-vivienda` no responde, sync y normalización devuelven 502 y no
+  escriben nada: "no pude leer el padrón" nunca se trata como "nada matchea".
+
+**Orden de despliegue** (importa): la migración `0003` de `svc-privada` tiene
+que correr **antes** de desplegar el código nuevo — el modelo ya declara la
+columna `id_geo` y sin ella fallan los endpoints de `localidades-info`.
+Después: deploy de ambos servicios → `POST /geo/sync` → normalización con
+`dry_run=true`, revisar el resumen → `dry_run=false` → Cloud Scheduler diario
+sobre `/geo/sync` → recalcular `resumen_territorial`.
 
 ## 4. Riesgos
 

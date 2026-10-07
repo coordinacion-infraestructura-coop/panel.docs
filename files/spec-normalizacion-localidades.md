@@ -1,7 +1,7 @@
 # Spec: Normalización de nombres de localidad (transversal)
 
 **Estado**: approved
-**Versión**: 0.5.0
+**Versión**: 0.6.0
 **Servicios**: `svc-vivienda` (padrón + endpoint interno de resolución + fixes de
 matching), `svc-gasifera` (sync), `svc-gralgob` (sync), `svc-privada` (rollup
 territorial), `frontend` (retira el matching hardcodeado de `AtpPage.tsx`)
@@ -11,6 +11,23 @@ territorial), `frontend` (retira el matching hardcodeado de `AtpPage.tsx`)
 
 ## Changelog
 
+- **0.6.0** (2026-10-07): criterio general fijado por el usuario y registrado
+  como **ADR-026** — Vivienda, Privada, Gral. de Gobierno, Gasífera y Resumen
+  Territorial usan la misma base oficial de localidades. Privada deja de tener
+  padrón propio (`priv_geo_localidades` pasa a ser espejo de solo lectura; ver
+  `spec-privada-padron-oficial.md`). Dos salvedades que quedan escritas acá
+  porque hasta ahora sólo existían como comportamiento: (1) **Gasífera y Gral.
+  de Gobierno** cargan desde planillas externas que escriben algunos nombres
+  distinto — se resuelven con el mapeo previo a la carga (`viv_geo_alias_manual`
+  + resolución en sync-time), y el texto de la planilla se conserva; (2) **Mi
+  Lugar** tiene proyectos que son loteos nombrados por barrio de Córdoba
+  Capital ("Barrio Chingolo", "Santa Teresa") — no matchean contra el padrón y
+  es correcto: se registran como "confirmado sin vínculo" (alias con
+  `id_geo = NULL`, migración `svc-vivienda` 0036, igual que "Santiago Temple")
+  para que no generen el aviso de §4.11. Pendientes anotados en
+  `spec-privada-padron-oficial.md §7`: el panel de asignación manual de §9 (el
+  usuario lo quiere para lo nuevo que no resuelva) y pasar al nombre oficial
+  el texto guardado en CC/CH/ML (hoy §2.6 dice que no se pisa).
 - **0.5.0** (2026-10-07): grafía única del padrón. De 544 filas de
   `viv_geo_localidades`, 30 tenían el nombre entero en minúsculas ("Villa de
   Pocho", casi todas las altas posteriores, id 533–560) y 24 el alias entre
