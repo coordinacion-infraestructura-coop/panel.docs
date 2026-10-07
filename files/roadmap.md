@@ -168,7 +168,8 @@ Prerequisito: marcar `docs/files/spec-svc-vivienda.md` como `approved`.
   `spec-normalizacion-localidades.md` (v0.7.0).
 - [ ] **Pantalla de asignación manual de localidades sin resolver** — desde el panel de
   notificaciones, un Admin vincula a una fila del padrón (o marca "confirmado sin vínculo") las
-  localidades nuevas que no matchean. Hoy sólo se puede por migración. Sin spec todavía
+  localidades nuevas que no matchean. Hoy sólo se puede por migración. Spec
+  `spec-geo-asignacion-manual-localidades.md` `approved` (2026-10-07), en implementación
   (`spec-privada-padron-oficial.md §7`, `spec-normalizacion-localidades.md §9`).
 - [x] **Resumen Territorial: indicadores como botón al listado + "Visita del gobernador" en la
   ficha** (2026-10-07, `spec-resumen-territorial-ficha-localidad.md` v0.5.0, E5e/E5f).
