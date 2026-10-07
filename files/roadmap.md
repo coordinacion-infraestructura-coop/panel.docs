@@ -159,6 +159,24 @@ Prerequisito: marcar `docs/files/spec-svc-vivienda.md` como `approved`.
   En producción desde 2026-09-14 (feed global + lectura por usuario + endpoint interno de alta + 2
   filas sembradas). **Pendiente**: la lógica que lo alimenta automáticamente (paso siguiente —
   quién dispara cada tipo de alerta y con qué contenido).
+- [x] **Una sola base oficial de localidades** (ADR-026, 2026-10-07) — `viv_geo_localidades` es
+  el padrón de toda la plataforma. Grafía única en mayúsculas (migración 0035); Privada pasa a un
+  espejo de solo lectura sincronizado a diario y sus 2.260 gestiones quedaron repunteadas al
+  `id_geo` oficial (511 modificadas); Cordón Cuneta / Córdoba Hogar / Mi Lugar guardan el nombre
+  oficial cuando hay vínculo; los loteos de Mi Lugar por barrio de Capital quedan "confirmado sin
+  vínculo". Specs `spec-privada-padron-oficial.md` (implemented) y
+  `spec-normalizacion-localidades.md` (v0.7.0).
+- [ ] **Pantalla de asignación manual de localidades sin resolver** — desde el panel de
+  notificaciones, un Admin vincula a una fila del padrón (o marca "confirmado sin vínculo") las
+  localidades nuevas que no matchean. Hoy sólo se puede por migración. Sin spec todavía
+  (`spec-privada-padron-oficial.md §7`, `spec-normalizacion-localidades.md §9`).
+- [x] **Resumen Territorial: indicadores como botón al listado + "Visita del gobernador" en la
+  ficha** (2026-10-07, `spec-resumen-territorial-ficha-localidad.md` v0.5.0, E5e/E5f).
+- [x] **`Autoridad` como rol de lectura en los cuatro servicios con panel** (2026-10-03 / 10-07,
+  `spec-resumen-territorial.md §7.1`).
+- [x] **CI por servicio** (2026-10-07) — un trigger de Cloud Build por microservicio
+  (`deploy-svc-{vivienda,privada,gasifera,gralgob,datos-externos}`); antes sólo desplegaba
+  `svc-vivienda`. El CI no corre Alembic.
 
 ---
 
