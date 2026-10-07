@@ -1,7 +1,7 @@
 # Spec: Privada adopta el padrón oficial de localidades
 
-**Estado**: approved
-**Versión**: 1.2.0
+**Estado**: implemented
+**Versión**: 1.3.0
 **Servicios**: `svc-privada` (padrón espejo, gestiones, rollup), `svc-vivienda`
 (endpoint interno de lectura del padrón)
 **ADR**: ADR-026 (reemplaza parcialmente ADR-012, cierra el pendiente de ADR-024)
@@ -230,6 +230,26 @@ Después: deploy de ambos servicios → `POST /geo/sync` → normalización con
 `dry_run=true`, revisar el resumen → `dry_run=false` → Cloud Scheduler diario
 sobre `/geo/sync` → recalcular `resumen_territorial`.
 
+### Puesta en producción (2026-10-07)
+
+- Migraciones aplicadas: `svc-privada` 0003, `svc-vivienda` 0036 y 0037.
+- Deploy por CI de `svc-vivienda` y `svc-privada` (commit `207c06e`).
+- `POST /geo/sync`: 544 filas, 58 actualizadas (grafía + las 7 desactivadas).
+- Normalización: simulación y corrida real con el mismo resultado — **511
+  gestiones modificadas**: 333 repunteadas por nombre (ids `BOOT|…`, los 7 que
+  apuntaban a duplicadas, "Las Higueras" 533 → 174, "CHUÑ‘A" 79 → 553), 177
+  sólo de grafía (incluye "Monte Cristo", cuyo departamento pasó a Río
+  Primero), 1 sin vínculo ("Paraje El Barrial"). `priv_localidades_info`: 429
+  de 430 con `id_geo`. Una simulación posterior no encuentra nada que cambiar.
+- Rollup verificado: 374 localidades, ningún `id_geo` repetido, una sola sin
+  vínculo.
+- Cloud Scheduler `sync-privada-padron-localidades`: diario 06:00 (Córdoba),
+  con la SA `svc-vivienda@` (ya tenía `run.invoker` sobre `svc-privada`);
+  probado con una corrida manual (200).
+- Corregido después (commit `355850c`): el resumen de la corrida real contaba
+  dos veces las gestiones ya repunteadas (totales inflados; los datos escritos
+  eran correctos).
+
 ## 4. Riesgos
 
 - **Cambio de nombre visible** en gestiones ya cargadas (180 gestiones, todas
@@ -248,18 +268,18 @@ las decisiones del usuario (§1.2).
 
 ## 6. Criterios de aceptación
 
-- [ ] `priv_geo_localidades` tiene exactamente las filas del padrón oficial
+- [x] `priv_geo_localidades` tiene exactamente las filas del padrón oficial
       (mismos `id_geo`, nombres y `activo`) después de un sync.
-- [ ] Toda gestión con localidad del padrón tiene `geo_id` oficial y nombre
+- [x] Toda gestión con localidad del padrón tiene `geo_id` oficial y nombre
       oficial; las que no, quedan con `geo_id = NULL` y figuran en el listado
       de revisión.
-- [ ] El rollup territorial de Privada no llama al resolver al vuelo y
+- [x] El rollup territorial de Privada no llama al resolver al vuelo y
       `resumen_territorial` agrupa las líneas de Privada por `id_geo`.
-- [ ] Tests de contrato de `svc-privada` (`tests/test_contrato.py`) sin
+- [x] Tests de contrato de `svc-privada` (`tests/test_contrato.py`) sin
       cambios de forma.
 - [ ] Alta y edición de una gestión desde el frontend funcionan sin cambios en
       el formulario.
-- [ ] Las salvedades de §0 quedan escritas en
+- [x] Las salvedades de §0 quedan escritas en
       `spec-normalizacion-localidades.md`.
 
 ## 7. Pendientes para próximas entregas
