@@ -1,7 +1,7 @@
 # Spec: Privada adopta el padrón oficial de localidades
 
 **Estado**: draft
-**Versión**: 0.1.0
+**Versión**: 0.2.0
 **Servicios**: `svc-privada` (padrón espejo, gestiones, rollup), `svc-vivienda`
 (endpoint interno de lectura del padrón)
 **ADR**: ADR-026 (reemplaza parcialmente ADR-012, cierra el pendiente de ADR-024)
@@ -56,6 +56,53 @@ al armar el rollup territorial. Es el único módulo que no cumple el criterio.
 Consecuencia: Privada valida contra una lista que puede divergir del padrón
 oficial (altas, bajas, correcciones de nombre que se hagan en uno no llegan al
 otro), y el cruce con el resto de las áreas depende de un matching por texto.
+
+## 1.1 Medición en producción (2026-10-07)
+
+Consulta de solo lectura a `db_vivienda` y `db_privada` (transacciones
+`READ ONLY`, vía `cloud-sql-proxy`), autorizada por el usuario. Responde las
+preguntas abiertas 1 y 2 de la v0.1.0.
+
+**Los dos padrones son la misma lista.** `priv_geo_localidades` y
+`viv_geo_localidades` tienen las mismas 544 filas con los mismos `id_geo`;
+ninguna localidad existe en uno y no en el otro, y ningún nombre difiere una
+vez normalizado. La copia de Privada sólo quedó vieja:
+
+- 54 filas con la grafía anterior a la migración 0035 (minúsculas).
+- 7 filas que el oficial desactivó por duplicadas (migración 0033: id 43, 78,
+  81, 212, 213, 285, 555) siguen activas en Privada, así que el formulario de
+  gestiones todavía las ofrece.
+
+**Gestiones activas: 2.258.**
+
+| Situación | Gestiones |
+|---|---|
+| `geo_id` correcto (coincide con el que resuelve el oficial por nombre) | 1.923 |
+| `geo_id` sintético `BOOT\|DEPTO\|LOCALIDAD` heredado del sistema viejo — no existe en ningún padrón, pero el nombre resuelve | 325 |
+| `geo_id` de una fila desactivada por duplicada (Charbonier 555 → 141; Eufrasio Loza 212 → 558) | 7 |
+| `geo_id` equivocado: "LAS HIGUERAS" (Río Cuarto) apunta a 533 "La Higuera" (Cruz del Eje); corresponde 174 | 2 |
+| Sin resolver por nombre | 2 |
+
+Las 2 sin resolver: "PARAJE EL BARRIAL" (Tulumba, no está en el padrón) y
+"MONTE CRISTO" cargada con departamento Colón (está en Río Primero; el
+`geo_id` 392 guardado es correcto, lo que está mal es el departamento).
+
+Además, 180 gestiones (38 combinaciones) tienen el texto de localidad con una
+grafía que no es idéntica a la oficial — todas diferencias de mayúsculas.
+
+**`priv_localidades_info`**: 430 filas, 429 resuelven contra el oficial; la
+única que no es "SANTIAGO TEMPLE" (ausente del padrón, ya conocido).
+
+**Vivienda** (para la pregunta abierta 4):
+
+| Tabla | Registros | Con vínculo | Texto no idéntico al oficial | …de los cuales distinto aun sin tildes/mayúsculas |
+|---|---|---|---|---|
+| Cordón Cuneta | 89 | 89 | 11 | 1 (CHARRAS) |
+| Córdoba Hogar | 221 | 221 | 24 | 3 (LUXARDO, GENERAL BALDISERA, CHARRAS) |
+| Mi Lugar | 49 | 47 | 1 | 0 |
+
+Los 2 proyectos de Mi Lugar sin vínculo son "Barrio Chingolo" y "Santa
+Teresa" — el caso de los loteos por barrio de §0.
 
 ## 2. Decisión de diseño
 
@@ -126,12 +173,8 @@ Las rutas, los parámetros y la forma de las respuestas de
 
 ## 4. Riesgos
 
-- **Localidades del padrón de Privada que no existen en el oficial** (551 vs
-  544 filas): gestiones que hoy validan y después de la migración quedarían sin
-  vínculo. Hay que medirlo antes de migrar (pregunta abierta 1) y decidir caso
-  por caso: alta en el padrón oficial, alias, o "sin vínculo" confirmado.
-- **Cambio de nombre visible** en gestiones ya cargadas (las 4 grafías
-  distintas y lo que aparezca al medir): filtros guardados o links con
+- **Cambio de nombre visible** en gestiones ya cargadas (180 gestiones, todas
+  diferencias de mayúsculas — §1.1): filtros guardados o links con
   `?localidad=` con el nombre viejo dejan de coincidir. Mitigación: los filtros
   de Privada ya comparan sin mayúsculas; evaluar comparar también por alias.
 - **Padrón desincronizado** si el job falla en silencio: el sync registra cada
@@ -141,15 +184,16 @@ Las rutas, los parámetros y la forma de las respuestas de
 
 ## 5. Preguntas abiertas
 
-1. ¿Cuántas filas de `priv_geo_localidades` no tienen equivalente en
-   `viv_geo_localidades`, y cuántas gestiones cuelgan de ellas? Requiere una
-   consulta de solo lectura a `db_privada` y `db_vivienda` en producción.
-2. ¿Los `id_geo` de `priv_geo_localidades` coinciden con los oficiales para las
-   localidades comunes (vienen del mismo origen) o son otro espacio de
-   identificadores? Define si la migración es un repunteo o una validación.
-3. Las gestiones sin vínculo después de migrar: ¿se corrigen a mano una por
-   una desde el panel, o se resuelven con alias en lote como se hizo con
-   Gasífera/ATP?
+1. ~~Localidades de Privada sin equivalente en el oficial~~ — **resuelta**
+   (§1.1): no hay ninguna, son las mismas 544 filas.
+2. ~~¿Mismo espacio de identificadores?~~ — **resuelta** (§1.1): sí. La
+   migración de gestiones es un repunteo: las 325 con id `BOOT|…` y las 7 que
+   apuntan a duplicados pasan al `id_geo` oficial por nombre; las 2 de "Las
+   Higueras" se corrigen a 174.
+3. Las gestiones sin vínculo después de migrar son sólo 2 (§1.1). Propuesta:
+   corregir a mano el departamento de "Monte Cristo" (Colón → Río Primero) y
+   dejar "Paraje El Barrial" sin vínculo, registrado como ausente del padrón.
+   A confirmar.
 4. **Texto libre en Vivienda**: `spec-normalizacion-localidades.md §2.6` dice
    que el nombre que guarda cada registro de CC/CH/ML no se pisa (se agrega
    `localidad_id` al lado). El criterio de §0 sugiere ir más lejos: que el
