@@ -70,6 +70,10 @@ transferencias), nunca de lógica de negocio de ninguna secretaría. No reemplaz
 
 ### 2.1 Alcance (v1)
 
+> **Nota 2026-10-09**: ADR-028 amplía el alcance del servicio (paneles de negocio propios). Este
+> apartado describe la v1 tal como se construyó; el alcance nuevo se especifica en
+> `spec-datos-externos-tablero-gobierno.md` (draft) y no rige hasta que ese spec se apruebe.
+
 - Carga única (no recurrente) del Censo 2022 INDEC a nivel gobierno local.
 - ETL mensual (+ disparo manual) de transferencias automáticas a municipios y comunas.
 - Un endpoint interno de rollup para que `svc-vivienda` federe (§3).
