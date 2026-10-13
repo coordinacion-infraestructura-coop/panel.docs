@@ -1,7 +1,7 @@
 # Spec: Datos externos — Fase 1: nomenclador INDEC de Gobierno + ficha de localidad (demografía y datos institucionales)
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-13
 **Servicios**: `svc-datos-externos` (sync + rollup) · `svc-vivienda` (`resumen_territorial`) · `frontend` (`resumen-territorial`)
@@ -12,6 +12,8 @@ de su §5 (superficie/densidad y población 2010/crecimiento intercensal).
 
 ## Changelog
 
+- **1.0.1** (2026-10-13): respuestas del área de Gobierno (§11). Sin cambio de alcance. La
+  población de zona rural es una estimación del área y se rotula así (§3.2, §8).
 - **1.0.0** (2026-10-13): aprobado por el usuario con correcciones. Entran a la Fase 1 los datos
   institucionales y sensibles de `DATOS LOC` (electores, empleados, masa salarial, intendente,
   partido, reelecto, continuidad, legislador y contacto del intendente), visibles **solo para el
@@ -84,9 +86,9 @@ gobiernos locales + 25 zonas rurales).
 | Columna de la planilla | Campo | Visibilidad | Observado |
 |---|---|---|---|
 | `ID_LOC` | clave | — | — |
-| `SUPERFICIE` | `superficie_km2` | Pública | 427/427 numérico. Es la superficie del **radio municipal** en km² (suma provincial ≈ 9.727 km²), no la del departamento. 49 localidades tienen menos de 0,5 km² |
-| `POBLACION 2010` | `poblacion_2010` | Pública | 427/427 numérico |
-| `POBLACION 2022` | `poblacion_2022_gob` | No se expone (control) | Difiere del Censo cargado en 3 localidades |
+| `SUPERFICIE` | `superficie_km2` | Pública | 427/427 numérico. Es la superficie del polígono del **radio municipal** en km², fuente IDECOR (confirmado por el área; suma provincial ≈ 9.727 km²), no la del departamento. 49 localidades tienen menos de 0,5 km² |
+| `POBLACION 2010` | `poblacion_2010` | Pública | 427/427 numérico. Censo 2010, INDEC (confirmado por el área) |
+| `POBLACION 2022` | `poblacion_2022_gob` | No se expone (control) | Difiere del Censo cargado en 3 localidades, por ajustes manuales del área (§11) |
 | `ELECTORES` | `electores` | Autoridad | 427/427 |
 | `EMPLEADOS` | `empleados` | Autoridad | 427/427 |
 | `MASA SALARIAL` | `masa_salarial` | Autoridad | 425/427 con dato |
@@ -103,7 +105,9 @@ mismo relevamiento y se trata como restringido.
 
 Las 25 filas de zona rural traen población 2022 y 2010 (≈70.000 y ≈98.000 habitantes) y
 superficie 0. Explican la diferencia entre los dos totales provinciales del Looker (3.840.905 con
-zona rural, 3.770.861 solo gobiernos locales).
+zona rural, 3.770.861 solo gobiernos locales). **Es una estimación**: el Censo 2022 no desagrega
+la población sin gobierno local por departamento; el área la reparte según la participación
+general de cada departamento.
 
 ### 3.3 Regla de lectura por lista blanca
 
@@ -275,7 +279,7 @@ Cálculo en cliente, igual que el resto de los indicadores del tablero:
 - A nivel departamento y provincia: suma de población sobre suma de superficie, y suma 2022
   sobre suma 2010, tomando solo localidades con ambos datos.
 - **Población rural**: a nivel departamento y provincia, una línea aparte "Población en zona
-  rural (sin gobierno local)". No se suma a ninguna localidad ni entra en densidad. El total
+  rural (sin gobierno local) — estimación de Gobierno". No se suma a ninguna localidad ni entra en densidad. El total
   provincial puede mostrarse como "gobiernos locales + zona rural", con las dos partes a la
   vista.
 - Si falta alguno de los datos: "N/D".
@@ -322,10 +326,14 @@ y `fichaMunicipio.ts`.
 
 ## 11. Preguntas abiertas — resueltas (2026-10-13)
 
-1. **Radios muy chicos**: se muestran tal cual, por ser el dato oficial. Se consulta igual al
-   área de dónde sale la superficie.
-2. **Diferencias de población con el Censo**: se mantiene el dato del Censo; se avisa al área.
-3. **Zonas rurales**: se suma su población, siempre rotulada como zona rural.
+1. **Radios muy chicos**: se muestran tal cual, por ser el dato oficial. El área confirmó la
+   fuente: polígono del radio según IDECOR.
+2. **Diferencias de población con el Censo**: se mantiene el dato del Censo. El área explicó que
+   Villa San Isidro (1.527 vs. 607) es un ajuste manual a pedido de la localidad, que se unió con
+   La Quintana; Cañada de Machado y Los Pozos probablemente también sean ajustes manuales. El
+   sync las sigue informando como anomalía.
+3. **Zonas rurales**: se suma su población, siempre rotulada como zona rural y como estimación
+   (reparto por departamento hecho por el área).
 
 ## 12. Aprobación
 

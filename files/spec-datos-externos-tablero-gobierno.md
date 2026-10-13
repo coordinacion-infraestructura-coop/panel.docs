@@ -1,7 +1,7 @@
 # Spec: Integración del "Tablero - Min. de Gobierno" (Looker Studio) al sistema
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.1.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-13
 **Servicios**: `svc-datos-externos` (amplía alcance, ADR-028) + `svc-gralgob` (ATP, ADR-029) + `svc-vivienda` (`resumen_territorial`, consumidor)
@@ -12,6 +12,10 @@ sección (o un spec hijo) pase a `approved`.
 
 ## Changelog
 
+- **1.1.0** (2026-10-13): respuestas del área de Gobierno a las consultas (§3.8). Cambios de
+  fondo: **ATP Interno y ATP Compromisos sí se superponen** (§3.3, nota en ADR-029); FOCOM pagado
+  por ATP está cargado en ambos lados; BANCOR y Vinculación Comunitaria salen del plan;
+  `RESUMENGRAL` no sirve como validación; la población de zona rural es una estimación.
 - **1.0.0** (2026-10-13): aprobado por el usuario. Respuestas a las preguntas abiertas en §7;
   Fase 1 aprobada en su spec hijo (v1.0.0), que suma los datos institucionales de `DATOS LOC`.
 - **0.2.0** (2026-10-13): relevamiento de las 21 planillas fuente por API (solo lectura).
@@ -63,6 +67,9 @@ y, el 2026-10-13, las planillas de Google Sheets que lo alimentan (listado en
 | Spec | `spec-sync-atp-compromiso-gobernador.md` (approved) | A abrir (spec hijo) |
 | Sensibilidad | Media | Alta (incluye el referente político de cada pago) |
 | Destino | Sigue como está | Módulo y panel nuevo en `svc-gralgob` |
+| Relación | Anuncios del Gobernador en cada visita | Registro administrativo de pagos; **incluye también** pagos de los compromisos (§3.3) |
+
+**Los montos de una y otra nunca se suman entre sí** (§3.3).
 
 ## 2. Inventario de planillas fuente
 
@@ -78,16 +85,16 @@ pestaña base** de cada una.
 | 0. Resumen General | `FONDO FEDERAL` | 1.503 | Etapas por localidad: monto, disponible, estado | `svc-datos-externos` |
 | 0. Resumen General | `FOCOM PURO` | 361 | FOCOM vigente: monto, concepto, categoría, estado, fecha de pago | `svc-datos-externos` |
 | 0. Resumen General | `ADELANTOS` | 294 | Adelantos de coparticipación 2023–2025 | `svc-datos-externos` |
-| 0. Resumen General | `RESUMENGRAL` | 427 | Tabla ya calculada por localidad (derivada; sirve para validar nuestra réplica) | No se sincroniza |
+| 0. Resumen General | `RESUMENGRAL`, `RESUMENGRAL-BRANDAN` | 427 | Tablas agregadas a pedido de dos despachos. El área informa que **no son confiables** (montos sin corroborar) | No se sincroniza ni se usa para validar |
 | 4. ATP 2026 | `ATP ACUMULADO` | 2.220 | ATP Interno del año en curso (planilla de carga) | `svc-gralgob` |
 | 11.1 COPARTICIPACION | `COPA` | 28.182 | Por localidad y quincena, 2024–2026: bruto, neto y ~40 conceptos de descuento | `svc-datos-externos` |
 | 11.1 FOFINDES | `FOFINDES` | 14.518 | Mensual 2024–2026: parte variable, excedentes, descuentos, neto | `svc-datos-externos` |
 | 11.1 FODEMEP | `FODEMEP`, `ESTADO` | 14.785 / 427 | Mensual 2023–2026 y estado de adhesión con saldo | `svc-datos-externos` |
 | 11.1 FOMMEP | `FROMMEP` | 854 | Anual: móviles y edificios por categoría | `svc-datos-externos` |
 | 7. FONDO PERMANENTE | `FONDO PERM CUOTAS`, `IMPORT_Listo` | 962 / 865 | Préstamos a municipios en cuotas descontadas de coparticipación; destino del préstamo | `svc-datos-externos` |
-| 8. BANCOR | `Prestamos` | 99 | Préstamos BANCOR: monto calificado, liquidado, concepto | `svc-datos-externos` |
+| 8. BANCOR | `Prestamos` | 99 | Préstamos BANCOR: monto calificado, liquidado, concepto. **Nunca se actualizó** (depende de un pedido al banco) | No se sincroniza hasta que el área la actualice |
 | 9. FONDO AMBIENTAL | `Fondo` | 135 | Expediente, convenio, resolución, objeto, monto, estado | `svc-datos-externos` |
-| 14. Vinculacion Comunitaria | `BD` | 388 | Aportes por beneficiario: monto, estado, expediente, rendición | `svc-datos-externos` |
+| 14. Vinculacion Comunitaria | `BD` | 388 | Aportes por beneficiario: monto, estado, expediente, rendición. **En desuso** según el área | No se sincroniza |
 | 17. Comunidades Regionales | `Fondo` | 131 | Fondos de funcionamiento y obra por comunidad regional, cuotas, rendición | `svc-datos-externos` |
 | 12. Obras | `BD-TABLERO` | 1.063 (886 obras) | Obra, división, estado, avance, fechas, monto; `BD-VARIAS` trae el prorrateo de obras compartidas | `svc-datos-externos` |
 | 12. Obras | `Parques industriales` (oculta) | 88 | Parques industriales por localidad | `svc-datos-externos` |
@@ -102,7 +109,8 @@ pestaña base** de cada una.
 | 5. FOCOM - Deprecated | — | 332 | Versión vieja de FOCOM | No se sincroniza |
 | 0. Responsables BD - Tablero | `Hoja 1` | 12 | Quién mantiene cada base y si se actualiza sola o a pedido | Referencia |
 
-**Sin fuente recibida**: IPCAM (capacitación municipal). Hay que pedirla.
+**Sin fuente recibida** (el área las va a compartir): IPCAM (capacitación municipal) y la
+planilla de origen de Fondo Federal (la pestaña `FONDO FEDERAL` de Resumen General es una copia).
 
 ## 3. Hallazgos
 
@@ -141,11 +149,27 @@ oculta con geometría de radios municipales, pero solo para 175 localidades.
 - La pestaña `ATP` de "0. Resumen General" es el **histórico acumulado** 2023–2026 (6.032 pagos,
   $146.825 M) e incluye las mismas filas de 2026. La página "ATP" del Looker lee de ahí.
 - Cada pago tiene un **referente** (funcionario al que se atribuye). Es el dato más sensible.
-- 366 pagos ($12.940 M) tienen como referente al Gobernador. Eso **no prueba** solapamiento con
-  la planilla de Compromisos, pero obliga al cruce de control de ADR-029 antes de sumar ambas.
-- Verificación puntual hecha: una localidad con $230 M de compromisos pagados en octubre de 2026
-  no tiene ningún pago en ATP Interno ese año. Es consistente con que no se repiten, pero es un
-  solo caso.
+- 366 pagos ($12.940 M) tienen como referente al Gobernador.
+
+**Solapamiento con Compromisos — informado por el área el 2026-10-13; contradice lo dicho en la
+reunión que originó ADR-029.** La planilla de Compromisos registra los anuncios del Gobernador en
+cada visita. Con eso se hace un registro administrativo que impacta en "4. ATP 2026". Por lo
+tanto **hay pagos repetidos por localidad en las dos planillas**, y el área no puede
+identificarlos: la base de administración no marca cuáles vienen de un compromiso. El área elevó
+la consulta a su autoridad.
+
+Consecuencias:
+
+- **Los montos de las dos fuentes no se suman nunca**, en ningún total, hasta tener una regla de
+  identificación acordada con el área. Se muestran como dos líneas separadas.
+- El cruce de control de ADR-029 deja de ser una verificación y pasa a ser un entregable de la
+  Fase 4: medir cuánto de `atp_cronograma_pagos` aparece en ATP Interno (localidad + mes +
+  monto) y proponerle al área la regla.
+- Único dato propio hasta ahora: una localidad con $230 M de compromisos pagados en octubre de
+  2026 no tiene ningún pago en ATP Interno ese año. O hay demora entre el pago y el registro
+  administrativo, o no todo compromiso pasa a ATP Interno. El cruce lo tiene que responder.
+- Hipótesis a probar en el cruce: el referente "Gobernador" como pista de qué pagos de ATP
+  Interno son compromisos. El área no lo confirma.
 
 ### 3.4 Coparticipación: la planilla es mucho más rica que el scraping
 
@@ -154,10 +178,9 @@ de Jubilaciones, APROSS, Fondo Permanente, préstamos BANCOR y otros bancos, Red
 Viviendas Semilla, EPEC, comunidades regionales, embargos). Cubre 427 localidades por quincena
 desde enero de 2024. Nuestro scraping trae cinco conceptos mensuales.
 
-**Riesgo**: según "Responsables BD", COPARTICIPACIÓN, FOFINDES y BANCOR se actualizan **a
-pedido**, no automáticamente. El resto figura como automática. Antes de reemplazar el scraping
-hay que medir cuánto se atrasa la planilla; hasta entonces el scraping queda como respaldo y
-como control cruzado.
+**Actualización**: COPARTICIPACIÓN y FOFINDES se cargan a pedido, con una semana de demora como
+máximo según el área. El scraping queda como respaldo permanente y control cruzado. BANCOR nunca
+se actualizó.
 
 ### 3.5 Fondo Permanente y Fondo Federal son cosas distintas
 
@@ -171,15 +194,35 @@ como control cruzado.
 Saneamiento y Loteo que Gobierno carga a mano. La fuente real es nuestro sistema para los tres
 primeros. No se incorpora: corresponde ofrecerle el dato al área.
 
-### 3.7 Pendiente de aclarar con el área
+### 3.7 Pendiente con el área
 
-- **Obras**: los montos más altos (miles de millones en obras rotuladas "en millones de
-  dólares") no cierran con la unidad declarada.
-- **Población**: `DATOS LOC` y el Censo cargado en `ext_geo_censo` pueden diferir; definir cuál
-  manda.
-- **IPCAM**: falta la planilla.
-- **Histórico de ATP Interno**: confirmar que la pestaña `ATP` de Resumen General es la fuente
-  autoritativa de 2023–2025 (o si existen planillas anuales anteriores).
+- **Obras**: la columna de monto "debería ser en USD"; el área va a revisar si hay un error de
+  carga en los valores de miles de millones. La Fase 5 no muestra montos de obras hasta que lo
+  confirmen.
+- **IPCAM** y **planilla de origen de Fondo Federal**: el área las va a compartir.
+- **ATP**: respuesta de la autoridad del área sobre la superposición (§3.3).
+- **Histórico de ATP Interno 2023–2025**: quedó sin responder si la pestaña `ATP` de Resumen
+  General es la fuente autoritativa o si hay planillas anuales anteriores. Volver a preguntar.
+
+### 3.8 Respuestas del área (2026-10-13)
+
+| Tema | Respuesta | Efecto |
+|---|---|---|
+| Superficie | km², polígono del radio de cada localidad, fuente IDECOR | Confirma la etiqueta "radio municipal" |
+| Población 2010 | Censo 2010, INDEC | Sirve para crecimiento intercensal |
+| Diferencias de población 2022 | Villa San Isidro: ajuste manual a pedido de la localidad (se unió con La Quintana). Cañada de Machado y Los Pozos: probablemente también ajustes manuales | Se mantiene el Censo (decisión del usuario); la diferencia queda como anomalía informada |
+| Zona rural | Es la población sin gobierno local, pero **repartida por departamento según la participación general**, porque el Censo 2022 no la desagrega | Es una estimación: se rotula como tal |
+| COPA / FOFINDES | Una semana de demora como máximo | §3.4 |
+| BANCOR | Nunca se actualizó | Sale de la Fase 3 |
+| FOCOM | `FOCOM PURO` es la fuente original filtrada por tipo de pago; la carga es de administración | Se usa `FOCOM PURO` |
+| FOCOM pagado por ATP | Está cargado **en ambos lados** (FOCOM y ATP); por eso existe "FOCOM puro" | Los FOCOM con estado "Pagado ATP" / "Pendiente ATP" no se suman a ATP |
+| Fondo Federal | Viene de otra planilla, todavía no compartida | Fase 3 espera esa planilla |
+| ATP | Hay registros duplicados con Compromisos, sin forma de identificarlos | §3.3 |
+| Obras | Debería ser USD; a revisar | §3.7 |
+| Vinculación Comunitaria | En desuso | Sale de la Fase 3 |
+| Visitas | Las fechas futuras y filas sin localidad son errores de carga | El sync las descarta y las informa como anomalía |
+| `RESUMENGRAL` / `-BRANDAN` | Agregados pedidos por dos despachos; no confiables | Todo cálculo se hace en nuestro backend desde cada planilla base |
+| Cambios de estructura | Avisan antes | — |
 
 ## 4. Calidad de datos observada (el sync debe tolerarla)
 
@@ -216,11 +259,11 @@ de corrida append-only, Cloud Scheduler), con vínculo por código INDEC.
 |---|---|---|
 | 1 | **Nomenclador + demografía** (`spec-datos-externos-fase1-nomenclador-demografia.md`, approved): tabla puente INDEC ↔ `id_geo` (con `ID_COPA`, tipo y entes), cierre de los `id_geo` nulos del censo, y superficie / población 2010 / electores desde `DATOS LOC` | Es la base de todas las demás y destraba densidad y crecimiento intercensal en el tablero ya construido. Baja sensibilidad |
 | 2 | **Transferencias automáticas**: COPA con descuentos, FOFINDES, FODEMEP, FOMMEP. Conciliación mes a mes contra el scraping | Mayor volumen y mayor valor fiscal; define si el scraping se retira |
-| 3 | **Fondos por localidad**: FOCOM, Fondo Federal, Fondo Ambiental, Fondo Permanente, Adelantos, BANCOR, Comunidades Regionales, Vinculación Comunitaria | Forma parecida entre sí; completan el "total transferido por localidad" |
-| 4 | **ATP Interno** en `svc-gralgob` (spec hijo propio), con el cruce de control contra Compromisos | Sensible; necesita definir roles antes |
+| 3 | **Fondos por localidad**: FOCOM (`FOCOM PURO`), Fondo Federal (cuando llegue su planilla de origen), Fondo Ambiental, Fondo Permanente, Adelantos, Comunidades Regionales. Fuera: BANCOR (sin actualizar) y Vinculación Comunitaria (en desuso) | Forma parecida entre sí; completan el "total transferido por localidad" |
+| 4 | **ATP Interno** en `svc-gralgob` (spec hijo propio). Empieza por el cruce contra Compromisos y la regla de no duplicación (§3.3); sin esa regla, las dos fuentes se muestran separadas y sin total conjunto | Sensible; la superposición está confirmada por el área |
 | 5 | **Gestión territorial**: obras, visitas, reuniones, convenios, polideportivos, parques industriales, empleados | Depende de aclarar la unidad de montos de obras |
 | 6 | **Político**: padrón de intendentes y legisladores (ADR-027) y elecciones | Sensible; requiere el mecanismo de ADR-027 y roles |
-| 7 | **Réplica**: Resumen General nativo (validado contra `RESUMENGRAL`), luego páginas por fondo | Necesita fases 1 a 4 |
+| 7 | **Réplica**: Resumen General nativo, calculado en nuestro backend desde las planillas base (no se valida contra `RESUMENGRAL`, §3.8), luego páginas por fondo | Necesita fases 1 a 4 |
 | 8 | **Paneles editables** que reemplazan planillas, empezando por las sensibles | ADR-028: auth, gateway, roles y audit log en `svc-datos-externos` |
 
 ## 7. Preguntas abiertas
@@ -240,9 +283,10 @@ Siguen abiertas:
 1. ADR-027: ¿espejo sincronizado en Privada (como ADR-026) o lectura federada? ¿Qué pasa con la
    edición manual de `habitantes` y `electores` en Privada? Hasta definirlo, los datos de
    Gobierno y los de Privada conviven por separado (spec Fase 1 §7.3).
-2. Los puntos de §3.7, en consulta con el área de Gobierno.
+2. Los puntos de §3.7, pendientes del área de Gobierno.
+3. ATP: regla para no contar dos veces los pagos que están en Compromisos y en ATP Interno
+   (§3.3). Depende del cruce de datos y de la respuesta de la autoridad del área.
 
 ## 8. Criterios de aceptación
 
-A definir por fase al pasar cada una a `review`. Este spec en `draft` no tiene entregables de
-código.
+A definir por fase en su spec hijo. Este spec paraguas no tiene entregables de código.
