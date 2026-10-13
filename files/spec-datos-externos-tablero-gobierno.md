@@ -1,7 +1,7 @@
 # Spec: Integración del "Tablero - Min. de Gobierno" (Looker Studio) al sistema
 
 **Estado**: approved
-**Versión**: 1.2.0
+**Versión**: 1.3.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-13
 **Servicios**: `svc-datos-externos` (amplía alcance, ADR-028) + `svc-gralgob` (ATP, ADR-029) + `svc-vivienda` (`resumen_territorial`, consumidor)
@@ -12,6 +12,8 @@ sección (o un spec hijo) pase a `approved`.
 
 ## Changelog
 
+- **1.3.0** (2026-10-13): primer cruce ATP Compromisos vs. ATP Interno contra datos reales
+  (§3.3.1). Confirma superposición parcial y descarta el referente como marca.
 - **1.2.0** (2026-10-13): corrección del usuario — todo lo marcado "solo `Autoridad`" lo ve también
   el rol `Admin` (§5, §7).
 - **1.1.0** (2026-10-13): respuestas del área de Gobierno a las consultas (§3.8). Cambios de
@@ -167,11 +169,42 @@ Consecuencias:
 - El cruce de control de ADR-029 deja de ser una verificación y pasa a ser un entregable de la
   Fase 4: medir cuánto de `atp_cronograma_pagos` aparece en ATP Interno (localidad + mes +
   monto) y proponerle al área la regla.
-- Único dato propio hasta ahora: una localidad con $230 M de compromisos pagados en octubre de
-  2026 no tiene ningún pago en ATP Interno ese año. O hay demora entre el pago y el registro
-  administrativo, o no todo compromiso pasa a ATP Interno. El cruce lo tiene que responder.
-- Hipótesis a probar en el cruce: el referente "Gobernador" como pista de qué pagos de ATP
-  Interno son compromisos. El área no lo confirma.
+
+#### 3.3.1 Primer cruce contra datos (2026-10-13)
+
+Lectura de solo lectura, autorizada por el usuario: `atp_cronograma_pagos` de producción (montos
+negativos = pagado) contra la pestaña `ATP ACUMULADO` de "4. ATP 2026". Solo 2026: el histórico
+está en "0. Resumen General", que ese día no era legible.
+
+| | Pagos | Monto |
+|---|---|---|
+| Compromisos pagados en 2026 | 952 | $26.993 M |
+| ATP Interno 2026 | 2.205 | $76.058 M |
+| Pagos de Compromisos con un pago de ATP Interno de **igual localidad y monto**, mismo mes | 135 | $5.450 M |
+| Ídem, con un mes de diferencia | 123 | $5.274 M |
+| Ídem, en otro mes de 2026 | 139 | $4.834 M |
+| Sin pago de igual monto en la localidad | 555 | $11.436 M |
+
+Lectura:
+
+- **Hay superposición real y es parcial.** Al menos el 40 % del monto pagado de Compromisos en
+  2026 ($10.724 M) aparece idéntico en ATP Interno dentro de un mes de diferencia; contando
+  cualquier mes, el 58 %.
+- **No todo se explica pago a pago.** Para el 42 % restante no hay un pago de igual monto. Puede
+  estar agrupado o partido: mirando totales por localidad y mes, 159 de 511 combinaciones dan
+  exactamente lo mismo en las dos fuentes y en 275 ATP Interno es mayor o igual.
+- **El referente no sirve como marca.** De los 397 pagos de ATP Interno que coincidieron, solo 73
+  tienen referente Gobernador; los otros 324 están atribuidos a otros funcionarios. A la inversa,
+  82 de los 137 pagos con referente Gobernador coinciden con un compromiso.
+- Límite del método: los montos redondos pueden coincidir por azar; las coincidencias en "otro
+  mes" son las menos confiables. De las 255 localidades con compromisos, 252 también tienen pagos
+  en ATP Interno 2026.
+- Corrige el dato previo de este spec (una localidad con compromisos pagados y sin pagos en ATP
+  Interno): estaba mal leído el signo del cronograma.
+
+Conclusión para la Fase 4: no hay una llave ni una marca que permita deduplicar con certeza.
+Se mantiene la regla de no sumar las dos fuentes. La regla definitiva la tiene que dar el área
+(por ejemplo, una columna en la base de administración que identifique el compromiso de origen).
 
 ### 3.4 Coparticipación: la planilla es mucho más rica que el scraping
 
