@@ -1,7 +1,7 @@
 # Spec: Datos externos — Fase 1: nomenclador INDEC de Gobierno + ficha de localidad (demografía y datos institucionales)
 
 **Estado**: approved
-**Versión**: 1.0.1
+**Versión**: 1.0.2
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-13
 **Servicios**: `svc-datos-externos` (sync + rollup) · `svc-vivienda` (`resumen_territorial`) · `frontend` (`resumen-territorial`)
@@ -12,6 +12,9 @@ de su §5 (superficie/densidad y población 2010/crecimiento intercensal).
 
 ## Changelog
 
+- **1.0.2** (2026-10-13): código escrito en la rama `datos-externos-fase1-nomenclador` de
+  `services/` y `frontend/` (sin commitear ni desplegar; el spec sigue en `approved`). Precisiones
+  que salieron de la implementación, en §5.1.
 - **1.0.1** (2026-10-13): respuestas del área de Gobierno (§11). Sin cambio de alcance. La
   población de zona rural es una estimación del área y se rotula así (§3.2, §8).
 - **1.0.0** (2026-10-13): aprobado por el usuario con correcciones. Entran a la Fase 1 los datos
@@ -205,6 +208,19 @@ claves), agregando el parámetro de `valueRenderOption`.
 
 `GET /internal/datos-externos/gobierno/localidades/sync-estado` devuelve la última corrida por
 fuente.
+
+### 5.1 Precisiones de implementación
+
+- Con `gob_localidades_sync_enabled` apagado, el endpoint de sync responde 503.
+- Si el resolver de localidades no responde (devuelve todo sin resolver), el sync **no pisa** los
+  `id_geo` resueltos en corridas anteriores.
+- Cierre del Censo: si el `id_geo` que aportaría el nomenclador ya lo usa otra fila del Censo, no
+  se asigna y queda como anomalía `censo_id_geo_en_conflicto` (señal de un match por nombre
+  equivocado en la carga original).
+- Un contacto de más de 40 caracteres se guarda como `NULL` y se anota el campo como inválido.
+- `svc-vivienda` guarda el departamento de cada zona rural con la grafía del padrón oficial (la
+  planilla trae, por ejemplo, `COLON`).
+- Una corrida que falla al arrancar deja su fila `fallido` en `ext_gob_sync_log` (commit propio).
 
 Configuración nueva (`config.py`, defaults vacíos/apagados; valores reales en
 `services/cloudbuild.yaml`): `google_sheet_gob_nomenclador_id`,
