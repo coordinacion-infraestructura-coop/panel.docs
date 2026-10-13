@@ -1,7 +1,7 @@
 # Spec: Integración del "Tablero - Min. de Gobierno" (Looker Studio) al sistema
 
 **Estado**: approved
-**Versión**: 1.1.0
+**Versión**: 1.2.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-13
 **Servicios**: `svc-datos-externos` (amplía alcance, ADR-028) + `svc-gralgob` (ATP, ADR-029) + `svc-vivienda` (`resumen_territorial`, consumidor)
@@ -12,6 +12,8 @@ sección (o un spec hijo) pase a `approved`.
 
 ## Changelog
 
+- **1.2.0** (2026-10-13): corrección del usuario — todo lo marcado "solo `Autoridad`" lo ve también
+  el rol `Admin` (§5, §7).
 - **1.1.0** (2026-10-13): respuestas del área de Gobierno a las consultas (§3.8). Cambios de
   fondo: **ATP Interno y ATP Compromisos sí se superponen** (§3.3, nota en ADR-029); FOCOM pagado
   por ATP está cargado en ambos lados; BANCOR y Vinculación Comunitaria salen del plan;
@@ -244,8 +246,8 @@ configuración regional de cada planilla.
 
 | Nivel | Fuentes | Tratamiento |
 |---|---|---|
-| Alto — datos personales | Contacto de intendentes (`DATOS LOC`, `Intendentes`); IPCAM | Se sincroniza; visible solo para el rol `Autoridad` |
-| Alto — político | ATP Interno (referente); Elecciones; detalle de Reuniones; intendente, partido y legislador | Visible solo para el rol `Autoridad` |
+| Alto — datos personales | Contacto de intendentes (`DATOS LOC`, `Intendentes`); IPCAM | Se sincroniza; visible solo para los roles `Admin` y `Autoridad` |
+| Alto — político | ATP Interno (referente); Elecciones; detalle de Reuniones; intendente, partido y legislador | Visible solo para los roles `Admin` y `Autoridad` |
 | Medio — financiero | Descuentos de coparticipación, Fondo Permanente, BANCOR, saldos | Roles de lectura del módulo |
 | Bajo | Obras, visitas, convenios, polideportivos, nomenclador, demografía | Roles de lectura del módulo |
 
@@ -273,9 +275,9 @@ Resueltas por el usuario el 2026-10-13:
 - **Código INDEC como llave alternativa**: confirmado, sin tocar el padrón oficial (§3.1).
 - **Coparticipación**: la planilla de Gobierno pasa a ser la fuente principal; el scraping queda
   como **respaldo permanente** y control cruzado.
-- **Roles**: ATP Interno, Elecciones y el detalle de Reuniones los ve **solo el rol
-  `Autoridad`**.
-- **Contacto de intendentes**: se sincroniza; lo ve solo el rol `Autoridad`.
+- **Roles**: ATP Interno, Elecciones y el detalle de Reuniones los ven **solo los roles
+  `Admin` y `Autoridad`** (corregido el 2026-10-13: `Admin` ve todo siempre).
+- **Contacto de intendentes**: se sincroniza; lo ven solo los roles `Admin` y `Autoridad`.
 - **Escritura hacia las planillas**: ninguna por ahora. El sistema solo lee.
 
 Siguen abiertas:
