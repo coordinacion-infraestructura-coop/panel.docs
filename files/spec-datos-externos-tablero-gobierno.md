@@ -1,41 +1,49 @@
 # Spec: Integración del "Tablero - Min. de Gobierno" (Looker Studio) al sistema
 
 **Estado**: draft
-**Versión**: 0.1.0
+**Versión**: 0.2.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-09
+**Última actualización**: 2026-10-13
 **Servicios**: `svc-datos-externos` (amplía alcance, ADR-028) + `svc-gralgob` (ATP, ADR-029) + `svc-vivienda` (`resumen_territorial`, consumidor)
 
 Spec paraguas de exploración. Define el inventario de fuentes, las decisiones ya tomadas y el
 orden de incorporación. **No habilita implementación**: cada fase se construye recién cuando su
 sección (o un spec hijo) pase a `approved`.
 
+## Changelog
+
+- **0.2.0** (2026-10-13): relevamiento de las 21 planillas fuente por API (solo lectura).
+  Reemplaza el inventario por página del Looker por el inventario real de planillas (§2),
+  agrega hallazgos (§3), calidad de datos (§4) y reordena el plan (§6).
+- **0.1.0** (2026-10-09): relevamiento del Looker en modo vista; ADR-027/028/029.
+
 ---
 
 ## 0. Origen
 
 El área de Gobierno compartió el Looker Studio "Tablero - Min. de Gobierno"
-(`https://datastudio.google.com/u/0/reporting/70162e1c-d89d-4e1f-b1d0-afeedaac82f5/page/SKu1D`,
-acceso de vista con `infraestructura.coop@gmail.com`). El objetivo del usuario es:
+(`https://datastudio.google.com/u/0/reporting/70162e1c-d89d-4e1f-b1d0-afeedaac82f5/page/SKu1D`)
+y, el 2026-10-13, las planillas de Google Sheets que lo alimentan (listado en
+`url_fuentes_externas.txt`, raíz del monorepo). El objetivo del usuario es:
 
 1. Sumar a nuestro sistema la información de ese tablero que hoy no tenemos.
 2. Reemplazar fuentes propias frágiles por las de Gobierno donde sean mejores.
 3. Como horizonte, replicar el tablero dentro del sistema.
-4. Más adelante, que las planillas que lo alimentan (primero las sensibles) pasen a ser paneles
-   editables propios, para que las áreas no carguen información sensible en Google Sheets.
+4. Más adelante, que las planillas (primero las sensibles) pasen a ser paneles editables
+   propios, para que las áreas no carguen información sensible en Google Sheets.
 
-Relevamiento hecho el 2026-10-09 en modo vista, sin editar nada.
+### 0.1 Cómo se relevó y qué límites tiene
 
-### 0.1 Límites del relevamiento
+- Lectura por la API de Sheets con la cuenta de servicio `svc-datos-externos@` (impersonada por
+  `infraestructura.coop@gmail.com`, permiso `serviceAccountTokenCreator` otorgado el 2026-10-13
+  para este relevamiento). Solo lectura: metadatos, encabezados, conteos y agregados.
+- La planilla de Compromisos del Gobernador no es legible con esa cuenta (está compartida con
+  `svc-gralgob@`, que es la que la sincroniza). No hizo falta: ya está en el sistema.
+- No se validó fila por fila la calidad de cada planilla; los conteos son de filas no vacías.
+- El cruce ATP Interno vs. Compromisos (§3.3) quedó parcial: falta compararlo contra
+  `atp_cronograma_pagos` de producción.
 
-- **No se conocen las fuentes de datos reales** (qué Sheet y qué pestaña alimenta cada página):
-  el modo vista no las muestra. Está pedido al área (§6).
-- El contenido que es sólo gráfico no se relevó (comparativas de COPA, gráfico de IPCAM, mapas):
-  las capturas de pantalla fallaron en las páginas pesadas y se leyó todo como texto.
-- De cada tabla se leyeron las primeras filas visibles: alcanza para columnas y forma, no para
-  volumen ni calidad de datos.
-
-## 1. Decisiones ya tomadas (2026-10-09)
+## 1. Decisiones ya tomadas
 
 | Decisión | ADR |
 |---|---|
@@ -49,136 +57,179 @@ Relevamiento hecho el 2026-10-09 en modo vista, sin editar nada.
 |---|---|---|
 | Qué es | Compromisos anunciados por el Gobernador | ATP de manejo discrecional/político de la Secretaría |
 | Estado en el sistema | Ya sincronizada (`atp_compromisos`, `atp_cronograma_pagos`) | No está en el sistema |
-| Fuente | Sheet `1x3E73hlGwDPBiLc9fbQuWxWUxjaibs3glModHsxCMZM` | Planilla a pedir al área |
+| Fuente | Sheet `1x3E73hlGwDPBiLc9fbQuWxWUxjaibs3glModHsxCMZM` | Sheet `1h3FzAL-X0_tgIGNgnZ_DgKd5rDo8oLg0wNxY0gisBAU` ("4. ATP 2026") + histórico en "0. Resumen General" (§3.3) |
 | Spec | `spec-sync-atp-compromiso-gobernador.md` (approved) | A abrir (spec hijo) |
-| Sensibilidad | Media | Alta |
-| Destino | Sigue como está | Módulo y panel nuevo en `svc-gralgob`; candidata prioritaria a cargarse sólo en el sistema |
+| Sensibilidad | Media | Alta (incluye el referente político de cada pago) |
+| Destino | Sigue como está | Módulo y panel nuevo en `svc-gralgob` |
 
-Según informó el área en reunión, **los registros no se repiten** entre una y otra. Es un dato
-informado, no verificado: antes de sumar ambas en cualquier total hay que correr un cruce de
-control (localidad + fecha + monto) sobre los datos reales.
+## 2. Inventario de planillas fuente
 
-En el Looker hay dos páginas: "Comp. Gober" (1.173 compromisos) y "ATP" (≈6.000 pagos con fecha,
-localidad y monto). A confirmar con el área si la página "ATP" es exactamente la planilla ATP
-Interno Gobierno.
+Todas las planillas comparten una pestaña `Validadores` (copia del padrón de localidades) y
+varias tienen pestañas derivadas (`SUMA`, tablas dinámicas, copias). **Solo se sincroniza la
+pestaña base** de cada una.
 
-## 2. Inventario del tablero
+| Planilla (título real) | Pestaña base | Filas | Contenido | Destino |
+|---|---|---|---|---|
+| 0. LOCALIDADES - NOMBRES | `LOCALIDADES` | 478 | Nomenclador: `ID_LOC` (INDEC), nombre, `ID_DPTO`, `ID_COPA`, tipo MU/CO | `svc-datos-externos` (§3.1) |
+| 0. Resumen General | `DATOS LOC` | 452 | Superficie, población 2022 y 2010, electores, empleados, masa salarial, intendente, reelecto, partido, continuidad, legislador, contacto | `svc-datos-externos` |
+| 0. Resumen General | `ATP` | 6.032 | Histórico de ATP Interno 2023–2026: fecha, localidad, monto, referente | `svc-gralgob` |
+| 0. Resumen General | `FONDO FEDERAL` | 1.503 | Etapas por localidad: monto, disponible, estado | `svc-datos-externos` |
+| 0. Resumen General | `FOCOM PURO` | 361 | FOCOM vigente: monto, concepto, categoría, estado, fecha de pago | `svc-datos-externos` |
+| 0. Resumen General | `ADELANTOS` | 294 | Adelantos de coparticipación 2023–2025 | `svc-datos-externos` |
+| 0. Resumen General | `RESUMENGRAL` | 427 | Tabla ya calculada por localidad (derivada; sirve para validar nuestra réplica) | No se sincroniza |
+| 4. ATP 2026 | `ATP ACUMULADO` | 2.220 | ATP Interno del año en curso (planilla de carga) | `svc-gralgob` |
+| 11.1 COPARTICIPACION | `COPA` | 28.182 | Por localidad y quincena, 2024–2026: bruto, neto y ~40 conceptos de descuento | `svc-datos-externos` |
+| 11.1 FOFINDES | `FOFINDES` | 14.518 | Mensual 2024–2026: parte variable, excedentes, descuentos, neto | `svc-datos-externos` |
+| 11.1 FODEMEP | `FODEMEP`, `ESTADO` | 14.785 / 427 | Mensual 2023–2026 y estado de adhesión con saldo | `svc-datos-externos` |
+| 11.1 FOMMEP | `FROMMEP` | 854 | Anual: móviles y edificios por categoría | `svc-datos-externos` |
+| 7. FONDO PERMANENTE | `FONDO PERM CUOTAS`, `IMPORT_Listo` | 962 / 865 | Préstamos a municipios en cuotas descontadas de coparticipación; destino del préstamo | `svc-datos-externos` |
+| 8. BANCOR | `Prestamos` | 99 | Préstamos BANCOR: monto calificado, liquidado, concepto | `svc-datos-externos` |
+| 9. FONDO AMBIENTAL | `Fondo` | 135 | Expediente, convenio, resolución, objeto, monto, estado | `svc-datos-externos` |
+| 14. Vinculacion Comunitaria | `BD` | 388 | Aportes por beneficiario: monto, estado, expediente, rendición | `svc-datos-externos` |
+| 17. Comunidades Regionales | `Fondo` | 131 | Fondos de funcionamiento y obra por comunidad regional, cuotas, rendición | `svc-datos-externos` |
+| 12. Obras | `BD-TABLERO` | 1.063 (886 obras) | Obra, división, estado, avance, fechas, monto; `BD-VARIAS` trae el prorrateo de obras compartidas | `svc-datos-externos` |
+| 12. Obras | `Parques industriales` (oculta) | 88 | Parques industriales por localidad | `svc-datos-externos` |
+| 2. RECORRIDO Y VISITAS | `Recorrido`, `Visitas Gober` | 429 / 427 | Visitas de funcionarios; última visita del Gobernador por localidad | `svc-datos-externos` |
+| 2.1 RECORRIDO Y VISITAS - CALVO | `Recorrido` | 365 | Actividades del ministro (misma estructura) | `svc-datos-externos` |
+| 1. REGISTRO REUNIONES | `Reuniones`, `Intendentes` | 578 / 452 | Reuniones con temas y resolución; padrón de intendentes con contacto | `svc-datos-externos` |
+| 6. CONVENIOS FIRMADOS Y RADIOS | `Convenios`, `Compromisas`, `Polideportivos` | 427 / 427 / 50 | Matriz de convenios; compromiso voluntario de datos; polideportivos | `svc-datos-externos` |
+| 10. Polideportivos y Vivienda Semilla | `Polideportivo` | 50 | Duplicado de la pestaña anterior | No se sincroniza |
+| 13. EMPLEADOS | `Activos MyC` | 1.125 | Empleados, salario promedio y masa salarial por localidad y año | `svc-datos-externos` |
+| 18. Resultados elecciones 21-25 | `2021`, `2023`, `2025`, `Municipales - 2023` | 634 circuitos / 427 | Votos por circuito electoral; resultado municipal 2023 | `svc-datos-externos` |
+| 15. Programas visados por Gobierno | `Fondo` | 132 | Expedientes visados de otros ministerios | Flujo inverso (§3.6) |
+| 5. FOCOM - Deprecated | — | 332 | Versión vieja de FOCOM | No se sincroniza |
+| 0. Responsables BD - Tablero | `Hoja 1` | 12 | Quién mantiene cada base y si se actualiza sola o a pedido | Referencia |
 
-19 páginas, filtros globales por Departamento y Localidad, universo de 427 localidades (coincide
-con las 427 filas de `ext_geo_censo`).
+**Sin fuente recibida**: IPCAM (capacitación municipal). Hay que pedirla.
 
-| Página | Contenido | Estado en nuestro sistema | Servicio destino |
-|---|---|---|---|
-| Tablero (portada) | Población, electores, empleados municipales; intendente y legislador; matriz de convenios; KPIs de cada fondo; préstamos BANCOR; reuniones en el Panal | Parcial | `svc-datos-externos` |
-| Resumen General | Una fila por localidad y por departamento: ATP, FOCOM, COPA, FOFINDES, adelanto de copa, obras, Fondo Federal, Fondo Ambiental, total y total por habitante | No existe | Se arma por federación (`resumen_territorial`) |
-| Obras | Obras provinciales por tipo (HYG, CASISA, EPEC, Vialidad, Arquitectura, Inf. Eléctrica), estado, fechas, avance, monto | Sólo gas (`svc-gasifera`) | `svc-datos-externos` |
-| Visitas | Visitas de funcionarios: fecha, localidad, funcionario, tipo | No existe | `svc-datos-externos` |
-| Visitas Gobernador | Última visita por localidad | Parcial (filtro en la Ficha) | `svc-datos-externos` |
-| COPA | Coparticipación bruta y neta, por quincena, 2023–2026; % destinado a sueldos | Parcial (`ext_transferencias`, mensual, por scraping) | `svc-datos-externos` |
-| FOFINDES | Bruto y neto mensual, 2024–2026 | Parcial (concepto de `ext_transferencias`) | `svc-datos-externos` |
-| FODEMEEP | Neto mensual por localidad; estado de adhesión | No existe | `svc-datos-externos` |
-| FOMMEP | Montos y cantidades: móviles, edificios cat. 1 a 3 | No existe | `svc-datos-externos` |
-| ATP | Pagos: fecha, localidad, monto; saldo disponible | No existe | `svc-gralgob` |
-| Comp. Gober | Compromisos: anuncio, monto, pagado, derivado, destino | Existe | `svc-gralgob` |
-| Fondo Federal | Etapas por localidad, otorgado, estado, disponible, saldo en cuenta | No existe | `svc-datos-externos` |
-| Fondo Ambiental | Monto, estado, destino por localidad o ente | No existe | `svc-datos-externos` |
-| VINC. COMU | Vinculación Comunitaria — **rota en el tablero** (error de conexión al conjunto de datos) | No existe | `svc-datos-externos` |
-| FOCOM | Convenio, fecha, estado de pago, monto, concepto, estado de obra | No existe | `svc-datos-externos` |
-| Comu. Regionales | Fondos para obras por departamento, cuotas, rendición | No existe | `svc-datos-externos` |
-| Expedientes (Ministerios) | Expedientes visados de Cooperativas y Mutuales (Cordón Cuneta, Gas, Gas-Escuela) | **Es dato nuestro** (`svc-vivienda`, `svc-gasifera`) | Flujo inverso, ver §3.3 |
-| IPCAM | Capacitación municipal: personas, certificados, por localidad | No existe | `svc-datos-externos` |
-| Elecciones | Resultados por localidad: 2021, 2023 (legislativas y gobernador), 2025 | No existe | `svc-datos-externos` |
+## 3. Hallazgos
 
-## 3. Análisis
+### 3.1 Todas las planillas comparten una clave: el código INDEC de gobierno local
 
-### 3.1 Información nueva de más valor
+`ID_LOC` es el código INDEC de gobierno local (6 dígitos, p. ej. `142007`) — **el mismo que ya
+tenemos en `ext_geo_censo.codigo_indec`**. No hace falta resolver localidades por nombre para
+ninguna de estas fuentes: el vínculo a `id_geo` sale de un join por código.
 
-- **Resumen General**: todo lo que la Provincia transfiere a cada localidad en una fila, con
-  total por habitante. Es el objetivo natural de la réplica y se apoya en casi todas las demás
-  fuentes.
-- **Fondos por localidad con estado de pago** (ATP, FOCOM, Fondo Federal, Fondo Ambiental,
-  FODEMEEP, FOMMEP, Comunidades Regionales): fuentes de forma parecida (localidad, monto,
-  estado, fecha).
-- **Empleados municipales y masa salarial**: habilita el indicador de qué porcentaje de la
-  coparticipación se destina a sueldos.
-- **Matriz de convenios**: 15 columnas SI/NO por localidad.
-- **Obras provinciales** fuera de gas, y **visitas** de funcionarios.
+El nomenclador de Gobierno tiene 478 filas: 427 gobiernos locales (271 municipios, 156 comunas),
+26 comunidades regionales (ids 428–453) y 25 filas "zona rural" por departamento (`nnZR`). Trae
+además `ID_COPA` (código de la localidad en las planillas de coparticipación) e `ID_DPTO`.
 
-Ninguna de estas fuentes cubre los huecos bloqueados de `spec-resumen-territorial-tablero-v2.md
-§5` (población 2010, superficie/densidad, indicadores de necesidad, polígonos de localidad).
+**Decisión confirmada por el usuario (2026-10-13)**: el padrón oficial sigue siendo
+`viv_geo_localidades` (ADR-024/026). El código INDEC no lo reemplaza: se usa como **llave
+alternativa** para incorporar planillas de Gobierno. Dos consecuencias:
 
-### 3.2 Fuentes propias candidatas a reemplazo
+- Las filas de `ext_geo_censo` que quedaron sin `id_geo` por homónimos (el Cuadro 1.6 del Censo
+  no trae departamento) ahora se pueden cerrar, porque el nomenclador sí trae departamento.
+- Comunidades regionales y zonas rurales **no son localidades**: necesitan un concepto propio
+  ("ente") y no entran al padrón.
 
-- **Scraping de PDFs de transferencias** (`ext_transferencias`): el tablero tiene coparticipación
-  y FOFINDES con bruto y neto, por quincena, desde 2023. Si detrás hay una planilla, es más
-  estable que el scraping (el sitio bloquea clientes automatizados) y trae más detalle. A
-  decidir al ver la fuente: reemplazo total, o scraping como respaldo.
-- **Padrón político de Privada** (`priv_localidades_info`): reemplazado como autoridad por
-  ADR-027.
+### 3.2 `DATOS LOC` destraba dos huecos del tablero v2
 
-### 3.3 Flujo inverso
+Trae **superficie** y **población 2010** completas para las 452 filas. Son los dos datos que
+`spec-resumen-territorial-tablero-v2.md §5` tenía bloqueados sin fuente (densidad y crecimiento
+intercensal). También trae electores, empleados y masa salarial (base del indicador "% de
+coparticipación destinado a sueldos"). La columna "CONT." del Looker es `CONTINUIDAD`.
 
-"Expedientes (Ministerios)" es una planilla que Gobierno mantiene a mano sobre programas que son
-nuestros. La fuente real es nuestro sistema: en vez de leerla, corresponde ofrecerle el dato al
-área (exportación o lectura directa). No es una fuente a incorporar.
+Sigue sin fuente: indicadores de necesidad. Polígonos: la planilla de visitas tiene una pestaña
+oculta con geometría de radios municipales, pero solo para 175 localidades.
 
-### 3.4 Inconsistencias a confirmar con el área
+### 3.3 ATP Interno: dónde está y qué se sabe del solapamiento
 
-- **Obras**: los títulos dicen "en millones de dólares" pero hay montos de miles de millones para
-  obras chicas. La unidad no cierra.
-- **Población**: la portada da 3.840.905 y el Resumen General 3.770.861 — dos bases distintas.
-- **Visitas**: hay fechas futuras y filas sin localidad.
-- **Columna "CONT."** del padrón de intendentes: significado desconocido.
-- **FOCOM**: tiene estados "Pagado ATP" / "Pendiente ATP" — hay FOCOM que se pagan por ATP.
-  Riesgo de doble conteo entre FOCOM y ATP al armar totales por localidad.
+- "4. ATP 2026" es la planilla de carga del año en curso (2.220 filas, $76.209 M).
+- La pestaña `ATP` de "0. Resumen General" es el **histórico acumulado** 2023–2026 (6.032 pagos,
+  $146.825 M) e incluye las mismas filas de 2026. La página "ATP" del Looker lee de ahí.
+- Cada pago tiene un **referente** (funcionario al que se atribuye). Es el dato más sensible.
+- 366 pagos ($12.940 M) tienen como referente al Gobernador. Eso **no prueba** solapamiento con
+  la planilla de Compromisos, pero obliga al cruce de control de ADR-029 antes de sumar ambas.
+- Verificación puntual hecha: una localidad con $230 M de compromisos pagados en octubre de 2026
+  no tiene ningún pago en ATP Interno ese año. Es consistente con que no se repiten, pero es un
+  solo caso.
 
-## 4. Sensibilidad de datos
+### 3.4 Coparticipación: la planilla es mucho más rica que el scraping
+
+`COPA` tiene 60 columnas: además del bruto y el neto, cerca de 40 conceptos de descuento (Caja
+de Jubilaciones, APROSS, Fondo Permanente, préstamos BANCOR y otros bancos, Redes de Gas,
+Viviendas Semilla, EPEC, comunidades regionales, embargos). Cubre 427 localidades por quincena
+desde enero de 2024. Nuestro scraping trae cinco conceptos mensuales.
+
+**Riesgo**: según "Responsables BD", COPARTICIPACIÓN, FOFINDES y BANCOR se actualizan **a
+pedido**, no automáticamente. El resto figura como automática. Antes de reemplazar el scraping
+hay que medir cuánto se atrasa la planilla; hasta entonces el scraping queda como respaldo y
+como control cruzado.
+
+### 3.5 Fondo Permanente y Fondo Federal son cosas distintas
+
+- **Fondo Federal**: aportes por etapas (pestaña `FONDO FEDERAL` de Resumen General).
+- **Fondo Permanente**: préstamos a municipios que se devuelven en cuotas descontadas de la
+  coparticipación (planilla propia). Es un dato nuevo que no habíamos identificado en el Looker.
+
+### 3.6 Flujo inverso
+
+"15. Programas visados por Gobierno" lista expedientes de Cordón Cuneta, Gas, Gas-Escuela,
+Saneamiento y Loteo que Gobierno carga a mano. La fuente real es nuestro sistema para los tres
+primeros. No se incorpora: corresponde ofrecerle el dato al área.
+
+### 3.7 Pendiente de aclarar con el área
+
+- **Obras**: los montos más altos (miles de millones en obras rotuladas "en millones de
+  dólares") no cierran con la unidad declarada.
+- **Población**: `DATOS LOC` y el Censo cargado en `ext_geo_censo` pueden diferir; definir cuál
+  manda.
+- **IPCAM**: falta la planilla.
+- **Histórico de ATP Interno**: confirmar que la pestaña `ATP` de Resumen General es la fuente
+  autoritativa de 2023–2025 (o si existen planillas anuales anteriores).
+
+## 4. Calidad de datos observada (el sync debe tolerarla)
+
+- `ID_LOC` con separador de miles según la planilla (`140.105`, `142,007`): leer solo dígitos.
+- `ID_LOC` en `#N/A` cuando el nombre no matcheó el validador de la planilla.
+- Formatos numéricos mezclados entre planillas (`$12.400.000` y `$12,400,000`); años como
+  `2.023`.
+- Fechas en `d/m/aaaa`, `dd/mm/aa` y texto (`24-ene-24`, `30 de enero de 2025`).
+- Texto libre con variantes y espacios finales en referentes (un mismo apellido escrito de dos
+  formas).
+- Filas de total y filas de relleno con id pero sin datos dentro del rango de datos.
+- Fórmulas rotas (`#REF!`) en Vinculación Comunitaria — es lo que rompe esa página del Looker.
+- En Comunidades Regionales, la columna de destino viene como fecha serial en parte de las filas.
+
+Leer siempre con valores sin formato (`UNFORMATTED_VALUE`) donde se pueda, para no depender de la
+configuración regional de cada planilla.
+
+## 5. Sensibilidad de datos
 
 | Nivel | Fuentes | Tratamiento |
 |---|---|---|
-| Alto — datos personales | Contactos de intendentes; DNI de personas capacitadas (IPCAM) | No se exponen en rollups, exportaciones generales ni en `resumen_territorial`. Evaluar si IPCAM necesita el DNI o alcanza con agregados |
-| Alto — político | ATP Interno Gobierno; Elecciones; partido cruzado con montos transferidos | Visibilidad acotada por rol; fuera de la vista de `Consulta`/`Operador` por defecto |
-| Medio — financiero | Saldos de cuenta y disponibles de fondos | Roles de lectura del módulo |
-| Bajo | Obras, visitas, convenios, fondos ya publicados | Roles de lectura del módulo |
+| Alto — datos personales | Contacto de intendentes (`DATOS LOC`, `Intendentes`); IPCAM | No se sincroniza el contacto en la primera etapa. Nunca en rollups ni exportaciones generales |
+| Alto — político | ATP Interno (referente); Elecciones; detalle de Reuniones; partido cruzado con montos | Visibilidad acotada por rol |
+| Medio — financiero | Descuentos de coparticipación, Fondo Permanente, BANCOR, saldos | Roles de lectura del módulo |
+| Bajo | Obras, visitas, convenios, polideportivos, nomenclador, demografía | Roles de lectura del módulo |
 
-El orden para pasar de planilla a panel editable propio (Fase D) sigue esta tabla de arriba hacia
-abajo.
+## 6. Plan por fases
 
-## 5. Plan por fases
+Cada fase requiere su sección o spec hijo en `approved` antes de escribir código. Todas usan el
+patrón de sync de Sheets ya probado en `svc-gasifera`/`svc-gralgob` (ADC, SAVEPOINT por fila, log
+de corrida append-only, Cloud Scheduler), con vínculo por código INDEC.
 
-Cada fase requiere su sección o spec hijo en `approved` antes de escribir código.
-
-| Fase | Qué | Depende de |
+| Fase | Qué | Por qué en este orden |
 |---|---|---|
-| 0 | Obtener las planillas fuente y aclarar §3.4 | Respuesta del área (§6) |
-| A | Sync de solo lectura de los fondos por localidad en `svc-datos-externos` (patrón `sync-sheets-to-cloudsql`, vínculo por `id_geo` vía ADR-024) y federación al Resumen Territorial. ATP Interno en `svc-gralgob`, con spec propio | Fase 0 |
-| B | Reemplazos: coparticipación/FOFINDES desde la fuente de Gobierno; padrón político según ADR-027 | Fase 0; definición del mecanismo de ADR-027 |
-| C | Réplica del tablero: primero Resumen General, después páginas por fondo | Fases A y B |
-| D | Paneles editables que reemplazan planillas, empezando por las sensibles | ADR-028: auth, gateway, roles, audit log en `svc-datos-externos` |
-
-## 6. Pedido al área (Fase 0)
-
-Compartir cada planilla como **Lector** con:
-
-- `infraestructura.coop@gmail.com` — para relevar columnas y pestañas.
-- `svc-datos-externos@gestorcooperativo.iam.gserviceaccount.com` — cuenta de servicio que lee en
-  cada sync. **Pendiente de verificar contra GCP** que exista con ese nombre exacto.
-- `svc-gralgob@gestorcooperativo.iam.gserviceaccount.com` — sólo para la planilla ATP Interno
-  Gobierno (ya tiene acceso a la de Compromisos).
-
-Y pedir, por cada página del tablero: qué planilla y pestaña la alimenta, si alguna no sale de un
-Sheet, y quién la mantiene.
+| 1 | **Nomenclador + demografía** (`spec-datos-externos-fase1-nomenclador-demografia.md`, en review): tabla puente INDEC ↔ `id_geo` (con `ID_COPA`, tipo y entes), cierre de los `id_geo` nulos del censo, y superficie / población 2010 / electores desde `DATOS LOC` | Es la base de todas las demás y destraba densidad y crecimiento intercensal en el tablero ya construido. Baja sensibilidad |
+| 2 | **Transferencias automáticas**: COPA con descuentos, FOFINDES, FODEMEP, FOMMEP. Conciliación mes a mes contra el scraping | Mayor volumen y mayor valor fiscal; define si el scraping se retira |
+| 3 | **Fondos por localidad**: FOCOM, Fondo Federal, Fondo Ambiental, Fondo Permanente, Adelantos, BANCOR, Comunidades Regionales, Vinculación Comunitaria | Forma parecida entre sí; completan el "total transferido por localidad" |
+| 4 | **ATP Interno** en `svc-gralgob` (spec hijo propio), con el cruce de control contra Compromisos | Sensible; necesita definir roles antes |
+| 5 | **Gestión territorial**: obras, visitas, reuniones, convenios, polideportivos, parques industriales, empleados | Depende de aclarar la unidad de montos de obras |
+| 6 | **Político**: padrón de intendentes y legisladores (ADR-027) y elecciones | Sensible; requiere el mecanismo de ADR-027 y roles |
+| 7 | **Réplica**: Resumen General nativo (validado contra `RESUMENGRAL`), luego páginas por fondo | Necesita fases 1 a 4 |
+| 8 | **Paneles editables** que reemplazan planillas, empezando por las sensibles | ADR-028: auth, gateway, roles y audit log en `svc-datos-externos` |
 
 ## 7. Preguntas abiertas
 
-1. ¿La página "ATP" del Looker es exactamente la planilla ATP Interno Gobierno?
+1. ~~Código INDEC como llave alternativa~~ — confirmado 2026-10-13 (§3.1).
 2. ADR-027: ¿espejo sincronizado en Privada (como ADR-026) o lectura federada? ¿Qué pasa con la
    edición manual de `habitantes` y `electores` en Privada?
-3. Coparticipación: ¿reemplazo total del scraping o scraping como respaldo?
-4. ¿Qué roles ven ATP Interno y Elecciones? ¿Hace falta un rol nuevo o alcanza con
-   `Admin`/`Autoridad`?
-5. IPCAM: ¿se necesita el dato nominal o alcanza con agregados por localidad?
-6. Los puntos de §3.4.
+3. Coparticipación: ¿reemplazo total del scraping o scraping como respaldo permanente?
+4. ¿Qué roles ven ATP Interno, Elecciones y el detalle de Reuniones?
+5. ¿Se sincroniza el contacto de intendentes en algún momento, o queda fuera del sistema?
+6. Los puntos de §3.7.
 
 ## 8. Criterios de aceptación
 
