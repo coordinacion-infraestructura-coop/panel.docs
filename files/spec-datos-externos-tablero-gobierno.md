@@ -1,17 +1,19 @@
 # Spec: Integración del "Tablero - Min. de Gobierno" (Looker Studio) al sistema
 
-**Estado**: draft
-**Versión**: 0.2.0
+**Estado**: approved
+**Versión**: 1.0.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-13
 **Servicios**: `svc-datos-externos` (amplía alcance, ADR-028) + `svc-gralgob` (ATP, ADR-029) + `svc-vivienda` (`resumen_territorial`, consumidor)
 
-Spec paraguas de exploración. Define el inventario de fuentes, las decisiones ya tomadas y el
-orden de incorporación. **No habilita implementación**: cada fase se construye recién cuando su
+Spec paraguas. Define el inventario de fuentes, las decisiones ya tomadas y el orden de
+incorporación. **No habilita implementación por sí solo**: cada fase se construye recién cuando su
 sección (o un spec hijo) pase a `approved`.
 
 ## Changelog
 
+- **1.0.0** (2026-10-13): aprobado por el usuario. Respuestas a las preguntas abiertas en §7;
+  Fase 1 aprobada en su spec hijo (v1.0.0), que suma los datos institucionales de `DATOS LOC`.
 - **0.2.0** (2026-10-13): relevamiento de las 21 planillas fuente por API (solo lectura).
   Reemplaza el inventario por página del Looker por el inventario real de planillas (§2),
   agrega hallazgos (§3), calidad de datos (§4) y reordena el plan (§6).
@@ -199,8 +201,8 @@ configuración regional de cada planilla.
 
 | Nivel | Fuentes | Tratamiento |
 |---|---|---|
-| Alto — datos personales | Contacto de intendentes (`DATOS LOC`, `Intendentes`); IPCAM | No se sincroniza el contacto en la primera etapa. Nunca en rollups ni exportaciones generales |
-| Alto — político | ATP Interno (referente); Elecciones; detalle de Reuniones; partido cruzado con montos | Visibilidad acotada por rol |
+| Alto — datos personales | Contacto de intendentes (`DATOS LOC`, `Intendentes`); IPCAM | Se sincroniza; visible solo para el rol `Autoridad` |
+| Alto — político | ATP Interno (referente); Elecciones; detalle de Reuniones; intendente, partido y legislador | Visible solo para el rol `Autoridad` |
 | Medio — financiero | Descuentos de coparticipación, Fondo Permanente, BANCOR, saldos | Roles de lectura del módulo |
 | Bajo | Obras, visitas, convenios, polideportivos, nomenclador, demografía | Roles de lectura del módulo |
 
@@ -212,7 +214,7 @@ de corrida append-only, Cloud Scheduler), con vínculo por código INDEC.
 
 | Fase | Qué | Por qué en este orden |
 |---|---|---|
-| 1 | **Nomenclador + demografía** (`spec-datos-externos-fase1-nomenclador-demografia.md`, en review): tabla puente INDEC ↔ `id_geo` (con `ID_COPA`, tipo y entes), cierre de los `id_geo` nulos del censo, y superficie / población 2010 / electores desde `DATOS LOC` | Es la base de todas las demás y destraba densidad y crecimiento intercensal en el tablero ya construido. Baja sensibilidad |
+| 1 | **Nomenclador + demografía** (`spec-datos-externos-fase1-nomenclador-demografia.md`, approved): tabla puente INDEC ↔ `id_geo` (con `ID_COPA`, tipo y entes), cierre de los `id_geo` nulos del censo, y superficie / población 2010 / electores desde `DATOS LOC` | Es la base de todas las demás y destraba densidad y crecimiento intercensal en el tablero ya construido. Baja sensibilidad |
 | 2 | **Transferencias automáticas**: COPA con descuentos, FOFINDES, FODEMEP, FOMMEP. Conciliación mes a mes contra el scraping | Mayor volumen y mayor valor fiscal; define si el scraping se retira |
 | 3 | **Fondos por localidad**: FOCOM, Fondo Federal, Fondo Ambiental, Fondo Permanente, Adelantos, BANCOR, Comunidades Regionales, Vinculación Comunitaria | Forma parecida entre sí; completan el "total transferido por localidad" |
 | 4 | **ATP Interno** en `svc-gralgob` (spec hijo propio), con el cruce de control contra Compromisos | Sensible; necesita definir roles antes |
@@ -223,13 +225,22 @@ de corrida append-only, Cloud Scheduler), con vínculo por código INDEC.
 
 ## 7. Preguntas abiertas
 
-1. ~~Código INDEC como llave alternativa~~ — confirmado 2026-10-13 (§3.1).
-2. ADR-027: ¿espejo sincronizado en Privada (como ADR-026) o lectura federada? ¿Qué pasa con la
-   edición manual de `habitantes` y `electores` en Privada?
-3. Coparticipación: ¿reemplazo total del scraping o scraping como respaldo permanente?
-4. ¿Qué roles ven ATP Interno, Elecciones y el detalle de Reuniones?
-5. ¿Se sincroniza el contacto de intendentes en algún momento, o queda fuera del sistema?
-6. Los puntos de §3.7.
+Resueltas por el usuario el 2026-10-13:
+
+- **Código INDEC como llave alternativa**: confirmado, sin tocar el padrón oficial (§3.1).
+- **Coparticipación**: la planilla de Gobierno pasa a ser la fuente principal; el scraping queda
+  como **respaldo permanente** y control cruzado.
+- **Roles**: ATP Interno, Elecciones y el detalle de Reuniones los ve **solo el rol
+  `Autoridad`**.
+- **Contacto de intendentes**: se sincroniza; lo ve solo el rol `Autoridad`.
+- **Escritura hacia las planillas**: ninguna por ahora. El sistema solo lee.
+
+Siguen abiertas:
+
+1. ADR-027: ¿espejo sincronizado en Privada (como ADR-026) o lectura federada? ¿Qué pasa con la
+   edición manual de `habitantes` y `electores` en Privada? Hasta definirlo, los datos de
+   Gobierno y los de Privada conviven por separado (spec Fase 1 §7.3).
+2. Los puntos de §3.7, en consulta con el área de Gobierno.
 
 ## 8. Criterios de aceptación
 
