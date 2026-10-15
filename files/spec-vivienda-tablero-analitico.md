@@ -1,7 +1,7 @@
 # Spec: Vivienda — Tablero analítico + correcciones de listados
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-15
 **Servicios**: `svc-vivienda` (módulo nuevo `tablero_analitico`, `resumen_territorial`, `checklist_tecnico`, paneles CC/CH/ML) · `frontend` (`vivienda`) · `infra` (gateway)
@@ -13,6 +13,15 @@ pedidos para la App GestorCoop 2026 10 02.pdf`) y el tablero que el área armó 
 
 ## Changelog
 
+- **1.0.1** (2026-10-15): precisiones de la implementación.
+  - **Denominador de localidades:** el "de N" del tablero son los gobiernos locales (427), igual que en
+    el Resumen Territorial. Ese recorte se calcula con datos de `svc-datos-externos`; para no volver a
+    federar en cada pedido, se toma `total_localidades_por_departamento` del último snapshot. Si no hay
+    snapshot, se usa el padrón activo (§4.2).
+  - **Documentación en los paneles:** viaja en el mismo resumen del checklist que el avance de obra
+    (`estado_tecnico.avance_por_entidad`). Así también la traen las respuestas de alta y edición, sin
+    tocar cada llamada.
+  - **Hora de los KPIs:** los KPIs por snapshot y el "día" de Tendencias usan la hora de Argentina (UTC-3).
 - **1.0.0** (2026-10-15): aprobado por el usuario, con las decisiones de §9 y la regla de secretaría de §4.2.
 - **0.1.0** (2026-10-15): primera versión, en review. Plan aprobado por el usuario el mismo día.
 
@@ -106,7 +115,7 @@ Módulo nuevo `app/tablero_analitico/` (`router.py`, `schemas.py`, `service.py`)
   ```
   {
     generado_en: datetime,
-    total_localidades_padron: int,                       # activas en viv_geo_localidades
+    total_localidades_padron: int,                       # gobiernos locales (último snapshot; si no, padrón activo)
     total_localidades_por_departamento: {depto: int},
     expedientes: [ExpedienteTablero]
   }
