@@ -1,12 +1,43 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
 **Estado**: approved
-**Versión**: 1.5.1
+**Versión**: 1.6.0
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
-**Última actualización**: 2026-09-25
+**Última actualización**: 2026-10-15
 
 ### Changelog
+- **1.6.0 (2026-10-15, approved)** — Pedidos del área de Vivienda
+  (`docs/context/areas/secretaria_Vivienda/Observaciones y pedidos para la App GestorCoop 2026 10 02.pdf`,
+  §2 "Incorporaciones": *Obra en ejecución* y *Estados*). El resto de los pedidos del documento
+  queda fuera de esta versión (se evalúan aparte). Migración `0039`. Decisiones tomadas con el
+  usuario el 2026-10-15:
+  1. **Avance físico de obra — historial de mediciones** (§5.6, tabla nueva
+     `viv_checklist_avance_medicion`): cada carga del área técnica agrega una fila
+     (fecha de medición + % de 0 a 100 + usuario). La "barra de avance" muestra la medición de
+     fecha más reciente. Se descartó el valor único que se pisa (se perdía el ritmo de obra).
+  2. **La fecha de medición de los hitos 40% / 70% / 100% se deriva del historial** (§5.5): es la
+     fecha de la primera medición que alcanzó ese umbral. Separa medición (área técnica) de pago
+     (`fecha_acreditado`, área económica), que es lo que pide la pág. 3 del PDF — sin campo nuevo
+     por hito ni doble carga. El Anticipo financiero no tiene medición.
+  3. **Fecha de finalización de obra** (`viv_checklist_tecnico.fecha_fin_obra`, §5.3): manual,
+     autosave, independiente. Si se carga con la última medición < 100% la UI avisa, pero no
+     bloquea. **No** cambia el "Estado del expediente" (`OBRA TERMINADA` sigue siendo manual).
+  4. **Estado de documentación "No Proyectado / No Aplica"** (§3, §5.4-bis): nueva fila del
+     catálogo con un flag nuevo `excluye_completitud`. Un ítem en ese estado **no cuenta ni como
+     faltante ni en el total** al medir si la documentación está completa (ej.: una localidad
+     que sólo hace adoquines no debe arrastrar los ítems de cordón cuneta como pendientes para
+     siempre). Aplica a los 3 programas (catálogo compartido).
+  5. **Avance visible en los paneles CC / CH / ML** (§6-bis), siempre de **solo lectura**:
+     columna en la tabla (mini barra + fecha de medición), columnas en el Excel exportado,
+     barra + fecha de fin en el `DetailPanel` (en CC, dentro de la pestaña Checklist Técnico) y
+     filtro cliente por situación de obra (sin medición / en ejecución / terminada).
+  6. **Hitos de obra en los listados** (PDF pág. 4, "Listados": "que salga la información de
+     avance de obra cuando la obra ya está iniciada — Anticipo Financiero, 40%, 70%, 100%"):
+     los paneles CC / CH / ML muestran, también de solo lectura, el estado de los 4 hitos
+     (medido / acreditado) en una columna compacta, en el Excel y en el detalle (§6-bis).
+  7. Gateway: 2 paths nuevos (`.../avance`, `.../avance/{medicion_id}`) → nueva config
+     `ministerio-config-v{YYYYMMDD}`.
 - **1.5.1 (2026-09-25)** — Resuelto el pendiente de la 1.5.0: se decidió dar de baja el sync
   viejo (no restaurar el acceso al Sheet). Se eliminó el Cloud Scheduler
   `sync-cc-checklist-tecnico` (`gcloud scheduler jobs delete`) y se sacó del panel de Cordón
@@ -138,6 +169,8 @@ enum fijo:
 3. En Evaluación TÉCNICA
 4. A corregir por M/C
 5. Completo OK  *(marcado `es_completo` — cuenta como documentación completa en Resumen Territorial / Tablero)*
+6. No Proyectado / No Aplica  *(v1.6.0 — marcado `excluye_completitud`: el ítem no aplica a esta
+   localidad/proyecto y se descarta al medir completitud — no es faltante ni suma al total)*
 
 **Estado del expediente de la localidad** — 9 valores (v1.2.0, `Validaciones!A410-418`), en este orden:
 1. A ESPERA de DOC.TÉCNICA
@@ -243,6 +276,7 @@ entidad_id            VARCHAR(36) NOT NULL   -- id en viv_cordon_cuneta / viv_co
 estado_expediente_id  BIGINT NULL REFERENCES viv_checklist_estado_expediente(id)
 fecha_radicacion      DATE NULL
 reparticion_id        BIGINT NULL REFERENCES viv_checklist_reparticion(id)
+fecha_fin_obra        DATE NULL              -- v1.6.0 — fecha de finalización al 100%, manual
 created_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 updated_by            VARCHAR(200) NULL
@@ -287,11 +321,55 @@ activo      BOOLEAN NOT NULL DEFAULT true
 bg          VARCHAR(10) NOT NULL DEFAULT '#f1f5f9'    -- color de fondo del chip
 text_color  VARCHAR(10) NOT NULL DEFAULT '#64748b'
 es_completo BOOLEAN NOT NULL DEFAULT false            -- estado "terminado" para Resumen Territorial / Tablero
+excluye_completitud BOOLEAN NOT NULL DEFAULT false    -- v1.6.0 — "no aplica": fuera del total y de los faltantes
+CHECK (NOT (es_completo AND excluye_completitud))
 ```
 Seed: los 5 valores de §3 (colores tomados de `STATUS_META` del frontend; `es_completo=true`
 solo en `Completo OK`). Un ítem nuevo arranca en el estado activo de menor `orden`.
 `resumen_territorial` y `programas-tablero` cuentan "documentación faltante" como
 `item_estado_id NOT IN (ids con es_completo)`, en vez del literal `'completo'`.
+
+**v1.6.0 — "No Proyectado / No Aplica".** La migración `0039` agrega la columna y siembra la fila
+`No Proyectado / No Aplica` (`excluye_completitud=true`, chip gris neutro `#e2e8f0`/`#475569`)
+con `orden` = máximo + 1 — **nunca** el menor, para que no se vuelva el estado por defecto de
+un ítem nuevo. Regla de completitud, en todos los lugares que la calculan
+(`resumen_territorial/aggregations.items_faltantes`, contadores del frontend del checklist y de
+la pestaña de CC, Ficha de localidad):
+- `total` = ítems del programa − ítems en un estado con `excluye_completitud`.
+- `faltan` = ítems que no están ni en `es_completo` ni en `excluye_completitud`.
+- Un checklist con todos sus ítems en "No Aplica" queda `total=0, faltan=0` (se muestra "Sin
+  documentación aplicable", no "completo").
+- Los ítems nunca cargados siguen contando como faltantes (comportamiento actual sin cambios).
+
+El flag es editable por `Admin` desde la pantalla de catálogos (como `es_completo`); el `CHECK`
+impide marcar un mismo estado con ambos flags (`422` desde la API).
+
+### 5.6 `viv_checklist_avance_medicion` — historial de avance físico de obra (v1.6.0)
+```
+id                UUID PK
+checklist_id      UUID NOT NULL REFERENCES viv_checklist_tecnico(id) ON DELETE CASCADE
+fecha_medicion    DATE NOT NULL
+porcentaje        SMALLINT NOT NULL CHECK (porcentaje BETWEEN 0 AND 100)
+created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
+created_by        VARCHAR(200) NULL
+created_by_nombre VARCHAR(255) NULL
+deleted_at        TIMESTAMPTZ NULL      -- soft delete: corregir una carga errónea
+```
+Misma forma que la bitácora de obra (§5.3-bis). Botón **"Agregar"** explícito (es una bitácora,
+igual que "Observaciones de obra" — no autosave). Reglas:
+- `fecha_medicion` no puede ser futura (`422`). No se exige que el % sea creciente: si una carga
+  baja respecto de la anterior la UI avisa ("menor que la medición del dd/mm") pero se acepta
+  (una re-medición puede corregir un valor sobreestimado).
+- **Avance vigente** = la medición no borrada de `fecha_medicion` más reciente (desempate por
+  `created_at`). Sin mediciones → avance `null` ("Sin medición"), distinto de 0%.
+- **Medición de hitos** (derivada, no persistida): para los hitos `40`, `70`, `100`,
+  `fecha_medicion` = `min(fecha_medicion)` entre las mediciones no borradas con
+  `porcentaje >= umbral`; `null` si ninguna lo alcanzó. `anticipo` no tiene medición (es
+  financiero). Se expone en cada hito del `GET` (§6) junto a `fecha_acreditado`.
+- Borrar es soft delete, permitido a `ROLES_ESCRITURA_CHECKLIST`, con audit log.
+- **Situación de obra** (para el filtro de los paneles, calculada en el cliente):
+  `fecha_fin_obra` cargada → *Terminada*; si no, avance vigente ≠ null → *En ejecución*;
+  si no → *Sin medición*.
 
 ### 5.5 `viv_checklist_obra_hitos` — los 3 programas (v1.2.0; antes solo `cc`)
 ```
@@ -310,6 +388,10 @@ Se recalcula en cada `GET` a partir del `monto` de la entidad del programa
 (`viv_cordon_cuneta` / `viv_cordoba_hogar` / `viv_ml_proyectos`) — no se persiste un valor
 que pueda desincronizarse del convenio real. `fecha_acreditado` se carga solo tras la visita
 de obra → puede quedar `NULL`.
+**v1.6.0:** `fecha_acreditado` es la fecha de **pago** (área económica). La fecha de
+**medición** de cada hito de avance se deriva del historial de §5.6 — la tarjeta del hito
+muestra ambas por separado ("Medido dd/mm" / "Pendiente de medición" y "Acreditado dd/mm" /
+"Pendiente de pago"). Sobre los hitos se dibuja la barra de avance vigente con marcas en 40/70/100.
 
 ## 6. Endpoints
 
@@ -319,7 +401,10 @@ Base: `/api/v1/vivienda/checklist-tecnico`
 GET    /catalogos                                    # estado_expediente + reparticion + items_estado (v1.2.0) + definición de ítems por programa (§4)
 GET    /entidades                                     # [{programa, id, nombre, departamento}] de CC+CH+ML no borradas — para el selector (v1.1.0)
 GET    /{programa}/{entidad_id}                       # checklist + items + hitos (v1.2.0: hitos para los 3 programas); crea la fila padre on-the-fly
-PATCH  /{programa}/{entidad_id}                        # body: estado_expediente_id? / fecha_radicacion? / reparticion_id?
+PATCH  /{programa}/{entidad_id}                        # body: estado_expediente_id? / fecha_radicacion? / reparticion_id? / fecha_fin_obra? (v1.6.0)
+GET    /{programa}/{entidad_id}/avance                 # historial de mediciones, más nueva primero (v1.6.0)
+POST   /{programa}/{entidad_id}/avance                 # body: fecha_medicion, porcentaje (v1.6.0)
+DELETE /{programa}/{entidad_id}/avance/{medicion_id}   # soft delete (v1.6.0)
 PATCH  /{programa}/{entidad_id}/items/{item_num}        # body: item_estado_id (v1.2.0), sub_item_num?
 PATCH  /{programa}/{entidad_id}/hitos/{tipo}            # body: fecha_acreditado — v1.2.0: los 3 programas
 GET    /{programa}/{entidad_id}/pedidos                 # observaciones DEL EXPEDIENTE de la entidad (v1.1.0)
@@ -350,6 +435,57 @@ delegan en el `service.py` del programa correspondiente (misma validación de en
 enmascarado de comunicaciones de infra/supervisión), pasando el actor `TecnicoDGV` tal cual.
 
 Cada path nuevo necesita su `options:` con `security: []` en `infra/gateway/openapi.yaml` (CORS preflight), siguiendo la convención del resto de `vivienda`.
+
+**v1.6.0 — cambios de contrato aditivos** (ningún campo existente cambia ni desaparece):
+- `GET /{programa}/{entidad_id}` agrega `fecha_fin_obra`, `avance: {porcentaje, fecha_medicion} | null`
+  (vigente) y, en cada hito, `fecha_medicion` (derivada, `null` en `anticipo`).
+- `GET /catalogos` y `/admin/item-estado` agregan `excluye_completitud` a cada estado de ítem;
+  `POST|PATCH /admin/item-estado` lo aceptan.
+- Gateway: se declaran `/{programa}/{entidad_id}/avance` (get, post, options) y
+  `/{programa}/{entidad_id}/avance/{medicion_id}` (delete, options) → config nueva.
+
+## 6-bis. Avance de obra en los paneles CC / CH / ML (v1.6.0)
+
+Mismo mecanismo que el Estado Técnico (`spec-estado-tecnico-desde-checklist.md`): los paneles
+**leen** del checklist, nunca escriben. `app/checklist_tecnico/estado_tecnico.py` suma una
+función `avance_por_entidad(db, programa) -> {entidad_id: {avance_pct, avance_fecha, fecha_fin_obra, hitos}}`
+(una consulta por tabla y por programa — checklist, mediciones, hitos — agrupadas en Python,
+sin N+1, nunca crea filas). Los `GET` de lista y detalle de `cordon_cuneta`, `cordoba_hogar` y
+`mi_lugar` agregan, como campos de solo lectura:
+```
+avance_obra_pct     int | null    -- avance vigente (§5.6), null = sin medición
+avance_obra_fecha   date | null   -- fecha de esa medición
+fecha_fin_obra      date | null
+hitos_obra          list | null   -- null si la entidad no tiene fila de checklist; si no, siempre 4,
+                                  -- en orden anticipo, 40, 70, 100:
+  - tipo              'anticipo' | '40' | '70' | '100'
+  - monto             decimal | null   -- misma fórmula 50/25/25/0 de §5.5 sobre el monto del panel
+  - fecha_medicion    date | null      -- derivada (§5.6); siempre null en 'anticipo'
+  - fecha_acreditado  date | null      -- fecha de pago
+```
+La fórmula de montos se factoriza en una sola función (hoy vive en `service.py`) que usan tanto
+el `GET` del checklist como `avance_por_entidad`, para que el monto de un hito no pueda
+diferir entre el checklist y el panel. Un hito sin fila en `viv_checklist_obra_hitos` se
+devuelve igual, con fechas `null`.
+
+**Situación de cada hito** (calculada en el cliente, misma regla en las 4 vistas):
+`fecha_acreditado` cargada → **Pagado** (verde); si no, `fecha_medicion` cargada → **Medido,
+pendiente de pago** (ámbar); si no → **Pendiente** (gris). El anticipo sólo puede estar
+Pagado o Pendiente.
+Los schemas de create/update de los paneles **no** los aceptan. Frontend (los 3 paneles, se
+replica en los hermanos — ver CLAUDE.md "Frontend structure"):
+- Columna **"Avance de obra"** en la tabla: mini barra + `%` + fecha de medición; ordenable por %;
+  "—" si no hay medición; "✓ Terminada dd/mm" si hay `fecha_fin_obra`.
+- Columna **"Hitos"** en la tabla: 4 chips compactos `Ant · 40 · 70 · 100` coloreados según la
+  situación de cada hito; tooltip con monto, fecha de medición y fecha de pago. Se muestra
+  sólo si la obra está iniciada (hay alguna medición o algún hito con fecha); si no, "—".
+- **Filtro** cliente "Obra": Todas / Sin medición / En ejecución / Terminada (regla de §5.6).
+- **Excel** (`↓ Exportar`): columnas `Avance obra %`, `Fecha última medición`, `Fecha fin de obra`
+  y, por hito, `Anticipo — monto`, `Anticipo — fecha pago`, `40% — monto`, `40% — fecha medición`,
+  `40% — fecha pago` (ídem 70% y 100%) — 14 columnas en total, fechas como fecha de Excel.
+- **DetailPanel**: barra completa con marcas 40/70/100 + fecha de fin + las 4 tarjetas de
+  hito en solo lectura (monto, medido, pagado) — en CC, dentro de la pestaña "Checklist
+  Técnico", que ya es el resumen de solo lectura del módulo.
 
 ## 7. Semilla de datos para Cordón Cuneta
 
@@ -400,3 +536,24 @@ Frontend (`Layout.tsx`): `SECRETARIA_NAV['vivienda']` deja de ser un array fijo 
 - [ ] `viv_cc_checklist_tecnico`/`viv_cc_checklist_items` y su Cloud Scheduler siguen funcionando sin cambios (regresión de `spec-sync-cc-checklist-tecnico.md`).
 - [ ] Tests unitarios de `checklist_tecnico` + test de regresión de permisos (§8) + test de `test_cc_checklist_sync.py` sigue en verde.
 - [ ] `npm run build` sin errores con la página nueva y el nav condicional.
+- [ ] **(v1.6.0)** Migración `0039`: tabla `viv_checklist_avance_medicion`,
+  `viv_checklist_tecnico.fecha_fin_obra`, `viv_checklist_item_estado.excluye_completitud` + fila
+  "No Proyectado / No Aplica" con `orden` máximo. Probada contra Postgres real (no sólo SQLite);
+  `downgrade -1` + `upgrade head` reversible.
+- [ ] **(v1.6.0)** `POST .../avance` con `porcentaje` fuera de 0..100 o fecha futura → `422`;
+  `DELETE` oculta la medición y el avance vigente pasa a la anterior; `TecnicoDGV` puede
+  cargar y borrar; `Consulta`/`Autoridad` → `403` en escritura.
+- [ ] **(v1.6.0)** La fecha de medición de los hitos 40/70/100 se deriva correctamente
+  (primera medición ≥ umbral; `null` si ninguna) y es independiente de `fecha_acreditado`.
+- [ ] **(v1.6.0)** Un ítem en "No Proyectado / No Aplica" no suma al total ni a los faltantes en
+  `resumen_territorial`, en el contador del checklist y en la pestaña de CC; todos en "No Aplica"
+  → `total=0, faltan=0`. Un estado con ambos flags → `422`.
+- [ ] **(v1.6.0)** Los `GET` de CC/CH/ML devuelven `avance_obra_pct`/`avance_obra_fecha`/`fecha_fin_obra`;
+  los paneles muestran columna, filtro, Excel y detalle; los schemas de escritura de los
+  paneles los ignoran/rechazan.
+- [ ] **(v1.6.0)** Los `GET` de CC/CH/ML devuelven `hitos_obra` (4 hitos, mismo monto y
+  mismas fechas que `GET /checklist-tecnico/{programa}/{entidad_id}` para la misma entidad;
+  `null` sin fila de checklist); la columna "Hitos", el Excel (14 columnas de obra) y el
+  detalle los muestran con la regla Pagado / Medido / Pendiente. Sin consultas N+1 (un test
+  cuenta las queries del listado).
+- [ ] **(v1.6.0)** Gateway con los 2 paths nuevos + `options:` desplegado en config nueva.
