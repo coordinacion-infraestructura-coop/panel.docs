@@ -25,6 +25,8 @@ pedidos para la App GestorCoop 2026 10 02.pdf`) y el tablero que el área armó 
   - **Checklist de la tabla** (§5.4): el texto "X de Y faltan" / "Completo" / "No iniciado" es un
     enlace al Checklist Técnico de ese expediente.
   - Backfill: modo `--completar-claves` para sumar la clave nueva a la historia (§4.3).
+  - Al probar el enlace apareció un bug del Checklist Técnico: solo mostraba un expediente por
+    programa y localidad. Se corrigió en `spec-checklist-tecnico-dgv.md` v1.6.1.
 - **1.0.2** (2026-10-15): desplegado en producción. Migración `0040` + backfill de `kpis` corridos en
   Cloud Shell; backend `a4c415d` (revisión `svc-vivienda-00201-d69`), frontend `140ea78`, gateway
   `ministerio-config-v20261015b`. Falta la verificación visual del área contra base44 (§10).

@@ -1,12 +1,19 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
 **Estado**: approved
-**Versión**: 1.6.0
+**Versión**: 1.6.1
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
-**Última actualización**: 2026-10-15
+**Última actualización**: 2026-10-16
 
 ### Changelog
+- **1.6.1 (2026-10-16)** — Corrección: una localidad con varios expedientes del mismo programa
+  mostraba uno solo en el selector (el frontend agrupaba por localidad y guardaba un expediente por
+  programa). En producción dejaba 18 proyectos de Mi Lugar sin acceso, repartidos en 10 localidades
+  (ej. 8 en Córdoba Capital). Ahora, si hay más de uno, debajo de la pestaña del programa aparecen
+  botones para elegir el expediente. Además la página acepta `?programa=cc|ch|ml&entidad=<id>` para
+  abrir un expediente puntual, que usa el enlace del Tablero analítico
+  (`spec-vivienda-tablero-analitico.md` v1.1.0). Sin cambios de backend.
 - **1.6.0 (2026-10-15, approved)** — Pedidos del área de Vivienda
   (`docs/context/areas/secretaria_Vivienda/Observaciones y pedidos para la App GestorCoop 2026 10 02.pdf`,
   §2 "Incorporaciones": *Obra en ejecución* y *Estados*). El resto de los pedidos del documento
