@@ -1,12 +1,20 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
 **Estado**: approved
-**Versión**: 1.6.1
+**Versión**: 1.7.0
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
 **Última actualización**: 2026-10-16
 
 ### Changelog
+- **1.7.0 (2026-10-16, aprobado por el usuario)** — Pedidos del área técnica sobre el panel (§6-ter):
+  - **Documentación en dos botones (solo Cordón Cuneta):** "Checklist técnico" (los 10 sub-ítems
+    del ítem 4, que carga el área técnica) y "Checklist legal y financiero" (los ítems 1 a 9,
+    incluido el 4 como ítem general, que carga el área legal y financiera). Lo editan personas
+    distintas. Córdoba Hogar y Mi Lugar siguen con una sola lista hasta que el área defina su división.
+  - **Corrección de observaciones ya cargadas** (del expediente y de obra), con un lápiz como el de
+    "Detalle" en Privada. Corrigen los mismos roles que cargan, quedan marcadas como "(editado)" y
+    el texto anterior queda en auditoría. Migración `0041` y dos paths nuevos en el gateway.
 - **1.6.1 (2026-10-16)** — Corrección: una localidad con varios expedientes del mismo programa
   mostraba uno solo en el selector (el frontend agrupaba por localidad y guardaba un expediente por
   programa). En producción dejaba 18 proyectos de Mi Lugar sin acceso, repartidos en 10 localidades
@@ -493,6 +501,57 @@ replica en los hermanos — ver CLAUDE.md "Frontend structure"):
 - **DetailPanel**: barra completa con marcas 40/70/100 + fecha de fin + las 4 tarjetas de
   hito en solo lectura (monto, medido, pagado) — en CC, dentro de la pestaña "Checklist
   Técnico", que ya es el resumen de solo lectura del módulo.
+
+## 6-ter. Secciones de documentación y corrección de observaciones (v1.7.0)
+
+### 6-ter.1 Dos botones: "Checklist técnico" / "Checklist legal y financiero"
+- **Clasificación**, fija en `catalog.py` junto a las etiquetas (§4), sin migración:
+  - **Cordón Cuneta:** los sub-ítems 4.1 a 4.10 son `tecnica`; los ítems 1 a 9 son
+    `legal_financiera`. El ítem 4 como fila general también es `legal_financiera`.
+  - **Córdoba Hogar y Mi Lugar:** sin clasificación (`null`). Una sola lista, como hoy.
+- **Catálogo:** `ItemDefinicion` e `ItemSubDefinicion` suman `seccion: "tecnica" | "legal_financiera" | null`
+  en `GET .../catalogos`. Cambio aditivo.
+- **Frontend (`ChecklistCard`):** si el programa tiene ítems con sección, la tarjeta muestra dos
+  botones. Cada uno tiene su propio "X de Y completos" y "N no aplican" y lista solo sus ítems:
+  - el técnico muestra los sub-ítems abiertos, sin el desplegable;
+  - el legal y financiero muestra los ítems 1 a 9.
+  
+  Arranca en "Checklist técnico". El conteo general del encabezado y el del Resumen Territorial y
+  los paneles no cambian: siguen contando toda la documentación.
+- **Permisos:** no cambian. Los dos botones son una ayuda de edición, no una restricción por rol;
+  `ROLES_ESCRITURA_CHECKLIST` puede editar las dos secciones.
+
+### 6-ter.2 Corrección de observaciones
+- **Alcance:** las dos bitácoras del panel:
+  - "Observaciones del expediente", que son las comunicaciones de los paneles (`viv_cc_pedidos`,
+    `viv_ch_pedidos`, `viv_ml_pedidos`);
+  - "Observaciones de obra" (`viv_checklist_obra_obs`).
+- **Endpoints nuevos**, con roles `ROLES_ESCRITURA_CHECKLIST`:
+  - `PATCH /api/v1/vivienda/checklist-tecnico/{programa}/{entidad_id}/pedidos/{pedido_id}`, body
+    `{descripcion?, fecha_pedido?}`;
+  - `PATCH /api/v1/vivienda/checklist-tecnico/{programa}/{entidad_id}/obs-obra/{obs_id}`, body
+    `{descripcion?, fecha?}`.
+- **Reglas:**
+  - la observación tiene que pertenecer a esa entidad; si no, 404;
+  - descripción no vacía; si no, 422;
+  - si no cambia nada, devuelve la fila sin tocarla;
+  - las comunicaciones de otra secretaría (`secretaria` = `infraestructura` o `supervision`) no
+    se corrigen desde acá y devuelven 403. Solo se corrigen las de Vivienda o sin secretaría.
+- **Marca de edición:** la migración `0041` suma `editado_at TIMESTAMPTZ NULL`,
+  `editado_por VARCHAR(200) NULL` y `editado_por_nombre VARCHAR(255) NULL` a las cuatro tablas.
+  - Las respuestas (`ChecklistPedidoOut`, `ObraObsOut` y, por herencia, `PedidoResponse` de CC/CH y
+    `PedidoMLOut`) las devuelven.
+  - La bitácora muestra "(editado por X, fecha)".
+- **Auditoría:** `log_audit` con `action="CORRECCION"`, el `resource_type` de la tabla y
+  `payload = {anterior: {...}, nuevo: {...}}`.
+- **Frontend (`BitacoraCard`):** cada entrada muestra un lápiz ✎ si el usuario puede editar. Al
+  tocarlo abre un textarea y un campo de fecha en el lugar, con "Guardar corrección" y "Cancelar"
+  (Esc cancela, Ctrl+Enter guarda), igual que en Privada. Las comunicaciones de otra secretaría
+  no muestran el lápiz.
+- **Paneles CC/CH/ML:** sus listas de comunicaciones devuelven también los campos `editado_*`,
+  pero la corrección se hace desde el Checklist. Mostrar la marca o el lápiz en los paneles queda
+  para otra entrega.
+- **Gateway:** dos paths nuevos con su `options`, y config nueva.
 
 ## 7. Semilla de datos para Cordón Cuneta
 
