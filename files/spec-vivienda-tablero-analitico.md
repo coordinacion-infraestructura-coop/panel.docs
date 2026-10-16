@@ -1,7 +1,7 @@
 # Spec: Vivienda — Tablero analítico + correcciones de listados
 
-**Estado**: approved
-**Versión**: 1.0.1
+**Estado**: implemented
+**Versión**: 1.0.2
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-15
 **Servicios**: `svc-vivienda` (módulo nuevo `tablero_analitico`, `resumen_territorial`, `checklist_tecnico`, paneles CC/CH/ML) · `frontend` (`vivienda`) · `infra` (gateway)
@@ -13,6 +13,9 @@ pedidos para la App GestorCoop 2026 10 02.pdf`) y el tablero que el área armó 
 
 ## Changelog
 
+- **1.0.2** (2026-10-15): desplegado en producción. Migración `0040` + backfill de `kpis` corridos en
+  Cloud Shell; backend `a4c415d` (revisión `svc-vivienda-00201-d69`), frontend `140ea78`, gateway
+  `ministerio-config-v20261015b`. Falta la verificación visual del área contra base44 (§10).
 - **1.0.1** (2026-10-15): precisiones de la implementación.
   - **Denominador de localidades:** el "de N" del tablero son los gobiernos locales (427), igual que en
     el Resumen Territorial. Ese recorte se calcula con datos de `svc-datos-externos`; para no volver a
