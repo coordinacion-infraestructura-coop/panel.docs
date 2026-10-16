@@ -1,6 +1,6 @@
 # Spec: Checklist Técnico DGV — panel editable por localidad y programa
 
-**Estado**: approved
+**Estado**: implemented
 **Versión**: 1.7.0
 **Servicio**: `svc-vivienda` (módulo nuevo `checklist_tecnico`, sin servicio nuevo)
 **Responsable de spec**: Pedro Bonafe (revisado sección por sección con el usuario, 2026-08-26)
@@ -8,6 +8,8 @@
 
 ### Changelog
 - **1.7.0 (2026-10-16, aprobado por el usuario)** — Pedidos del área técnica sobre el panel (§6-ter):
+  - **Desplegado 2026-10-16:** migración `0041` (Cloud Shell), backend `26af072` (rev
+    `svc-vivienda-00203-g68`), frontend `7870625`, gateway `ministerio-config-v20261016`.
   - **Documentación en dos botones (solo Cordón Cuneta):** "Checklist técnico" (los 10 sub-ítems
     del ítem 4, que carga el área técnica) y "Checklist legal y financiero" (los ítems 1 a 9,
     incluido el 4 como ítem general, que carga el área legal y financiera). Lo editan personas
