@@ -1,9 +1,9 @@
 # Spec: Vivienda — Tablero analítico + correcciones de listados
 
-**Estado**: implemented
-**Versión**: 1.0.2
+**Estado**: approved
+**Versión**: 1.1.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-15
+**Última actualización**: 2026-10-16
 **Servicios**: `svc-vivienda` (módulo nuevo `tablero_analitico`, `resumen_territorial`, `checklist_tecnico`, paneles CC/CH/ML) · `frontend` (`vivienda`) · `infra` (gateway)
 
 Origen: pedido del área de Vivienda (PDF `docs/context/areas/secretaria_Vivienda/Observaciones y
@@ -13,6 +13,18 @@ pedidos para la App GestorCoop 2026 10 02.pdf`) y el tablero que el área armó 
 
 ## Changelog
 
+- **1.1.0** (2026-10-16, aprobado por el usuario): pedidos del área técnica después de la primera revisión.
+  - **KPI "Localidades con ítems faltantes"** (§4.3, §5.2): reemplaza a "Con ítems faltantes", que
+    contaba **expedientes** con el rótulo de localidades. Ejemplo que lo destapó: Mi Lugar mostraba
+    49 (sus 49 proyectos) frente a 33 localidades del programa. Ahora cuenta localidades y, por
+    programa, dibuja una barra al 100 % con el total de localidades del programa en gris y el dato
+    nominal "N de M".
+  - **Filtro "Est. técnico"** (§5.1): las opciones salen del catálogo de estados del expediente del
+    Checklist Técnico, no de los valores presentes en los datos. Así aparece "RECHAZADO por M/C"
+    aunque hoy ningún expediente activo lo tenga.
+  - **Checklist de la tabla** (§5.4): el texto "X de Y faltan" / "Completo" / "No iniciado" es un
+    enlace al Checklist Técnico de ese expediente.
+  - Backfill: modo `--completar-claves` para sumar la clave nueva a la historia (§4.3).
 - **1.0.2** (2026-10-15): desplegado en producción. Migración `0040` + backfill de `kpis` corridos en
   Cloud Shell; backend `a4c415d` (revisión `svc-vivienda-00201-d69`), frontend `140ea78`, gateway
   `ministerio-config-v20261015b`. Falta la verificación visual del área contra base44 (§10).
@@ -146,6 +158,8 @@ Módulo nuevo `app/tablero_analitico/` (`router.py`, `schemas.py`, `service.py`)
   - `localidades`, `departamentos`;
   - `programas_activos` y `programas_por_programa: {programa: n}`;
   - `items_faltantes`, que es la cantidad de programas con al menos un ítem faltante;
+  - `localidades_items_faltantes` (v1.1.0): localidades distintas con al menos un expediente con
+    ítems faltantes. Un checklist no iniciado cuenta como faltante, porque le falta todo;
   - `comunicaciones_30d`, programas con una comunicación en los últimos 30 días contados desde el
     cómputo del snapshot;
   - `monto_total`;
@@ -156,6 +170,10 @@ Módulo nuevo `app/tablero_analitico/` (`router.py`, `schemas.py`, `service.py`)
   día que todavía no tenga `kpis` y lo completa. Es idempotente y se corre en Cloud Shell con
   `cloud-sql-proxy`. Los snapshots anteriores al deploy no traen avance, así que su
   `avance_obra_promedio` queda `null`.
+- **`--completar-claves`** (v1.1.0): para el snapshot que lee Tendencias en cada día (el último con
+  `kpis`), recalcula `kpis_por_area` y agrega **solo las claves que faltan**, sin pisar las
+  existentes (así `avance_obra_promedio` ya guardado no se pierde). Idempotente; también acepta
+  `--dry-run`.
 - **`GET .../tendencias?dias=90`** (1–365, default 90), con los mismos roles que §4.2. Devuelve
   `[{fecha, kpis}]` con los `kpis["vivienda"]` del último snapshot con `kpis` de cada día, en orden
   ascendente. Los días sin dato no aparecen.
@@ -193,8 +211,15 @@ Módulo nuevo `app/tablero_analitico/` (`router.py`, `schemas.py`, `service.py`)
   - departamento;
   - localidad, que depende del departamento.
 - **Programa.**
-- **Estados:** general, jurídico, técnico y financiero. Las opciones se arman con los valores que
-  aparecen en los datos y van en orden alfabético (§9).
+- **Estados:** general, jurídico, técnico y financiero. Las opciones de general, jurídico y
+  financiero se arman con los valores que aparecen en los datos. Las de **técnico** salen del
+  catálogo activo de estados del expediente del Checklist Técnico (`GET .../checklist-tecnico/catalogos`,
+  ya accesible para los mismos roles), aunque ningún expediente tenga ese estado (v1.1.0). Todas van
+  en orden alfabético (§9).
+  - Nota: "APROBADO por TRIB.C", "En CURSO en TRIB.C", "OBRA en EJECUCIÓN", etc. son estados de ese
+    catálogo porque el estado técnico de los paneles es el estado del expediente del checklist
+    (`spec-estado-tecnico-desde-checklist.md`). Sacar uno es una baja en el catálogo que decide el
+    área desde la administración del Checklist, no un cambio del tablero.
 - **Documentación:** Completa (`faltan = 0` e iniciado), Incompleta (`faltan > 0`) y No iniciada.
   base44 lista cada combinación "X de Y faltan"; se agrupan porque esa lista no escala.
 - **Obra:** situación de obra (`situacionObra` de `avanceObra.tsx`).
@@ -204,7 +229,11 @@ Módulo nuevo `app/tablero_analitico/` (`router.py`, `schemas.py`, `service.py`)
 ### 5.2 KPIs, recalculados con los filtros
 - **Localidades:** "X de `total_localidades_padron`", con barra apilada por programa y el resto en gris.
 - **Departamentos:** "X de 26", con barra apilada por programa.
-- **Programas con ítems faltantes:** barras por programa.
+- **Localidades con ítems faltantes** (v1.1.0): "X de Y", con Y = localidades del conjunto
+  filtrado. Debajo, una barra horizontal al 100 % por programa: el tramo de color son las
+  localidades del programa con ítems faltantes y el resto, en gris, las demás localidades del
+  programa; al costado, el dato nominal "N de M". El delta usa `localidades_items_faltantes` y no se
+  muestra si la serie todavía no tiene la clave.
 - **Comunicaciones de los últimos 30 días:** dona "X de N".
 - **Programas activos:** barra apilada por programa.
 - **Monto total.**
@@ -223,7 +252,10 @@ el delta se oculta, porque la serie histórica no está filtrada.
 - **Columnas por expediente:**
   - programa;
   - chips de estado general, J, T y F;
-  - checklist "X de Y faltan" / "Completo" / "No iniciado";
+  - checklist "X de Y faltan" / "Completo" / "No iniciado", como **enlace** al Checklist Técnico de
+    ese expediente (v1.1.0): `/vivienda/checklist-tecnico?programa={cc|ch|ml}&entidad={id}`, en una
+    pestaña nueva para no perder los filtros del tablero. `ChecklistTecnicoPage` lee esos parámetros
+    y abre la localidad con ese programa ya elegido; un id inexistente se ignora;
   - avance de obra (`AvanceCelda`);
   - última comunicación (fecha).
 - **Orden:** alfabético por localidad (`localeCompare('es')`), o por distancia cuando el filtro de
@@ -272,7 +304,7 @@ el delta se oculta, porque la serie histórica no está filtrada.
   - programas activos;
   - localidades;
   - departamentos;
-  - programas con ítems faltantes;
+  - localidades con ítems faltantes (v1.1.0; los días sin la clave quedan sin punto);
   - comunicaciones en 30 días;
   - monto total;
   - avance de obra promedio.
@@ -326,6 +358,8 @@ Opciones Completa, Incompleta y No iniciada, sobre `doc_*` (§4.5). Entra en `ha
   - días sin `kpis` omitidos;
   - rango `dias`.
 - **`area_responsable`:** alta y edición válidas; un valor inválido devuelve 422.
+- **v1.1.0:** `localidades_items_faltantes` cuenta localidades y no expedientes (dos expedientes con
+  faltantes en la misma localidad cuentan uno; un checklist no iniciado cuenta).
 - **`documentacion_por_entidad`:** "No Aplica" y entidad sin checklist.
 - **Regla de fixtures:** los fixtures `client_*` comparten override, así que nunca se combinan dos roles en un mismo test.
 
@@ -336,6 +370,11 @@ Opciones Completa, Incompleta y No iniciada, sobre `doc_*` (§4.5). Entra en `ha
 - **Config nueva:** `ministerio-config-v{AAAAMMDD}`.
 
 ## 12. Despliegue
+
+**v1.1.0:** sin migración ni cambios de gateway. Push a `main` (CI), `firebase deploy` y, en Cloud
+Shell, `python -m scripts.backfill_kpis_snapshot --completar-claves` (primero con `--dry-run`).
+
+**v1.0.0:**
 1. Migración `0040` y backfill de `kpis` en Cloud Shell, desde una rama, antes del push a `main`.
 2. Push a `main` de `panel.backend`, que dispara el CI de `deploy-svc-vivienda`.
 3. Gateway con la config nueva.
@@ -356,3 +395,7 @@ Opciones Completa, Incompleta y No iniciada, sobre `doc_*` (§4.5). Entra en `ha
   - muestran el área del estado una vez que el área la carga.
 - **Alcance del refactor:** el Resumen Territorial no cambia de comportamiento.
 - **Acceso:** `TecnicoDGV` ve el tablero y no gana acceso a los paneles CC/CH/ML.
+- **v1.1.0:**
+  - Mi Lugar muestra en "Localidades con ítems faltantes" un número ≤ a sus localidades, nunca 49 de 33;
+  - el filtro Est. técnico ofrece "RECHAZADO por M/C";
+  - un clic en el checklist de una fila abre el Checklist Técnico de ese expediente.
