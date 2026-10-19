@@ -1,7 +1,7 @@
 # Spec: Datos externos — fuentes oficiales públicas por gobierno local (Estadística Córdoba, IDECOR, RENABAP)
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `svc-datos-externos` (sync + tablas + rollup) · `svc-vivienda` (`resumen_territorial`, consumidor) · `frontend` (`resumen-territorial`, solo textos) · `infra` (Cloud Scheduler)
@@ -14,6 +14,15 @@ necesidad). Base: relevamiento de fuentes del 2026-10-19 (conversación con el u
 
 ## Changelog
 
+- **1.0.1** (2026-10-19): implementación en las ramas `datos-externos-fuentes-oficiales`
+  (`services/`) y `resumen-fuentes-oficiales` (`frontend/`), sin desplegar. Ajustes que salieron de
+  correr el sync contra las fuentes reales: (1) la capa de polígonos trae un gobierno local en
+  dos filas — se juntan sus anillos; (2) el registro civil se vincula por el centroide del radio
+  de IDECOR y, si cae fuera de todo gobierno local (el radio legal puede ser más grande que el
+  censal: Tanti), por nombre normalizado cuando es único — 5.064 de 5.100 filas vinculadas; (3)
+  los `crudo` y polígonos van en columnas `JSON` (no `TEXT`). Corrida real (Postgres 15 local):
+  427 gobiernos locales sin huecos de IPS/condiciones de vida/empleo, 26 departamentos (94.425
+  habitantes fuera de gobiernos locales), RENABAP 316/318, salud 874/889, educación 4.965/5.489.
 - **1.0.0** (2026-10-19): aprobado por el usuario. Decisiones: (1) la superficie que se usa para
   la densidad es la de **Estadística** (la del Censo), no la del radio legal de IDECOR; (2) la
   población rural por departamento pasa a ser el **dato oficial** del Censo (departamento menos sus
@@ -91,9 +100,10 @@ Hallazgos que el sync debe respetar:
 
 Se piden con `srsName=EPSG:4326` y se leen como UTF-8. Ninguna trae código INDEC: los puntos se
 ubican en el polígono de gobierno local de §2.1 (punto en polígono, local); el registro civil se
-vincula por el centroide del radio de IDECOR del mismo nombre. Validado: salud 874/889, educación
-4.965/5.489 (el resto son escuelas rurales fuera de un gobierno local), registro civil 2.472/2.562
-filas.
+vincula por el centroide del radio de IDECOR del mismo nombre y, si cae fuera de todo gobierno
+local, por nombre normalizado cuando es único. Validado: salud 874/889, educación 4.965/5.489 (el
+resto son escuelas rurales fuera de un gobierno local), registro civil 5.064/5.100 filas
+(quedan afuera radios con nombre repetido entre departamentos).
 
 ### 2.3 RENABAP — vía Poblaciones (CONICET/UCA)
 
