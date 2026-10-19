@@ -1,7 +1,7 @@
 # Spec: Tablero de Gobierno nativo (reemplazo del Looker "Tablero - Min. de Gobierno")
 
-**Estado**: draft
-**Versión**: 0.4.0
+**Estado**: approved
+**Versión**: 1.0.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `frontend` (módulo nuevo) · `svc-datos-externos` (endpoints de panel, ADR-028) ·
@@ -13,6 +13,9 @@ planificada desde ahora para que cada fase de datos llegue con su pantalla. Base
 
 ## Changelog
 
+- **1.0.0** (2026-10-19): **aprobado** por el usuario junto con la maqueta (versión 3). Se
+  detalla el alcance de la Etapa 0 (§3.3) y se anota el acceso de `Autoridad` a ATP
+  Compromisos como tema de la Etapa 1.
 - **0.4.0** (2026-10-19): segunda lectura del Looker con Claude in Chrome (relevamiento 1.1.0
   §5.1). Se confirman los cortes del semáforo y la torta de FOCOM, se corrigen las comparativas
   de Coparticipación (son % de retención, no montos) y se suman a la maqueta los componentes que
@@ -180,7 +183,26 @@ Sin gráfico en el Looker y con gráfico en la maqueta (se mantienen como mejora
 - Visibilidad: los bloques 🔒 se filtran en el backend con una lista propia de roles
   (`Admin`, `Autoridad`), fail-closed, como `ficha_gobierno` (spec Fase 1 §7).
 
-### 3.2 Frontend
+### 3.3 Etapa 0 en concreto
+
+- **Acceso**: `svc-datos-externos` suma `app/auth.py` (JWT de Firebase + lookup de rol en
+  `svc-vivienda`, ADR-015, igual que `svc-gralgob`). El tablero exige **rol `Admin` o
+  `Autoridad`, sin chequeo de secretaría** (mismo criterio que `resumen_territorial`: es una
+  vista transversal). Cualquier otro rol, o un fallo del lookup (`invitado`), recibe 403.
+- **Primer endpoint**: `GET /api/v1/datos-externos/tablero/meta` → lo que necesita la barra
+  común: localidades del nomenclador de Gobierno para los filtros (`id_geo`, nombre,
+  departamento, tipo), años con datos y **frescura por fuente** (última corrida y estado de
+  nomenclador, Vista de Gobierno, transferencias; Censo 2022 como carga única). Las secciones
+  llegan con su endpoint en cada etapa.
+- **Gateway**: el path con su `options` (CORS) y una config nueva.
+- **Frontend**: ruta `/tablero-gobierno/:seccion?/:sub?`, entrada en el menú y en el inicio solo
+  para `Admin`/`Autoridad`, barra de filtros en la URL, navegación de secciones, indicador de
+  frescura y una pantalla "en preparación" por sección hasta su etapa.
+- **Tema para la Etapa 1**: `svc-gralgob` hoy exige la secretaría `gralgob` también a
+  `Autoridad`, así que una `Autoridad` sin esa secretaría recibe 403 en ATP Compromisos. Se
+  resuelve al construir esa sección (endpoint de lectura con la misma regla que este tablero).
+
+## 4. Matriz de paridad con el Looker
 
 - Módulo nuevo `src/modules/tablero-gobierno/` (una página por sección, componentes compartidos
   en su `components/`): `FiltrosGobierno`, `KpiCard`, `EmbudoEstados`, `TablaGobierno`,
