@@ -1,7 +1,7 @@
 # Spec: Mi Lugar — Valor Fiscal sugerido y valor de referencia de mercado desde IDECOR
 
 **Estado**: approved
-**Versión**: 1.0.1
+**Versión**: 1.1.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `svc-datos-externos` (consulta a IDECOR) · `svc-vivienda` (`mi_lugar`) · `frontend` (`MiLugarPage.tsx`) · `infra` (gateway + Cloud Scheduler)
@@ -13,6 +13,19 @@ Decisión de arquitectura: ADR-031.
 
 ## Changelog
 
+- **1.1.0** (2026-10-19): **desplegado en producción.** Migración `0043` aplicada; `svc-vivienda`
+  y `svc-datos-externos` en la revisión `cbc1f39` (`VALUACION_IDECOR_ENABLED=true`); gateway
+  `ministerio-config-v20261019`; Cloud Scheduler `mi-lugar-valuacion-idecor` (lunes 06:00,
+  America/Argentina/Cordoba); frontend en Firebase Hosting (`ee7f09d`). Primera corrida: 21
+  proyectos de Expropiación → 16 `ok`, 1 `sin_parcelas` (Capital - San Felipe: el punto no cae
+  en una parcela), 4 `sin_datos` (sin puntos ni nomenclaturas). **5 coinciden al centavo** con el
+  `valor_fiscal` del área (Villa María, Estación Juárez Celman, Las Higueras, Río Cuarto,
+  Salsipuedes); Almafuerte (−60%), Montecristo (+10%) y Cruz del Eje (−2%) difieren, lo que
+  sugiere parcelas faltantes o de más (se completan con nomenclaturas). 8 proyectos de Capital no
+  tienen `valor_fiscal` cargado y ahora tienen sugerencia. Capital - Ferreyra: la parcela tiene
+  valuación $0 en Catastro. Criterios §8 cumplidos: 1, 2 (ninguna escritura del scheduler en
+  `ml_proyecto`), 5. Pendientes: 3 (prueba con la fuente apagada en producción, no ejecutada), 4
+  (unidad rural) y 6 (verificación visual del área). El estado pasa a `implemented` al cerrarlos.
 - **1.0.1** (2026-10-19): corrección de la cuenta de ejemplo de §3 (valor de mercado de la parcela
   de Villa María: $17.154.786.999). Código escrito en la rama `mi-lugar-valuacion-idecor` de
   `services/`, `frontend/` e `infra/`, sin desplegar; runbook en
