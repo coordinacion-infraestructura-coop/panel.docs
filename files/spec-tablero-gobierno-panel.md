@@ -193,6 +193,8 @@ primera (E1, ATP Compromisos) cada fondo nuevo es sobre todo trabajo de datos.
 Resueltas por el usuario (2026-10-19):
 
 - **Maqueta**: sí, se arma una maqueta navegable con datos de ejemplo antes de la Etapa 0.
+  Publicada el 2026-10-19 (privada): https://claude.ai/artifact/TJh9BKJ53D29jpP35u98rF —
+  pendiente de revisión del usuario; su aprobación abre la Etapa 0.
 - **Usuarios**: por ahora solo `Admin` y `Autoridad`. Más adelante se verá si se suma algo.
 - **Relación con el Resumen Territorial**: paneles separados; se unen en la Ficha de Localidad.
 - **ATP Interno**: solo `Admin` y `Autoridad`.
