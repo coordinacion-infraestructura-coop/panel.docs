@@ -1,7 +1,7 @@
 # Spec: Datos externos — Fase 1: nomenclador INDEC de Gobierno + ficha de localidad (demografía y datos institucionales)
 
 **Estado**: approved
-**Versión**: 1.2.1
+**Versión**: 1.2.2
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `svc-datos-externos` (sync + rollup) · `svc-vivienda` (`resumen_territorial`) · `frontend` (`resumen-territorial`)
@@ -12,6 +12,11 @@ de su §5 (superficie/densidad y población 2010/crecimiento intercensal).
 
 ## Changelog
 
+- **1.2.2** (2026-10-19): el Censo había vinculado el código 142672 (comuna Kilómetro 658) a la
+  fila "KILOMETRO 691" del padrón, un paraje que no es gobierno local. Tras el alta de Kilómetro
+  658 en el padrón (`svc-vivienda` 0042) la localidad salía dos veces en el rollup. Migración
+  `svc-datos-externos` 0004 repunta el Censo al `id_geo` del nomenclador (§5.1), y el sync suma
+  la anomalía `censo_id_geo_difiere_del_nomenclador`.
 - **1.2.1** (2026-10-19): respuestas del usuario a §11.1 — superficie y población 2010 desde
   fuentes oficiales externas, en otra sesión; la ficha restringida se vuelve a pedir al área.
 - **1.2.0** (2026-10-19): **cambio de fuente, por instrucción del usuario.** El área no puede
@@ -280,6 +285,10 @@ fuente.
   se asigna y queda como anomalía `censo_id_geo_en_conflicto` (señal de un match por nombre
   equivocado en la carga original).
 - Un contacto de más de 40 caracteres se guarda como `NULL` y se anota el campo como inválido.
+- Si el Censo y el nomenclador vinculan el mismo código INDEC a `id_geo` distintos, el sync no
+  pisa el del Censo pero lo anota como `censo_id_geo_difiere_del_nomenclador`. El nomenclador
+  vincula por nombre **y** departamento; el Censo, solo por nombre. La corrección se hace por
+  migración (la 0004 corrigió el código 142672).
 - `svc-vivienda` guarda el departamento de cada zona rural con la grafía del padrón oficial (la
   planilla trae, por ejemplo, `COLON`).
 - Una corrida que falla al arrancar deja su fila `fallido` en `ext_gob_sync_log` (commit propio).
