@@ -1,7 +1,7 @@
 # Spec: Tablero de Gobierno nativo (reemplazo del Looker "Tablero - Min. de Gobierno")
 
 **Estado**: draft
-**Versión**: 0.1.0
+**Versión**: 0.2.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `frontend` (módulo nuevo) · `svc-datos-externos` (endpoints de panel, ADR-028) ·
@@ -13,6 +13,10 @@ planificada desde ahora para que cada fase de datos llegue con su pantalla. Base
 
 ## Changelog
 
+- **0.2.0** (2026-10-19): respuestas del usuario a §7 — acceso solo `Admin` y `Autoridad` (todo
+  el panel, por ahora); paneles separados del Resumen Territorial y unidos en la Ficha de
+  Localidad; ATP Interno solo `Admin`/`Autoridad`; se arma una maqueta navegable. La pregunta de
+  Expedientes se reformula (§7).
 - **0.1.0** (2026-10-19): primera versión. Plan de trabajo, propuesta de presentación, matriz de
   paridad con el Looker y etapas.
 
@@ -27,7 +31,9 @@ Un panel dentro del sistema que **reemplace al Looker** con:
 2. **Una sola fuente de verdad**: todo calculado en nuestro backend desde las planillas base (o,
    más adelante, desde paneles editables propios), no desde agregados manuales.
 3. **Una presentación más simple y consistente** que la del Looker, con la estética del sistema.
-4. **Acceso por rol**: lo sensible solo para `Admin` y `Autoridad` (paraguas §5).
+4. **Acceso por rol**: **todo el panel es solo para `Admin` y `Autoridad`** (decisión del
+   usuario 2026-10-19; más adelante se evaluará sumar otros perfiles). Las marcas 🔒 quedan
+   como capa adicional para el día que se abra a otros roles.
 
 Criterio de "reemplazo": para cada página del Looker, nuestro panel muestra los mismos números con
 los mismos filtros (diferencias explicadas y aceptadas por el área). Recién con todas las páginas
@@ -125,7 +131,8 @@ Ficha de Localidad, donde se suman los bloques de Gobierno (fondos, convenios, v
   en su `components/`): `FiltrosGobierno`, `KpiCard`, `EmbudoEstados`, `TablaGobierno`,
   `ComparativaAnual`, `IndicadorFrescura`.
 - Ruta `/tablero-gobierno/:seccion/:subseccion?` con filtros en query string (compartible).
-- Entrada en el menú para la secretaría General de Gobierno y para `Admin`/`Autoridad`.
+- Entrada en el menú solo para `Admin` y `Autoridad`; el backend responde 403 a cualquier otro
+  rol en todos los endpoints del panel.
 
 ## 4. Matriz de paridad con el Looker
 
@@ -183,23 +190,27 @@ primera (E1, ATP Compromisos) cada fondo nuevo es sobre todo trabajo de datos.
 
 ## 7. Preguntas abiertas
 
-1. **Maqueta**: ¿se aprueba la estructura de 6 secciones y el esqueleto de §2.3? Propuesta: armar
-   una maqueta navegable con datos de ejemplo antes de la Etapa 0.
-2. **Usuarios**: ¿quiénes lo usan además de `Admin`/`Autoridad`? ¿Usuarios de la secretaría General
-   de Gobierno con rol `Consulta`? Define qué ve cada uno fuera de lo 🔒.
-3. **Relación con el Resumen Territorial**: propuesta de mantenerlos separados (el Resumen es "qué
-   programas tiene cada localidad"; este tablero es "qué recibe cada localidad del Gobierno") y
-   unirlos en la Ficha de Localidad. ¿De acuerdo?
-4. **Expedientes**: ¿se le ofrece al área esta página en lugar de su planilla "15. Programas
-   visados" (flujo inverso)?
-5. ATP Interno: ¿lo ven solo `Admin`/`Autoridad` (paraguas §5) o también la secretaría?
-6. Pendientes del relevamiento (§5): capturas de los gráficos, "CAJA" en la comparativa, período de
+Resueltas por el usuario (2026-10-19):
+
+- **Maqueta**: sí, se arma una maqueta navegable con datos de ejemplo antes de la Etapa 0.
+- **Usuarios**: por ahora solo `Admin` y `Autoridad`. Más adelante se verá si se suma algo.
+- **Relación con el Resumen Territorial**: paneles separados; se unen en la Ficha de Localidad.
+- **ATP Interno**: solo `Admin` y `Autoridad`.
+
+Siguen abiertas:
+
+1. **Expedientes (reformulada)**: la página "Expedientes (Ministerios)" del Looker la alimenta una
+   planilla que el área carga a mano copiando expedientes de Cordón Cuneta y Gas, que **ya están
+   en nuestro sistema**. Nuestro panel la arma con nuestros datos. ¿Se le avisa al área que puede
+   dejar de cargar esa planilla y mirar el panel? Hoy el panel es solo para `Admin`/`Autoridad`,
+   así que la pregunta aplica cuando se abra a otros usuarios.
+2. Pendientes del relevamiento (§5): capturas de los gráficos, "CAJA" en la comparativa, período de
    los montos de la Vista, moneda de Obras.
 
 ## 8. Criterios de aceptación (del spec completo)
 
 1. Las 17 páginas en alcance (19 menos VINC. COMU y BANCOR) tienen su sección y pasan la
    conciliación de §6.
-2. Los bloques 🔒 no llegan en la respuesta de la API a usuarios fuera de `Admin`/`Autoridad`.
+2. Ningún endpoint del panel responde datos a usuarios fuera de `Admin`/`Autoridad` (403).
 3. Cada fuente muestra su frescura y un aviso cuando su último sync falló.
 4. El área valida el panel y acuerda la baja del Looker.
