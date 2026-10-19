@@ -1,7 +1,7 @@
 # Spec: Datos externos — Fase 1: nomenclador INDEC de Gobierno + ficha de localidad (demografía y datos institucionales)
 
 **Estado**: approved
-**Versión**: 1.2.0
+**Versión**: 1.2.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `svc-datos-externos` (sync + rollup) · `svc-vivienda` (`resumen_territorial`) · `frontend` (`resumen-territorial`)
@@ -12,6 +12,8 @@ de su §5 (superficie/densidad y población 2010/crecimiento intercensal).
 
 ## Changelog
 
+- **1.2.1** (2026-10-19): respuestas del usuario a §11.1 — superficie y población 2010 desde
+  fuentes oficiales externas, en otra sesión; la ficha restringida se vuelve a pedir al área.
 - **1.2.0** (2026-10-19): **cambio de fuente, por instrucción del usuario.** El área no puede
   compartir "0. Resumen General" (dejó de ser legible el 2026-10-13) y en su lugar mandó
   **"0. Resumen General - Vista"** (§3.2). La Vista trae, de la ficha, solo `POBLACION` (2022 de
@@ -436,13 +438,18 @@ y `fichaMunicipio.ts`.
    área, §11). Opciones: (a) que el área sume esas dos columnas a la Vista, que no son sensibles;
    (b) cargarlas desde la fuente pública, con un spec de fuente nueva. Recomendación: pedir (a),
    que mantiene el código INDEC como llave y no agrega fuentes; si no es posible, (b).
+   **Resuelta (2026-10-19): opción (b).** El usuario decide usar datos externos oficiales (IDECOR
+   y Censo 2010 de INDEC), a configurar en otra sesión con su propio spec (paraguas §3.10).
 2. **Población de zonas rurales.** Es una estimación propia del área y no tiene fuente pública.
-   Solo puede venir de que la sumen a la Vista (25 filas `nnZR`).
+   Solo puede venir de que la sumen a la Vista (25 filas `nnZR`). Consultado al área el
+   2026-10-19.
 3. **Ficha institucional restringida** (intendente, reelecto, continuidad, legislador, electores,
    empleados, masa salarial, contacto). ¿Puede compartirla el área por otra vía o es justamente lo
    que no puede compartir? Si no puede, encaja con el objetivo de fondo del paraguas: que esa
    información se cargue directamente en el sistema (Fase 8) en lugar de vivir en una planilla.
    Intendente y electores ya existen hoy en Privada (§7.3).
+   **2026-10-19**: el usuario la vuelve a pedir al área por ser importante. Si llega, entra por la
+   lista blanca del sync sin cambios de modelo ni de frontend.
 4. **Columnas de montos de la Vista**: ver paraguas §3.9.
 
 ## 12. Aprobación

@@ -1,7 +1,7 @@
 # Spec: Integración del "Tablero - Min. de Gobierno" (Looker Studio) al sistema
 
 **Estado**: approved
-**Versión**: 1.4.0
+**Versión**: 1.4.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `svc-datos-externos` (amplía alcance, ADR-028) + `svc-gralgob` (ATP, ADR-029) + `svc-vivienda` (`resumen_territorial`, consumidor)
@@ -12,6 +12,9 @@ sección (o un spec hijo) pase a `approved`.
 
 ## Changelog
 
+- **1.4.1** (2026-10-19): el usuario confirma la recomendación de §3.9 (montos de la Vista) y
+  decide que superficie y población 2010 se tomen de fuentes oficiales externas (§3.10). Las
+  preguntas al área se enviaron.
 - **1.4.0** (2026-10-19): **"0. Resumen General" no se puede compartir.** El área lo informó y
   en su lugar mandó "0. Resumen General - Vista" (una pestaña, 427 localidades). Se pierden como
   fuente las pestañas `DATOS LOC`, `ATP` (histórico), `FONDO FEDERAL`, `FOCOM PURO` y `ADELANTOS`
@@ -287,6 +290,31 @@ Opciones, a decidir por el usuario:
 
 Recomendación: 2 ahora para COPA y FOFINDES, que tienen planilla base; para FOCOM, Fondo Federal y
 adelantos, 1 recién con período y moneda confirmados por el área, porque no hay otra fuente.
+
+**Decisión del usuario (2026-10-19): se adopta la recomendación.**
+
+- **COPA y FOFINDES**: los totales de la Vista se guardan **solo como control** contra lo que se
+  calcule desde sus planillas base. Nunca se muestran. Se implementa con la Fase 2, que es la que
+  trae las planillas base; sin ellas no hay contra qué comparar.
+- **FOCOM, Fondo Federal y adelantos**: se usan como **dato provisorio** de la Fase 3, rotulado como
+  agregado de Gobierno con su período, **recién cuando el área confirme período y moneda**. Hasta
+  entonces no se sincronizan.
+- `ATP` de la Vista no se usa hasta que el área aclare si incluye Compromisos (§3.3).
+- Pendiente del área (enviado el 2026-10-19): período y moneda de los montos; si `ATP` incluye
+  Compromisos; zonas rurales; fuentes para el histórico de ATP, FOCOM, Fondo Federal y adelantos.
+
+### 3.10 Superficie y población 2010: fuentes oficiales externas (2026-10-19)
+
+Decisión del usuario: superficie del radio municipal y población 2010 **no se le piden al área**;
+se toman de las fuentes oficiales públicas (las mismas que el área citó: superficie del polígono
+del radio según IDECOR, población del Censo 2010 de INDEC). Se configura **en otra sesión**, con su
+propio spec hijo (fuente, formato, frecuencia, vínculo por código INDEC o `id_geo`). Al cargarse,
+completan `superficie_km2` y `poblacion_2010` de `ext_gob_localidades`, o columnas equivalentes que
+defina ese spec, y destraban densidad y crecimiento intercensal sin cambios en el frontend
+(spec Fase 1 §8).
+
+La **ficha institucional restringida** (intendente, electores, masa salarial, contacto, etc.) la
+vuelve a pedir el usuario al área, por ser importante. El modelo y el frontend ya la soportan.
 
 ### 3.8 Respuestas del área (2026-10-13)
 
