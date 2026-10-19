@@ -183,6 +183,15 @@ Sin gráfico en el Looker y con gráfico en la maqueta (se mantienen como mejora
 - Visibilidad: los bloques 🔒 se filtran en el backend con una lista propia de roles
   (`Admin`, `Autoridad`), fail-closed, como `ficha_gobierno` (spec Fase 1 §7).
 
+### 3.2 Frontend
+
+- Módulo nuevo `src/modules/tablero-gobierno/` (una página por sección, componentes compartidos
+  en su `components/`): `FiltrosGobierno`, `KpiCard`, `EmbudoEstados`, `TablaGobierno`,
+  `ComparativaAnual`, `IndicadorFrescura`.
+- Ruta `/tablero-gobierno/:seccion/:subseccion?` con filtros en query string (compartible).
+- Entrada en el menú solo para `Admin` y `Autoridad`; el backend responde 403 a cualquier otro
+  rol en todos los endpoints del panel.
+
 ### 3.3 Etapa 0 en concreto
 
 - **Acceso**: `svc-datos-externos` suma `app/auth.py` (JWT de Firebase + lookup de rol en
@@ -201,15 +210,6 @@ Sin gráfico en el Looker y con gráfico en la maqueta (se mantienen como mejora
 - **Tema para la Etapa 1**: `svc-gralgob` hoy exige la secretaría `gralgob` también a
   `Autoridad`, así que una `Autoridad` sin esa secretaría recibe 403 en ATP Compromisos. Se
   resuelve al construir esa sección (endpoint de lectura con la misma regla que este tablero).
-
-## 4. Matriz de paridad con el Looker
-
-- Módulo nuevo `src/modules/tablero-gobierno/` (una página por sección, componentes compartidos
-  en su `components/`): `FiltrosGobierno`, `KpiCard`, `EmbudoEstados`, `TablaGobierno`,
-  `ComparativaAnual`, `IndicadorFrescura`.
-- Ruta `/tablero-gobierno/:seccion/:subseccion?` con filtros en query string (compartible).
-- Entrada en el menú solo para `Admin` y `Autoridad`; el backend responde 403 a cualquier otro
-  rol en todos los endpoints del panel.
 
 ## 4. Matriz de paridad con el Looker
 
