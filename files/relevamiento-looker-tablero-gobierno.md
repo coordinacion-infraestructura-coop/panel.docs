@@ -257,7 +257,7 @@ descuento). Nuestro scraping (`ext_transferencias`) queda como respaldo y contro
 
 - KPIs: Localidades alcanzadas · Departamentos · Personas capacitadas · Certificados.
 - Gráfico "Personas capacitadas por año e iniciativa".
-- Tabla "Top 10 personas con más certificados" (**por DNI** — dato personal; no se replica).
+- Tabla "Top 10 personas con más certificados" (**por DNI** — dato personal). Se replica con nombre y localidad, sin mostrar el DNI (decisión del usuario 2026-10-19, `spec-tablero-gobierno-panel.md` §2.5 #9).
 - Tabla CERTIFICADOS: LOCALIDAD · DEPARTAMENTO · PROYECTO · INSTITUCIÓN/DISERTANTE · AÑO ·
   INICIATIVA.
 - Nota: los datos 2024 son del cuatrimestre agosto–noviembre (lanzamiento del Instituto).
