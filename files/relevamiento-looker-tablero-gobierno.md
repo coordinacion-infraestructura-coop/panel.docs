@@ -1,7 +1,7 @@
 # Relevamiento: "Tablero - Min. de Gobierno" (Looker / Data Studio)
 
 **Tipo**: documento de análisis (no es un spec; no habilita implementación)
-**Versión**: 1.0.0
+**Versión**: 1.1.0
 **Fecha**: 2026-10-19
 **Responsable**: Pedro Bonafe
 **Relacionado**: `spec-datos-externos-tablero-gobierno.md` (paraguas, inventario de planillas y
@@ -317,10 +317,40 @@ Todos los indicadores se recalculan con los filtros Departamento / Localidad / A
 
 ## 5. Pendientes del relevamiento
 
-1. **Capturas de los gráficos** (tipo, ejes, colores) de Obras, COPA (3 comparativas), FOFINDES,
-   FODEMEEP, ATP, Comp. Gober, Fondo Federal, IPCAM. Requiere la extensión Claude in Chrome
-   conectada; solo lectura.
-2. Confirmar qué es "CAJA" en la comparativa CAJA/COPA.
-3. Confirmar el período de los montos de la Vista y la moneda de Obras (pedido al área).
-4. Valores de referencia para la conciliación: al implementar cada página, comparar nuestros
+### 5.1 Segunda lectura (2026-10-19, Claude in Chrome, solo lectura)
+
+Se recorrieron las 17 páginas en alcance contando los componentes de cada una (tablas, KPIs,
+gráficos) y se miraron de cerca los gráficos. Lo único que se tocó fue el orden de una tabla
+(estado de vista, no se guarda en el informe).
+
+| Página | Componentes | Hallazgo |
+|---|---|---|
+| Resumen General | 2 tablas | **Semáforo de ATP/COPA+FOFIN** (color de fondo de la celda): verde ≥ 1,5 %, amarillo entre ~0,8 % y 1,5 %, rojo < ~0,8 % (0,9 % es amarillo y 0,7 % es rojo; el corte exacto no se ve en modo vista). Valores reales: 0,1 % a 108,8 % por localidad, 2,1 % a 51,1 % por departamento, total 18,4 % (la fila de total no lleva color). Rótulo "Obras en **miles de millones de pesos**" con valores "USD …". |
+| COPA | 6 KPIs, 2 tablas (pagos por quincena y por mes), 2 velocímetros, 3 combinados | Los velocímetros son el **% de COPA + FOFINDES que va a sueldos** (sobre el total y sobre lo neto; este último pasa el 100 %). Las 3 comparativas **no son montos**: son **retenciones como % de la COPA bruta**. "COMPARATIVA CAJA/COPA – MES A MES": Caja de Jubilaciones ÷ COPA bruta por mes, una serie por año. "ACUMULADO A <MES>" y "MES DE <MES> DE CADA AÑO": barras horizontales por año con dos series, **CAJA / COPA BRUTA** y **APROSS / COPA BRUTA**. Resuelve el pendiente 2. |
+| FOFINDES | 4 KPIs, 1 tabla | Sin gráfico. |
+| FODEMEEP | 6 KPIs, 2 tablas, 1 tabla dinámica | Tabla "Último mes completo": DEPARTAMENTO · LOCALIDAD · MES · NETO A TRANSFERIR. Tabla dinámica de localidades por estado de adhesión. |
+| FOMMEP | 10 KPIs | Sin tablas visibles; filtro AÑO. |
+| ATP | 4 KPIs, 1 tabla | Sin gráfico (el relevamiento 1.0.0 lo daba "a confirmar"). |
+| Comp. Gober | 5 KPIs, 1 tabla | Sin gráfico. |
+| Fondo Federal | 23 KPIs, 2 tablas, 2 velocímetros | KPIs extra: última cuota habilitada, saldo en cuenta, última cuota pagada, disponible en etapas, pagado por etapas, **aportes COPA del año**, **repago de préstamos del año**. Velocímetros "Localidades que recibieron la **última** / **anteúltima** cuota otorgada (% del total)". Tablas: detalle de etapas por localidad y estado (con filtros ESTADO y ETAPA) y **detalle de etapas pagadas por localidad en el año** (otorgado). |
+| Fondo Ambiental | 13 KPIs, 1 tabla, 1 torta | Torta "FONDO AMBIENTAL POR ESTADO DE PAGO". |
+| FOCOM | 27 KPIs, 1 tabla, 1 torta | Los KPIs de arriba son "**excluyendo pagados por ATP**"; el bloque por estado es "incluyendo pagados por ATP". **Torta: PAGADO · PAGADO ATP · PENDIENTE ATP** (sobre el monto). La tabla colorea la celda de estado. |
+| Comu. Regionales | 15 KPIs, 1 tabla, 1 torta | Torta "Cuotas de fondos por estado". |
+| Obras | 5 tablas | Además de las 2 por departamento, tiene **3 tablas por localidad**: "obras que abarcan una sola localidad", "obras que abarcan múltiples localidades" (montos **no** prorrateados) y "resumen de obras generales" (sin departamento asignado). Columnas MES INICIO y MES FIN. La planilla 12 **sí trae localidad**. Rótulo "millones de dólares". |
+| Visitas | 22 KPIs, 1 tabla, 3 velocímetros | Velocímetros: % de localidades visitadas, municipios visitados, comunas visitadas. Tabla "LOCALIDADES VISITADAS": FECHA · LOCALIDAD · FUNCIONARIO · TIPO DE VISITA. |
+| Visitas Gobernador | 2 KPIs, 2 tablas | — |
+| Expedientes | 18 KPIs, 1 tabla | — |
+| IPCAM | 4 KPIs, 1 combinado, 1 tabla dinámica | Combinado = personas por año e iniciativa. La tabla dinámica es el top por certificados, **identificado por DNI** (con localidad); no hay nombre. |
+| Elecciones | 5 tablas | Sin gráficos. |
+
+### 5.2 Siguen pendientes
+
+1. Corte exacto entre amarillo y rojo del semáforo (entre 0,7 % y 0,9 %): pedirlo al área o leerlo
+   en modo edición si nos dan acceso de editor.
+2. Moneda de Obras: el Looker dice "millones de dólares" en Obras y "miles de millones de pesos" en
+   el Resumen General para la misma columna (pedido al área).
+3. Período de los montos de la Vista (pedido al área).
+4. IPCAM: la planilla identifica a las personas por DNI; para mostrar nombre hace falta que la
+   fuente lo traiga (si no, se muestra solo localidad y cantidad).
+5. Valores de referencia para la conciliación: al implementar cada página, comparar nuestros
    KPIs con los del Looker con el mismo filtro (criterio de aceptación del plan).

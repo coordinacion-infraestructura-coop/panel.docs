@@ -1,7 +1,7 @@
 # Spec: Tablero de Gobierno nativo (reemplazo del Looker "Tablero - Min. de Gobierno")
 
 **Estado**: draft
-**Versión**: 0.3.0
+**Versión**: 0.4.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `frontend` (módulo nuevo) · `svc-datos-externos` (endpoints de panel, ADR-028) ·
@@ -13,6 +13,10 @@ planificada desde ahora para que cada fase de datos llegue con su pantalla. Base
 
 ## Changelog
 
+- **0.4.0** (2026-10-19): segunda lectura del Looker con Claude in Chrome (relevamiento 1.1.0
+  §5.1). Se confirman los cortes del semáforo y la torta de FOCOM, se corrigen las comparativas
+  de Coparticipación (son % de retención, no montos) y se suman a la maqueta los componentes que
+  faltaban (§2.6). Mejoras propias para la maqueta: mapas por localidad y "Para mirar" (§2.7).
 - **0.3.0** (2026-10-19): primera revisión de la maqueta por el usuario: 9 correcciones
   incorporadas a la maqueta y a la matriz de paridad (§2.5, §4). Capacitación pasa a llamarse
   "Capacitación IPCAM" y se suma el top 10 de personas con más certificados (nombre y
@@ -113,15 +117,48 @@ Ficha de Localidad, donde se suman los bloques de Gobierno (fondos, convenios, v
 
 | # | Pantalla | Pedido del usuario | Cómo queda |
 |---|---|---|---|
-| 1 | Transferencias › Resumen general | Semáforo en la columna ATP/COPA+FOFIN, como el Looker | Punto de color + valor del ratio: verde > 1, amarillo ≈ 1 (banda ±5 %, a confirmar contra el Looker), rojo < 1. También en el KPI y la fila de total. La columna se muestra como ratio (1,23) y no en %. |
-| 2 | Gestión › Obras | Faltan las tablas a nivel localidad | Selector "Por departamento / Por localidad", por defecto departamento (las dos tablas del Looker). "Por localidad": resumen por localidad (obras, en ejecución, finalizadas, avance promedio, monto) y listado de obras con su localidad. Si hay una localidad elegida en el filtro global, se fuerza el nivel localidad. Las obras de varios departamentos no tienen localidad única: solo en la vista por departamento. **A confirmar con el área**: que la planilla 12 trae la localidad de cada obra. |
+| 1 | Transferencias › Resumen general | Semáforo en la columna ATP/COPA+FOFIN, como el Looker | Punto de color + valor en %. **Cortes leídos del Looker (0.4.0)**: verde ≥ 1,5 %, amarillo de 0,8 % a 1,5 %, rojo < 0,8 % (el corte amarillo/rojo está entre 0,7 % y 0,9 %; se toma 0,8 % hasta que el área lo confirme). La fila de total no lleva color, como en el Looker. |
+| 2 | Gestión › Obras | Faltan las tablas a nivel localidad | Selector "Por departamento / Por localidad", por defecto departamento (las dos tablas del Looker). "Por localidad": resumen por localidad (obras, en ejecución, finalizadas, avance promedio, monto) y listado de obras con su localidad. Si hay una localidad elegida en el filtro global, se fuerza el nivel localidad. **Confirmado en 0.4.0**: el Looker ya tiene tablas por localidad (una sola localidad, varias localidades sin prorrateo y obras generales sin departamento), así que la planilla 12 trae la localidad; la vista por localidad replica esas tres tablas y suma mapa y resumen. |
 | 3 | Gestión › Visitas | Falta el ratio de localidades visitadas y el desagregado comunas / municipios | KPIs en % con "X de Y" (total, municipios, comunas); panel de cobertura con barras de progreso; tabla de cobertura por departamento (visitadas, %, municipios y comunas "X de Y"), de menor a mayor. La misma cobertura se agrega a Visitas del Gobernador. |
-| 4 | Transferencias › Coparticipación | Sumar "COMPARATIVA - ACUMULADO A <MES> DE CADA AÑO" y "COMPARATIVA - MES DE <MES> DE CADA AÑO" | Panel "Comparativa interanual" debajo de la serie mensual, con los dos gráficos lado a lado y un selector de mes (por defecto, el último mes completo; el Looker lo fija en febrero). Resalta el año del filtro. |
+| 4 | Transferencias › Coparticipación | Sumar "COMPARATIVA - ACUMULADO A <MES> DE CADA AÑO" y "COMPARATIVA - MES DE <MES> DE CADA AÑO" | **Corregido en 0.4.0**: las comparativas son % de retención sobre la COPA bruta (Caja de Jubilaciones y APROSS), no montos. Panel "Retenciones sobre la coparticipación bruta": Caja/COPA mes a mes (una serie por año) y, lado a lado, acumulado a <mes> y mes de <mes> de cada año con las dos series. Selector de mes (por defecto el último completo; el Looker lo fija en febrero). |
 | 5 | Transferencias › FODEMEEP | "Neto a transferir por mes" relativo al total | Barras apiladas: la barra completa es el total convenido del mes, verde lo transferido, rojo lo que falta, % transferido arriba. KPI nuevo "Pendiente de transferir" (monto y % de lo convenido). *El usuario lo pidió en FOFINDES, pero la serie "Neto a transferir por mes" es de FODEMEEP (relevamiento §2.8): se aplicó ahí.* |
 | 6 | Transferencias › FOMMEP | Falta el filtro por año | Filtro propio "Toda la gestión / 2024 / 2025 / 2026" (por defecto la gestión, como el Looker) que mueve KPIs y grupos; gráfico de total por año. |
 | 7 | Fondos › ATP Interno | Falta la tabla con el detalle por localidad | Tabla por localidad: departamento, localidad, cantidad de pagos, monto, % del total, último pago y referente (🔒), con total. |
-| 8 | Fondos › FOCOM | Falta la torta de cómo se pagó | Torta "Cómo se pagó" sobre el monto: pagado directo (FOCOM), pagado vía ATP, pendiente vía ATP y sin pagar (resto de estados). **A confirmar** contra la captura del Looker qué cortes usa. |
+| 8 | Fondos › FOCOM | Falta la torta de cómo se pagó | Torta sobre el monto con los **3 cortes del Looker** (confirmado en 0.4.0): Pagado · Pagado ATP · Pendiente ATP. Los KPIs de arriba excluyen lo pagado por ATP, como el Looker. |
 | 9 | Gestión › Capacitación | Renombrar a "Capacitación IPCAM"; faltan el gráfico por año e iniciativa y el top de personas con más certificados y su localidad | Renombrado. Barras apiladas de personas capacitadas por año e iniciativa (2024 = cuatrimestre ago–nov). Top 10 de personas con más certificados: nombre, localidad y cantidad, respeta los filtros. **Nunca el DNI** (se usa solo para contar en el backend). Datos personales: solo `Admin`/`Autoridad`, como el resto del panel. |
+
+### 2.6 Lo que faltaba respecto del Looker (segunda lectura, 2026-10-19)
+
+Agregado a la maqueta (versión 3) después de recorrer las 17 páginas (relevamiento §5.1):
+
+| Pantalla | Agregado |
+|---|---|
+| Coparticipación | % a sueldos como **dos velocímetros** (sobre el total y sobre lo neto); las tres comparativas de retención (§2.5 #4). |
+| FODEMEEP | Tabla "Neto a transferir por localidad y mes" con estado de adhesión. |
+| Fondo Federal | KPIs de última cuota habilitada / pagada, saldo en cuenta, disponible en etapas, aportes COPA y repago de préstamos del año; velocímetros de localidades que recibieron la última y la anteúltima cuota; tabla de etapas pagadas por localidad en el año. |
+| Fondo Ambiental y Comunidades Regionales | Torta por estado de pago (como el Looker). |
+| Obras | Columnas inicio y fin; las tres tablas por localidad del Looker. |
+| Visitas | Tabla de visitas registradas (fecha, localidad, funcionario, tipo de visita). Los 3 velocímetros del Looker se muestran como barras de cobertura (más fáciles de comparar). |
+| IPCAM | El top 10 del Looker es por DNI, sin nombre: el panel muestra nombre solo si la fuente lo trae; si no, localidad y cantidad. Nunca el DNI. |
+
+Sin gráfico en el Looker y con gráfico en la maqueta (se mantienen como mejora): ATP Interno
+(pagos por mes), Comp. Gober (por ministerio, estado), Elecciones (% por fuerza).
+
+### 2.7 Mejoras propias (más allá del Looker)
+
+1. **Mapas por localidad** en los paneles de mayor peso territorial: Resumen general (semáforo
+   ATP/COPA+FOFIN), ATP Interno (ATP por habitante), FOCOM / Fondo Ambiental / Comunidades
+   Regionales (todo pagado · parte · nada · sin fondo), Fondo Federal (¿recibió la última
+   cuota?), Obras (vista por localidad), Visitas y Visitas del Gobernador (visitada o no). En
+   Inicio, el mapa alterna Departamentos / Localidades. Un clic en un punto elige la localidad
+   (filtro global). En el sistema se reutiliza `MapaDualPuntos` / Leaflet con las coordenadas del
+   padrón (`viv_geo_localidades`); la maqueta usa un contorno esquemático.
+2. **"Para mirar"** en Inicio: cruces entre fuentes que el Looker no hace — localidades más
+   pobladas sin visita del Gobernador, localidades con el semáforo en rojo, mayor FOCOM sin
+   pagar. Cada ítem lleva a la localidad.
+3. Para evaluar más adelante, fuera de la maqueta: alerta cuando una fuente deja de sincronizar
+   (como ATP del 9 al 19/10); exportar la vista filtrada a PDF; comparar una localidad contra el
+   promedio de su departamento o de localidades de tamaño similar.
 
 ## 3. Arquitectura
 
@@ -160,18 +197,18 @@ Cada fila es un criterio de aceptación: "igual que el Looker con el mismo filtr
 |---|---|---|---|---|
 | Tablero | 22 KPIs, intendentes, legisladores, matriz de convenios | Inicio + Político | parcial | E1 → E6 |
 | Resumen General | 2 tablas (localidad/depto), ATP/COPA+FOFIN, TOTAL, TOTAL x HABIT | Transferencias › Resumen | Vista (control) → planillas base | E2 → E3 |
-| COPA | 9 KPIs, % a sueldos (bruto/neto), 3 comparativas (acumulado a mes y mismo mes de cada año con selector de mes, §2.5 #4) | Transferencias › Coparticipación | scraping → planilla COPA | E1 → E2 |
+| COPA | KPIs, % a sueldos en 2 velocímetros, 3 comparativas de retención Caja/APROSS sobre COPA bruta (§2.5 #4), tablas de pagos | Transferencias › Coparticipación | scraping → planilla COPA | E1 → E2 |
 | FOFINDES | 5 KPIs, serie mensual | Transferencias › FOFINDES | scraping → planilla | E1 → E2 |
-| FODEMEEP | 6 KPIs + pendiente de transferir, tabla mensual, neto a transferir apilado transferido/pendiente (§2.5 #5), estados de adhesión | Transferencias › FODEMEEP | planilla | E2 |
+| FODEMEEP | 6 KPIs + pendiente de transferir, tabla neto a transferir por localidad y mes (§2.6), neto a transferir apilado transferido/pendiente (§2.5 #5), estados de adhesión | Transferencias › FODEMEEP | planilla | E2 |
 | FOMMEP | 2 KPIs + 4 grupos (móviles, edificios 1–3), filtro de año propio (§2.5 #6) | Transferencias › FOMMEP | planilla | E2 |
 | Comp. Gober | 5 KPIs, tabla, por ministerio | Fondos › ATP Compromisos | **ya en el sistema** | E1 |
 | ATP | 4 KPIs, tabla, gráfico, detalle por localidad (§2.5 #7) | Fondos › ATP Interno 🔒 | 4. ATP 2026 | E4 |
 | FOCOM | 3 KPIs + 8 estados, torta de forma de pago (§2.5 #8), tabla | Fondos › FOCOM | falta fuente | E3 |
-| Fondo Federal | 7 KPIs + estados con %, tabla de etapas | Fondos › Fondo Federal | falta fuente | E3 |
-| Fondo Ambiental | 5 KPIs + 4 estados, tabla | Fondos › Fondo Ambiental | planilla 9 | E3 |
-| Comu. Regionales | 5 KPIs + 6 estados, tablas | Fondos › Comunidades Regionales | planilla 17 | E3 |
-| Obras | 2 tablas (1 y varios deptos), estado, prorrateo; nivel localidad con selector (§2.5 #2) | Gestión › Obras | planilla 12 (moneda en duda) | E5 |
-| Visitas | KPIs con ratio total / municipios / comunas, cobertura por departamento (§2.5 #3), tabla, tabla por funcionario | Gestión › Visitas | planillas 2 y 2.1 | E5 |
+| Fondo Federal | KPIs de cuotas, saldo, aportes y repago; estados; 2 velocímetros de cuotas; tablas de etapas y de etapas pagadas (§2.6) | Fondos › Fondo Federal | falta fuente | E3 |
+| Fondo Ambiental | 5 KPIs + 4 estados, torta por estado, tabla | Fondos › Fondo Ambiental | planilla 9 | E3 |
+| Comu. Regionales | 5 KPIs + 6 estados, torta por estado, tablas | Fondos › Comunidades Regionales | planilla 17 | E3 |
+| Obras | 5 tablas: 1 y varios departamentos (prorrateo), 1 y varias localidades (sin prorrateo), obras generales; inicio/fin; selector de nivel (§2.5 #2) | Gestión › Obras | planilla 12 (moneda en duda) | E5 |
+| Visitas | KPIs con ratio total / municipios / comunas (3 velocímetros en el Looker), cobertura por departamento (§2.5 #3), visitas registradas, tabla por funcionario | Gestión › Visitas | planillas 2 y 2.1 | E5 |
 | Visitas Gobernador | KPIs con ratio y cobertura por tipo, visitadas / no visitadas | Gestión › Visitas del Gobernador | planilla 2 | E5 |
 | IPCAM | 4 KPIs, gráfico por año e iniciativa, top 10 por certificados (nombre y localidad, sin DNI), certificados | Gestión › Capacitación IPCAM | no recibida | E5 |
 | Expedientes | 6 KPIs, por programa y estado, tabla | Expedientes | **datos propios** | E1 |
@@ -213,7 +250,8 @@ Resueltas por el usuario (2026-10-19):
 - **Maqueta**: sí, se arma una maqueta navegable con datos de ejemplo antes de la Etapa 0.
   Publicada el 2026-10-19 (privada): https://claude.ai/artifact/TJh9BKJ53D29jpP35u98rF.
   Primera revisión del usuario: "muy bien", con 9 correcciones (§2.5), incorporadas en la
-  versión 2. Pendiente de aprobación final; su aprobación abre la Etapa 0.
+  versión 2. Segunda revisión contra el Looker y mapas (§2.6, §2.7) en la versión 3.
+  Pendiente de aprobación final; su aprobación abre la Etapa 0.
 - **Usuarios**: por ahora solo `Admin` y `Autoridad`. Más adelante se verá si se suma algo.
 - **Relación con el Resumen Territorial**: paneles separados; se unen en la Ficha de Localidad.
 - **ATP Interno**: solo `Admin` y `Autoridad`.
@@ -225,8 +263,9 @@ Siguen abiertas:
    en nuestro sistema**. Nuestro panel la arma con nuestros datos. ¿Se le avisa al área que puede
    dejar de cargar esa planilla y mirar el panel? Hoy el panel es solo para `Admin`/`Autoridad`,
    así que la pregunta aplica cuando se abra a otros usuarios.
-2. Pendientes del relevamiento (§5): capturas de los gráficos, "CAJA" en la comparativa, período de
-   los montos de la Vista, moneda de Obras.
+2. Pendientes del relevamiento (§5.2): corte exacto amarillo/rojo del semáforo, moneda de Obras
+   (el Looker dice dólares en una página y pesos en otra), período de los montos de la Vista,
+   nombre de las personas en IPCAM. Las capturas de gráficos y "CAJA" quedaron resueltas.
 
 ## 8. Criterios de aceptación (del spec completo)
 
