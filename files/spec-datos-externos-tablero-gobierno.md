@@ -313,6 +313,11 @@ completan `superficie_km2` y `poblacion_2010` de `ext_gob_localidades`, o column
 defina ese spec, y destraban densidad y crecimiento intercensal sin cambios en el frontend
 (spec Fase 1 §8).
 
+**Spec hijo (2026-10-19)**: `spec-datos-externos-fuentes-oficiales.md` (approved). Fuente elegida:
+Estadística Córdoba (ArcGIS REST, Censo 2010/2022 por gobierno local con el mismo código INDEC);
+la superficie para la densidad es la del Censo, no el radio legal de IDECOR. Suma además
+indicadores de condiciones de vida, IPS, RENABAP, equipamientos y estadísticas vitales.
+
 La **ficha institucional restringida** (intendente, electores, masa salarial, contacto, etc.) la
 vuelve a pedir el usuario al área, por ser importante. El modelo y el frontend ya la soportan.
 
