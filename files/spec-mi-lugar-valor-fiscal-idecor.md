@@ -1,7 +1,7 @@
 # Spec: Mi Lugar — Valor Fiscal sugerido y valor de referencia de mercado desde IDECOR
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `svc-datos-externos` (consulta a IDECOR) · `svc-vivienda` (`mi_lugar`) · `frontend` (`MiLugarPage.tsx`) · `infra` (gateway + Cloud Scheduler)
@@ -13,6 +13,10 @@ Decisión de arquitectura: ADR-031.
 
 ## Changelog
 
+- **1.0.1** (2026-10-19): corrección de la cuenta de ejemplo de §3 (valor de mercado de la parcela
+  de Villa María: $17.154.786.999). Código escrito en la rama `mi-lugar-valuacion-idecor` de
+  `services/`, `frontend/` e `infra/`, sin desplegar; runbook en
+  `infra/deploy-mi-lugar-valuacion-idecor.md`. El estado sigue en `approved` hasta el deploy.
 - **1.0.0** (2026-10-19): **aprobado por el usuario**, con las respuestas a §9 de la v0.1.0:
   1. el valor sugerido es la valuación **total** (tierra + mejoras);
   2. las parcelas salen de **los puntos y de una lista de nomenclaturas** que carga el área (la
@@ -90,7 +94,7 @@ Conclusiones:
    contra 105,21 ha declaradas). No se usa ni se compara en esta versión.
 
 Valor de mercado para la parcela de Villa María `1604220301275100` (29,74 ha urbanas):
-57.687 $/m² × 297.377 m² = $17.154.787.599. Su valuación fiscal de la tierra es $2.401.670.179,86.
+57.687 $/m² × 297.377 m² = $17.154.786.999. Su valuación fiscal de la tierra es $2.401.670.179,86.
 
 ## 4. Fuente
 
