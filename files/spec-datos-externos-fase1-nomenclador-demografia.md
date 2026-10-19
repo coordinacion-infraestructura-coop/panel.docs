@@ -409,7 +409,9 @@ y `fichaMunicipio.ts`.
 3. ✅ 421 de 427 con `id_geo`; 6 sin resolver (2026-10-14). Falta listar cuáles.
 4. ✅ 28 filas de `ext_geo_censo` cerradas (2026-10-14).
 5. ✅ Cloud Scheduler diario `sync-gob-localidades` creado (2026-10-14).
-6. Corrida real con la Vista: 427 filas aplicadas, fuente `resumen_vista` en `ok`.
+6. ✅ Corrida real con la Vista (2026-10-19, `svc-datos-externos-00005`): 427 filas aplicadas,
+   `resumen_vista` en `ok`, sin anomalías; 425 de 427 con `id_geo`; el rollup entrega el partido
+   de 425 localidades y ningún otro campo restringido.
 7. ~~Densidad, crecimiento intercensal y población rural visibles~~ — **bloqueado sin fuente**
    desde la v1.2.0 (§11.1). Mientras tanto se muestran "N/D" y la línea rural no aparece.
 8. Verificado contra producción con dos usuarios: uno `Admin` o `Autoridad` ve el bloque
