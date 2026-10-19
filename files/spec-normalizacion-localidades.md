@@ -1,16 +1,24 @@
 # Spec: Normalización de nombres de localidad (transversal)
 
 **Estado**: approved
-**Versión**: 0.7.0
+**Versión**: 0.7.1
 **Servicios**: `svc-vivienda` (padrón + endpoint interno de resolución + fixes de
 matching), `svc-gasifera` (sync), `svc-gralgob` (sync), `svc-privada` (rollup
 territorial), `frontend` (retira el matching hardcodeado de `AtpPage.tsx`)
-**Última actualización**: 2026-10-07
+**Última actualización**: 2026-10-19
 
 ---
 
 ## Changelog
 
+- **0.7.1** (2026-10-19): **alta de "Santiago Temple" (Río Segundo) y "Kilómetro 658"
+  (Río Primero) en el padrón**, migración `svc-vivienda` 0042. Eran los dos casos "confirmado
+  sin vínculo" que sí son gobiernos locales reales: el nomenclador INDEC de Gobierno
+  (municipio 141078 y comuna 142672) y la API Georef lo confirman. La regla "nunca se inventa
+  un `id_geo`" se mantiene: se da de alta la localidad con fuente oficial, no se la vincula a
+  otra. Coordenadas: centroide de la localidad según Georef. Los alias `id_geo = NULL` de esos
+  nombres pasan a apuntar a la fila nueva, y la migración vincula los registros de CC/CH/ML sin
+  vínculo con ese nombre. Decisión del usuario.
 - **0.7.0** (2026-10-07): **cambia §2.6.** Hasta ahora el texto de localidad
   de cada registro de Cordón Cuneta / Córdoba Hogar / Mi Lugar no se pisaba
   (se resolvía `localidad_id` al lado). Por decisión del usuario (ADR-026),
