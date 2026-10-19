@@ -1,9 +1,9 @@
 # Spec: Integración del "Tablero - Min. de Gobierno" (Looker Studio) al sistema
 
 **Estado**: approved
-**Versión**: 1.3.0
+**Versión**: 1.4.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-13
+**Última actualización**: 2026-10-19
 **Servicios**: `svc-datos-externos` (amplía alcance, ADR-028) + `svc-gralgob` (ATP, ADR-029) + `svc-vivienda` (`resumen_territorial`, consumidor)
 
 Spec paraguas. Define el inventario de fuentes, las decisiones ya tomadas y el orden de
@@ -12,6 +12,11 @@ sección (o un spec hijo) pase a `approved`.
 
 ## Changelog
 
+- **1.4.0** (2026-10-19): **"0. Resumen General" no se puede compartir.** El área lo informó y
+  en su lugar mandó "0. Resumen General - Vista" (una pestaña, 427 localidades). Se pierden como
+  fuente las pestañas `DATOS LOC`, `ATP` (histórico), `FONDO FEDERAL`, `FOCOM PURO` y `ADELANTOS`
+  (§2). La Fase 1 pasa a leer la Vista (spec hijo v1.2.0). Las columnas de montos de la Vista
+  quedan sin usar hasta decidir qué hacer con ellas (§3.9).
 - **1.3.0** (2026-10-13): primer cruce ATP Compromisos vs. ATP Interno contra datos reales
   (§3.3.1). Confirma superposición parcial y descarta el referente como marca.
 - **1.2.0** (2026-10-13): corrección del usuario — todo lo marcado "solo `Autoridad`" lo ve también
@@ -67,7 +72,7 @@ y, el 2026-10-13, las planillas de Google Sheets que lo alimentan (listado en
 |---|---|---|
 | Qué es | Compromisos anunciados por el Gobernador | ATP de manejo discrecional/político de la Secretaría |
 | Estado en el sistema | Ya sincronizada (`atp_compromisos`, `atp_cronograma_pagos`) | No está en el sistema |
-| Fuente | Sheet `1x3E73hlGwDPBiLc9fbQuWxWUxjaibs3glModHsxCMZM` | Sheet `1h3FzAL-X0_tgIGNgnZ_DgKd5rDo8oLg0wNxY0gisBAU` ("4. ATP 2026") + histórico en "0. Resumen General" (§3.3) |
+| Fuente | Sheet `1x3E73hlGwDPBiLc9fbQuWxWUxjaibs3glModHsxCMZM` | Sheet `1h3FzAL-X0_tgIGNgnZ_DgKd5rDo8oLg0wNxY0gisBAU` ("4. ATP 2026"); el histórico estaba en "0. Resumen General", que no se puede compartir (§2) |
 | Spec | `spec-sync-atp-compromiso-gobernador.md` (approved) | A abrir (spec hijo) |
 | Sensibilidad | Media | Alta (incluye el referente político de cada pago) |
 | Destino | Sigue como está | Módulo y panel nuevo en `svc-gralgob` |
@@ -84,12 +89,13 @@ pestaña base** de cada una.
 | Planilla (título real) | Pestaña base | Filas | Contenido | Destino |
 |---|---|---|---|---|
 | 0. LOCALIDADES - NOMBRES | `LOCALIDADES` | 478 | Nomenclador: `ID_LOC` (INDEC), nombre, `ID_DPTO`, `ID_COPA`, tipo MU/CO | `svc-datos-externos` (§3.1) |
-| 0. Resumen General | `DATOS LOC` | 452 | Superficie, población 2022 y 2010, electores, empleados, masa salarial, intendente, reelecto, partido, continuidad, legislador, contacto | `svc-datos-externos` |
-| 0. Resumen General | `ATP` | 6.032 | Histórico de ATP Interno 2023–2026: fecha, localidad, monto, referente | `svc-gralgob` |
-| 0. Resumen General | `FONDO FEDERAL` | 1.503 | Etapas por localidad: monto, disponible, estado | `svc-datos-externos` |
-| 0. Resumen General | `FOCOM PURO` | 361 | FOCOM vigente: monto, concepto, categoría, estado, fecha de pago | `svc-datos-externos` |
-| 0. Resumen General | `ADELANTOS` | 294 | Adelantos de coparticipación 2023–2025 | `svc-datos-externos` |
-| 0. Resumen General | `RESUMENGRAL`, `RESUMENGRAL-BRANDAN` | 427 | Tablas agregadas a pedido de dos despachos. El área informa que **no son confiables** (montos sin corroborar) | No se sincroniza ni se usa para validar |
+| 0. Resumen General - Vista | `Hoja 1` | 427 | Población 2022 de Gobierno y partido por localidad, más totales de montos por fondo (§3.9). Reemplaza a "0. Resumen General" | `svc-datos-externos` (población y partido, Fase 1) |
+| ~~0. Resumen General~~ | `DATOS LOC` | 452 | Superficie, población 2022 y 2010, electores, empleados, masa salarial, intendente, reelecto, partido, continuidad, legislador, contacto | **No disponible** (2026-10-19) |
+| ~~0. Resumen General~~ | `ATP` | 6.032 | Histórico de ATP Interno 2023–2026: fecha, localidad, monto, referente | **No disponible** |
+| ~~0. Resumen General~~ | `FONDO FEDERAL` | 1.503 | Etapas por localidad: monto, disponible, estado | **No disponible** |
+| ~~0. Resumen General~~ | `FOCOM PURO` | 361 | FOCOM vigente: monto, concepto, categoría, estado, fecha de pago | **No disponible** |
+| ~~0. Resumen General~~ | `ADELANTOS` | 294 | Adelantos de coparticipación 2023–2025 | **No disponible** |
+| ~~0. Resumen General~~ | `RESUMENGRAL`, `RESUMENGRAL-BRANDAN` | 427 | Tablas agregadas a pedido de dos despachos. El área informa que **no son confiables** (montos sin corroborar) | No se sincroniza ni se usa para validar |
 | 4. ATP 2026 | `ATP ACUMULADO` | 2.220 | ATP Interno del año en curso (planilla de carga) | `svc-gralgob` |
 | 11.1 COPARTICIPACION | `COPA` | 28.182 | Por localidad y quincena, 2024–2026: bruto, neto y ~40 conceptos de descuento | `svc-datos-externos` |
 | 11.1 FOFINDES | `FOFINDES` | 14.518 | Mensual 2024–2026: parte variable, excedentes, descuentos, neto | `svc-datos-externos` |
@@ -116,6 +122,17 @@ pestaña base** de cada una.
 **Sin fuente recibida** (el área las va a compartir): IPCAM (capacitación municipal) y la
 planilla de origen de Fondo Federal (la pestaña `FONDO FEDERAL` de Resumen General es una copia).
 
+**"0. Resumen General" no se puede compartir** (informado por el área el 2026-10-19; dejó de ser
+legible el 2026-10-13). Las pestañas tachadas arriba dejan de ser fuente. Lo que eso afecta:
+
+| Pestaña perdida | Afecta a | Alternativa |
+|---|---|---|
+| `DATOS LOC` | Fase 1: superficie, población 2010, zona rural y ficha institucional | Vista (solo población y partido); resto en spec Fase 1 §11.1 |
+| `ATP` (histórico) | Fase 4: ATP Interno 2023–2025 y el cruce histórico con Compromisos | "4. ATP 2026" cubre solo el año en curso. Preguntar si hay planillas anuales |
+| `FONDO FEDERAL` | Fase 3 | Ya estaba pendiente la planilla de origen; ahora es la única vía |
+| `FOCOM PURO` | Fase 3 | "5. FOCOM - Deprecated" no sirve. Pedir la fuente original (administración) |
+| `ADELANTOS` | Fase 3 | Pedir la planilla de origen |
+
 ## 3. Hallazgos
 
 ### 3.1 Todas las planillas comparten una clave: el código INDEC de gobierno local
@@ -138,6 +155,9 @@ alternativa** para incorporar planillas de Gobierno. Dos consecuencias:
   ("ente") y no entran al padrón.
 
 ### 3.2 `DATOS LOC` destraba dos huecos del tablero v2
+
+> **2026-10-19**: `DATOS LOC` no está disponible (§2). Lo que sigue describe lo que tenía; los
+> dos huecos del tablero v2 siguen abiertos (spec Fase 1 v1.2.0 §11.1).
 
 Trae **superficie** y **población 2010** completas para las 452 filas. Son los dos datos que
 `spec-resumen-territorial-tablero-v2.md §5` tenía bloqueados sin fuente (densidad y crecimiento
@@ -239,6 +259,35 @@ primeros. No se incorpora: corresponde ofrecerle el dato al área.
 - **Histórico de ATP Interno 2023–2025**: quedó sin responder si la pestaña `ATP` de Resumen
   General es la fuente autoritativa o si hay planillas anuales anteriores. Volver a preguntar.
 
+### 3.9 Columnas de montos de "0. Resumen General - Vista" (2026-10-19)
+
+La Vista trae por localidad, en **millones de pesos**: `ATP`, `FOCOM PURO`, `COPA`, `FOFINDES`,
+`ADELANTO COPA`, `OBRAS`, `FONDO FEDERAL`, `FONDO AMBIENTAL`, `GUARDIAS` (vacía) y `TOTAL`; más dos
+derivadas, `ATP/COPA+FOFIN` (proporción) y `TOTAL x HABIT` (en pesos, `TOTAL × 1.000.000 /
+POBLACION`). Es la única fuente disponible hoy para FOCOM, Fondo Federal y adelantos por localidad.
+
+**No se usan todavía.** Por qué:
+
+- Son totales agregados del mismo tipo que `RESUMENGRAL`, que el área calificó como no del todo
+  confiables y para los que pidió calcular en nuestro backend desde cada planilla base (§3.8). La
+  Vista vuelve a ofrecer justamente ese agregado.
+- No se sabe **qué período** cubren (¿2024–2026 acumulado?, ¿año en curso?).
+- `ATP` no aclara si incluye los pagos de Compromisos del Gobernador (§3.3). Si se mostrara junto
+  a la línea de Compromisos, podría contarlos dos veces.
+- `OBRAS` arrastra la duda de moneda (§3.7).
+
+Opciones, a decidir por el usuario:
+
+1. **Usarlas como dato provisorio** de las Fases 3 y 7 (total por fondo y por localidad), rotulado
+   "agregado informado por Gobierno, período X", sin sumar `ATP` con Compromisos. Requiere que el
+   área confirme período y moneda, y un spec hijo.
+2. **Usarlas solo como control**: guardar los totales y compararlos con lo que calculemos desde
+   las planillas base (COPA y FOFINDES ya tienen la suya), sin mostrarlas.
+3. **No usarlas** y esperar las planillas base.
+
+Recomendación: 2 ahora para COPA y FOFINDES, que tienen planilla base; para FOCOM, Fondo Federal y
+adelantos, 1 recién con período y moneda confirmados por el área, porque no hay otra fuente.
+
 ### 3.8 Respuestas del área (2026-10-13)
 
 | Tema | Respuesta | Efecto |
@@ -292,7 +341,7 @@ de corrida append-only, Cloud Scheduler), con vínculo por código INDEC.
 
 | Fase | Qué | Por qué en este orden |
 |---|---|---|
-| 1 | **Nomenclador + demografía** (`spec-datos-externos-fase1-nomenclador-demografia.md`, approved): tabla puente INDEC ↔ `id_geo` (con `ID_COPA`, tipo y entes), cierre de los `id_geo` nulos del censo, y superficie / población 2010 / electores desde `DATOS LOC` | Es la base de todas las demás y destraba densidad y crecimiento intercensal en el tablero ya construido. Baja sensibilidad |
+| 1 | **Nomenclador + demografía** (`spec-datos-externos-fase1-nomenclador-demografia.md`, approved v1.2.0): tabla puente INDEC ↔ `id_geo` (con `ID_COPA`, tipo y entes), cierre de los `id_geo` nulos del censo, y población 2022 de Gobierno + partido desde la Vista. Superficie, población 2010 y ficha institucional quedan sin fuente (spec hijo §11.1) | Es la base de todas las demás y destraba densidad y crecimiento intercensal en el tablero ya construido. Baja sensibilidad |
 | 2 | **Transferencias automáticas**: COPA con descuentos, FOFINDES, FODEMEP, FOMMEP. Conciliación mes a mes contra el scraping | Mayor volumen y mayor valor fiscal; define si el scraping se retira |
 | 3 | **Fondos por localidad**: FOCOM (`FOCOM PURO`), Fondo Federal (cuando llegue su planilla de origen), Fondo Ambiental, Fondo Permanente, Adelantos, Comunidades Regionales. Fuera: BANCOR (sin actualizar) y Vinculación Comunitaria (en desuso) | Forma parecida entre sí; completan el "total transferido por localidad" |
 | 4 | **ATP Interno** en `svc-gralgob` (spec hijo propio). Empieza por el cruce contra Compromisos y la regla de no duplicación (§3.3); sin esa regla, las dos fuentes se muestran separadas y sin total conjunto | Sensible; la superposición está confirmada por el área |
@@ -321,6 +370,10 @@ Siguen abiertas:
 2. Los puntos de §3.7, pendientes del área de Gobierno.
 3. ATP: regla para no contar dos veces los pagos que están en Compromisos y en ATP Interno
    (§3.3). Depende del cruce de datos y de la respuesta de la autoridad del área.
+4. Qué hacer con las columnas de montos de la Vista (§3.9).
+5. Fuentes que reemplacen las pestañas perdidas de "0. Resumen General" (§2): histórico de ATP
+   Interno, FOCOM, Fondo Federal, adelantos; y para la Fase 1, superficie, población 2010, zona
+   rural y ficha institucional.
 
 ## 8. Criterios de aceptación
 
