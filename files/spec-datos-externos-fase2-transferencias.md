@@ -1,7 +1,7 @@
 # Spec: Fase 2 — Transferencias automáticas desde las planillas de Gobierno
 
-**Estado**: review
-**Versión**: 0.9.0
+**Estado**: approved
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-20
 **Servicio**: `svc-datos-externos`
@@ -10,6 +10,12 @@
 
 ## Changelog
 
+- **1.0.1** (2026-10-20): implementado (svc-datos-externos `ffd3fef`, `ec4c15d`; frontend
+  `9d97570`). Verificado con las planillas reales contra Postgres 15 descartable: ~60.000 filas en
+  18 s sin descartes; % a sueldos 63,4 % / 129,6 %, igual que el Looker. Hallazgo en §8.2.
+  FOMMEP devuelve todos los años más la gestión, y las retenciones vienen para los 12 meses, para que
+  la pantalla elija sin volver a pedir (maqueta §2.5).
+- **1.0.0** (2026-10-20): aprobado por el usuario sin cambios.
 - **0.9.0** (2026-10-20): primera versión, a partir de la lectura de estructura de las cinco
   planillas (solo lectura, con la cuenta `svc-datos-externos@`).
 
@@ -243,7 +249,9 @@ aprobada (`spec-tablero-gobierno-panel.md` §2.5 y §2.6), con las limitaciones 
    (según planilla)".
 2. **FOMMEP `Monto_total`**: es mayor que móviles + edificios en 803 de 854 filas. ¿Qué más
    incluye? Mientras tanto se muestra el total de la planilla y la diferencia como "otros
-   conceptos".
+   conceptos". **Hallazgo (2026-10-20)**: en 2025 la diferencia provincial es exactamente igual al
+   monto de edificios (330,3 M), así que el total parece sumar los edificios dos veces. Se le
+   pregunta al área si es un error de fórmula.
 3. **FOFINDES**: los tres descuentos aparecen dos veces con el mismo nombre. ¿Son iguales o
    significan cosas distintas? Además, ¿el bruto es `FOFINDES` o `Total Parte Variable`? Coinciden
    solo en el 44 % de las filas; se usa `FOFINDES`.
