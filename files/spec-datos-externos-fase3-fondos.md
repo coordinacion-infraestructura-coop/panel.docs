@@ -1,7 +1,7 @@
 # Spec: Fase 3 — Fondos por localidad desde las planillas de Gobierno
 
-**Estado**: review
-**Versión**: 0.9.0
+**Estado**: implemented
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-20
 **Servicio**: `svc-datos-externos`
@@ -10,6 +10,15 @@
 
 ## Changelog
 
+- **1.0.1** (2026-10-20): implementado (svc-datos-externos `40eed84`, migración 0007 aplicada en
+  producción; frontend `5a2132d`). Verificado con las planillas reales contra Postgres 15
+  descartable: las tres fuentes en 5 s, sin descartes; los rangos pedidos a Sheets saltean las
+  columnas de personas. Totales: §1 cierra (etapas 220/123, disponible 2.133 M, saldo 7.444 M;
+  Fondo Ambiental afectado 6.942 M, ingresos 7.052 M, disponible 110,5 M; los saldos de
+  Comunidades Regionales coinciden con `Control - Import` en los tres años). Hallazgo: el código
+  `500` de Fondo Ambiental (§1.2). Las tres pantallas usan filtro de año propio, como FOMMEP,
+  porque Fondo Ambiental no tiene 2026 y la barra común arranca en el año en curso.
+- **1.0.0** (2026-10-20): aprobado por el usuario sin cambios.
 - **0.9.0** (2026-10-20): primera versión, a partir de la lectura de estructura de las tres
   planillas (solo lectura, con la cuenta `svc-datos-externos@`, autorizada por el usuario).
 
@@ -71,6 +80,11 @@ la localidad lo pide como préstamo y lo devuelve en cuotas descontadas de la co
   comunidades regionales** (1.652 M).
 - Columnas: `N° EXPEDIENTE`, `AÑO`, `N° DE CONVENIO`, `FECHA DE CONVENIO`, `N° DE RESOLUCIÓN`,
   `FECHA DE RESOLUCION`, `OBJETO SEGÚN CONVENIO (GLOSARIO)`, `MONTO`, `ESTADO`, `FECHA ESTADO`.
+- **Código `500`** (4 convenios, 2024–2025): lo comparten entes intermunicipales que no son
+  comunidades regionales (uno de San Justo y uno de San Alberto / San Javier) y no está en el
+  nomenclador. Se guardan nombre y departamento de la planilla para mostrarlos y filtrarlos; se
+  cuentan como entes distintos por nombre. Queda como anomalía informativa
+  `ente_fuera_del_nomenclador`.
 - Estados hoy: `PAGADO` (133, 6.892 M) y `LISTO PARA PAGAR` (2, 49,6 M). El Looker muestra también
   "Tribunal de Cuentas" y "En trámite", hoy vacíos.
 - `INGRESOS`: dos celdas, una por año (2024: 1.499 M; 2025: 5.553 M). Es el ingreso del fondo en
@@ -113,7 +127,7 @@ tienen `created_at` y `updated_at`. Montos en `Numeric(18, 2)`, en pesos.
 | `ext_gob_fperm_localidad` | `codigo_indec` | `ultima_etapa`, `disponible`, `recibio_ultima`, `recibio_anteultima` |
 | `ext_gob_fperm_etapa` | `codigo_indec, etapa` | `monto` (etapas disponibles sin otorgar) |
 | `ext_gob_fperm_prestamo` | `id` | `codigo_indec` (nulo si falta), `etapas_texto`, `etapa_desde`, `etapa_hasta`, `fecha`, `mes_inicio_descuento`, `monto_total`, `cuota`, `plazo`, `ord_res`, `sticker`, `fecha_ingreso`, `destino` |
-| `ext_gob_fondo_ambiental` | `id` | `codigo` (INDEC o ente), `es_ente`, `anio`, `expediente`, `convenio`, `fecha_convenio`, `resolucion`, `fecha_resolucion`, `objeto`, `monto`, `estado`, `fecha_estado` |
+| `ext_gob_fondo_ambiental` | `id` | `codigo_indec` o `codigo_ente`, `nombre_ente` y `departamento_ente` (solo entes, como vienen en la planilla), `anio`, `expediente`, `convenio`, `fecha_convenio`, `resolucion`, `fecha_resolucion`, `objeto`, `monto`, `estado`, `fecha_estado` |
 | `ext_gob_creg_cuota` | `id` | `codigo_ente`, `tipo`, `anio`, `expediente`, `destino` (nulo si vino como fecha), `monto`, `cuota`, `monto_cuota`, `estado`, `fecha_pago`, `resolucion`, `fecha_rendicion` |
 | `ext_gob_fondo_valor` | `fondo, concepto, anio` | `monto`. Valores sueltos: saldo en cuenta y última etapa habilitada (Fondo Permanente), ingresos por año (Fondo Ambiental), crédito de funcionamiento y de obras por año (Comunidades Regionales) |
 

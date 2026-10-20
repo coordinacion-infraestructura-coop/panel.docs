@@ -279,7 +279,7 @@ que llegan las fuentes.
 | **E0 — Base** | Maqueta navegable aprobada (§7.1); ADR-028 en `svc-datos-externos` (auth, roles, gateway); módulo frontend con filtros, componentes compartidos e indicador de frescura | Aprobación de este spec |
 | **E1 — Con lo que ya hay** | Inicio parcial (población, ATP Compromisos, transferencias del scraping); Fondos › ATP Compromisos; Transferencias › Coparticipación y FOFINDES desde el scraping (sin % a sueldos). Expedientes pasa a "a definir" (§7) | E0 |
 | **E2 — Transferencias completas** | Coparticipación (quincenas, descuentos, 3 comparativas), FOFINDES, FODEMEEP, FOMMEP desde planillas; % a sueldos (necesita masa salarial: ficha restringida pedida al área); Resumen general calculado + control contra la Vista | Paraguas Fase 2 |
-| **E3 — Fondos** | Fondo Ambiental y Comunidades Regionales; FOCOM, Fondo Federal y adelantos cuando lleguen sus fuentes (o como dato provisorio de la Vista, paraguas §3.9) | Paraguas Fase 3 |
+| **E3 — Fondos** | Fondo Ambiental, Comunidades Regionales y Fondo Permanente (hecho 2026-10-20, `spec-datos-externos-fase3-fondos.md`); FOCOM, Fondo Federal y adelantos cuando lleguen sus fuentes (o como dato provisorio de la Vista, paraguas §3.9) | Paraguas Fase 3 |
 | **E4 — ATP Interno** 🔒 | Página ATP; regla de no duplicación con Compromisos | Paraguas Fase 4 |
 | **E5 — Gestión territorial** | Obras, visitas, visitas del Gobernador, reuniones, convenios, IPCAM | Paraguas Fase 5 |
 | **E6 — Político** 🔒 | Intendentes, legisladores, elecciones | Paraguas Fase 6 + ADR-027 |
