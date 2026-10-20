@@ -1,7 +1,7 @@
 # Spec: Tablero de Gobierno nativo (reemplazo del Looker "Tablero - Min. de Gobierno")
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.1.0
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-19
 **Servicios**: `frontend` (módulo nuevo) · `svc-datos-externos` (endpoints de panel, ADR-028) ·
@@ -13,6 +13,9 @@ planificada desde ahora para que cada fase de datos llegue con su pantalla. Base
 
 ## Changelog
 
+- **1.1.0** (2026-10-19): Etapa 0 en producción (gateway `ministerio-config-v20261019b`) y
+  Etapa 1 construida (§3.4). Expedientes sale de la Etapa 1: falta definir de dónde sale el
+  estado "Remitido / En trámite" (§7). Se resuelve el acceso de `Autoridad` a ATP Compromisos.
 - **1.0.0** (2026-10-19): **aprobado** por el usuario junto con la maqueta (versión 3). Se
   detalla el alcance de la Etapa 0 (§3.3) y se anota el acceso de `Autoridad` a ATP
   Compromisos como tema de la Etapa 1.
@@ -211,6 +214,34 @@ Sin gráfico en el Looker y con gráfico en la maqueta (se mantienen como mejora
   `Autoridad`, así que una `Autoridad` sin esa secretaría recibe 403 en ATP Compromisos. Se
   resuelve al construir esa sección (endpoint de lectura con la misma regla que este tablero).
 
+### 3.4 Etapa 1 en concreto
+
+- `svc-datos-externos`:
+  - `GET /api/v1/datos-externos/tablero/inicio?anio=&codigo_indec=…` → localidades,
+    municipios y comunas, población 2022 (Censo, con la Vista de Gobierno como respaldo),
+    transferido en el año y por habitante, total y por departamento.
+  - `GET /api/v1/datos-externos/tablero/transferencias/{coparticipacion|fofindes}?anio=&codigo_indec=…`
+    → serie mensual del año y del anterior, acumulado, variación contra el mismo período del
+    año anterior, último mes y desglose por concepto.
+  - Cálculos puros en `app/tablero/aggregations.py`, con tests. Un mes sin publicar queda
+    "sin dato", no en 0. Sin filtro territorial se suman también las filas sin vínculo al
+    padrón, para que el total coincida con el PDF; el desglose por departamento usa solo
+    lo vinculado.
+- `svc-gralgob`: `GET /api/v1/gralgob/tablero/atp-compromisos?id_geo=…` → KPIs, por
+  ministerio, por estado de pago (mismo criterio que `resumen_territorial`), por departamento
+  y la lista. Solo `Admin` y `Autoridad`, **sin chequeo de secretaría**: resuelve el 403 de
+  una `Autoridad` sin `gralgob` (§3.3). El año del filtro no se aplica (compromisos de toda
+  la gestión).
+- Filtro territorial: el frontend traduce departamento o localidad a la lista de códigos
+  INDEC (`svc-datos-externos`) o de `id_geo` (`svc-gralgob`) desde `/tablero/meta`.
+- Frontend: Inicio (KPIs, mapa coroplético por departamento con 3 indicadores y clic para
+  filtrar, accesos a secciones), Coparticipación y FOFINDES (serie comparada mes a mes,
+  conceptos), ATP Compromisos (por ministerio, estado de pago, tabla con búsqueda y
+  exportación).
+- Limitaciones aceptadas: los montos de transferencias son brutos (Transparencia); neto,
+  quincenas, retenciones y % a sueldos llegan en la Etapa 2. El mapa por localidad necesita
+  coordenadas del padrón y llega con la Etapa 5.
+
 ## 4. Matriz de paridad con el Looker
 
 Cada fila es un criterio de aceptación: "igual que el Looker con el mismo filtro".
@@ -246,7 +277,7 @@ que llegan las fuentes.
 | Etapa | Contenido | Depende de |
 |---|---|---|
 | **E0 — Base** | Maqueta navegable aprobada (§7.1); ADR-028 en `svc-datos-externos` (auth, roles, gateway); módulo frontend con filtros, componentes compartidos e indicador de frescura | Aprobación de este spec |
-| **E1 — Con lo que ya hay** | Inicio parcial (población, ATP Compromisos, transferencias del scraping); Fondos › ATP Compromisos; Transferencias › Coparticipación y FOFINDES desde el scraping (sin % a sueldos); Expedientes con datos propios | E0 |
+| **E1 — Con lo que ya hay** | Inicio parcial (población, ATP Compromisos, transferencias del scraping); Fondos › ATP Compromisos; Transferencias › Coparticipación y FOFINDES desde el scraping (sin % a sueldos). Expedientes pasa a "a definir" (§7) | E0 |
 | **E2 — Transferencias completas** | Coparticipación (quincenas, descuentos, 3 comparativas), FOFINDES, FODEMEEP, FOMMEP desde planillas; % a sueldos (necesita masa salarial: ficha restringida pedida al área); Resumen general calculado + control contra la Vista | Paraguas Fase 2 |
 | **E3 — Fondos** | Fondo Ambiental y Comunidades Regionales; FOCOM, Fondo Federal y adelantos cuando lleguen sus fuentes (o como dato provisorio de la Vista, paraguas §3.9) | Paraguas Fase 3 |
 | **E4 — ATP Interno** 🔒 | Página ATP; regla de no duplicación con Compromisos | Paraguas Fase 4 |
@@ -279,6 +310,13 @@ Resueltas por el usuario (2026-10-19):
 - **ATP Interno**: solo `Admin` y `Autoridad`.
 
 Siguen abiertas:
+
+0. **Expedientes: de dónde sale el estado.** El Looker muestra por expediente ESTADO
+   (Remitido / En trámite), N° EXPEDIENTE, MINISTERIO, PROGRAMA (Cordón Cuneta, Gas, Gas -
+   Escuela), LOCALIDAD, FECHA y MONTO. En nuestro sistema hay número de expediente en Cordón
+   Cuneta (`viv_cordon_cuneta.expediente`) y en Gas (`gas_pit_obras.expediente`), pero no un
+   estado "remitido / en trámite" ni la fecha de visado. Hace falta que el área defina qué
+   significa cada estado (o desde qué estado nuestro se deriva), antes de construir la pantalla.
 
 1. **Expedientes (reformulada)**: la página "Expedientes (Ministerios)" del Looker la alimenta una
    planilla que el área carga a mano copiando expedientes de Cordón Cuneta y Gas, que **ya están
