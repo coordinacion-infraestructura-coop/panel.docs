@@ -1,7 +1,7 @@
 # Spec: Fase 4 — ATP Interno de Gobierno (planilla "4. ATP 2026")
 
-**Estado**: review
-**Versión**: 0.9.0
+**Estado**: implemented
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-21
 **Servicio**: `svc-gralgob` (módulo nuevo `atp_interno`, ADR-029); `svc-datos-externos` para el
@@ -11,6 +11,17 @@ Resumen general
 
 ## Changelog
 
+- **1.0.1** (2026-10-21): implementado y en producción. Backend `b691382` (svc-gralgob migración
+  `0003` aplicada; svc-datos-externos con ATP en el Resumen), gateway `ministerio-config-v20261021`
+  (infra `3fc4017`), frontend `a586c4b`. Cloud Scheduler `sync-gralgob-atp-interno` (`15 * * * *`)
+  y `roles/run.invoker` de `svc-datos-externos@` sobre `svc-gralgob`. Verificado con la planilla
+  real contra Postgres 15 descartable y en producción: 2.220 filas, $76.209 M, 407 localidades,
+  15 fechas rotas, 0 descartes; ninguna respuesta trae el referente. La planilla ya estaba
+  compartida con `svc-gralgob@`. Nota de despliegue: el push no disparó los triggers de Cloud
+  Build (webhook de GitHub); se corrieron a mano `deploy-svc-gralgob` y
+  `deploy-svc-datos-externos` con `gcloud builds triggers run`.
+- **1.0.0** (2026-10-21): aprobado por el usuario sin cambios, con autorización para implementar
+  y desplegar. El área ya pidió compartir la planilla con `svc-gralgob@`.
 - **0.9.0** (2026-10-21): primera versión, a partir de la lectura de estructura y agregados de la
   planilla (solo lectura, con la cuenta `svc-datos-externos@`, autorizada por el usuario; el
   referente no se imprimió). Incluye dos decisiones del usuario del mismo día: el referente se
