@@ -1,7 +1,7 @@
 # Spec: Fase 5 — Gestión territorial desde las planillas de Gobierno
 
-**Estado**: review
-**Versión**: 0.9.0
+**Estado**: implemented
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-21
 **Servicio**: `svc-datos-externos`
@@ -10,6 +10,17 @@
 
 ## Changelog
 
+- **1.0.1** (2026-10-21): implementado y en producción. Backend `7567e2d` (migración `0008`
+  aplicada), gateway `ministerio-config-v20261021b` (infra `b3e4bb3`), frontend `04a69fc`. Sin job
+  nuevo: las cinco fuentes entran al `sync-gob-transferencias` diario. Verificado con las
+  planillas reales contra Postgres 15 descartable y en producción: obras 1.054 filas (883 obras;
+  9 descartadas), recorridos 429 + 427 de Visitas Gober, ministro 347 (18 descartadas: 6 fechas
+  futuras, 1 inválida, 11 sin código), reuniones 578, convenios 427 localidades × 15 columnas.
+  Cobertura: 274 de 427 localidades visitadas por funcionarios; 321 por el Gobernador. Ningún
+  rango pedido a Sheets incluyó columnas excluidas y la respuesta de obras no trae montos.
+  Visitas del Gobernador no tiene filtro de año (es una foto de hoy).
+- **1.0.0** (2026-10-21): aprobado por el usuario sin cambios, con autorización para implementar
+  y desplegar.
 - **0.9.0** (2026-10-21): primera versión, a partir de la lectura de estructura y agregados de
   cinco planillas (solo lectura, con la cuenta `svc-datos-externos@`, autorizada por el usuario).
   No se imprimieron textos libres, nombres de personas ni partidos; los funcionarios se
