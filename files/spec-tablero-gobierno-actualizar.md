@@ -1,7 +1,7 @@
 # Spec: Botón "Actualizar datos" del Tablero de Gobierno
 
 **Estado**: implemented
-**Versión**: 1.0.1
+**Versión**: 1.0.2
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-22
 **Servicios**: `svc-datos-externos` (y, encadenado, `svc-privada`)
@@ -9,6 +9,15 @@
 
 ## Changelog
 
+- **1.0.2** (2026-10-22): corrección tras el primer uso real. El primer pedido disparó los cuatro
+  jobs pero tres devolvieron 502 (nomenclador y los dos ATP) y COPA falló con `KeyError`: el
+  cliente de Google Sheets era uno solo por proceso y `googleapiclient`/httplib2 no se puede
+  compartir entre hilos; con los jobs corriendo juntos, dos syncs en la misma instancia se
+  rompían la conexión. Ahora hay un cliente por hilo (`svc-datos-externos` y `svc-gralgob`,
+  backend `702ed17`). Verificado disparando los cuatro jobs a la vez: los cuatro en 200 y todas
+  las fuentes en `ok`. Además, `/tablero/meta` informa el último pedido (`actualizacion`) para
+  que el botón siga una actualización en curso aunque se recargue la página; el 409 ya no se
+  muestra como error.
 - **1.0.1** (2026-10-22): implementado y en producción. Backend `6ac5900`, gateway
   `ministerio-config-v20261022` (infra `aa09164`), frontend con el botón al lado del indicador de
   frescura. `svc-datos-externos@` con `roles/cloudscheduler.jobRunner` (verificado disparando
