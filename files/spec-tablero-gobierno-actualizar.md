@@ -1,7 +1,7 @@
 # Spec: Botón "Actualizar datos" del Tablero de Gobierno
 
 **Estado**: implemented
-**Versión**: 1.0.2
+**Versión**: 1.0.3
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-10-22
 **Servicios**: `svc-datos-externos` (y, encadenado, `svc-privada`)
@@ -9,6 +9,18 @@
 
 ## Changelog
 
+- **1.0.3** (2026-10-22): (1) el botón ya no espera 15 minutos fijos: `/meta` informa
+  `en_curso` y `terminado_en`, y el pedido termina cuando el nomenclador, las planillas y las
+  fuentes oficiales registran una corrida posterior (medido: alrededor de un minuto). Terminado,
+  se acepta otro pedido sin esperar. (2) Pedido del usuario: Transparencia y fuentes oficiales
+  pasan a correr a diario (`sync-transferencias-transparencia` 08:30 UTC, nuevo endpoint
+  `POST /internal/datos-externos/transferencias/sync-recientes`; `sync-fuentes-oficiales` 08:45
+  UTC) y el botón también las dispara. (3) Hallazgo: `transparencia.cba.gov.ar` y la API de
+  Estadística Córdoba (`smart-geo-data.cba.gov.ar`) responden **403 a las conexiones que salen
+  de Google Cloud** (desde una IP argentina responden 200, con cualquier User-Agent): es un
+  bloqueo por IP. Las corridas quedan registradas como falla; RENABAP e IDECOR cargan bien.
+  Fuentes oficiales no había corrido nunca en producción: primera corrida 2026-10-22 (7 s).
+  Backend `66ba835` + `93e09c4`, frontend `0f319cc`.
 - **1.0.2** (2026-10-22): corrección tras el primer uso real. El primer pedido disparó los cuatro
   jobs pero tres devolvieron 502 (nomenclador y los dos ATP) y COPA falló con `KeyError`: el
   cliente de Google Sheets era uno solo por proceso y `googleapiclient`/httplib2 no se puede
@@ -37,6 +49,8 @@ Dispara en ese momento los mismos jobs de Cloud Scheduler que corren solos cada 
 | `sync-gob-transferencias` | Todas las planillas de Gobierno (transferencias, fondos, gestión, intendentes, elecciones) |
 | `sync-atp-compromiso-gobernador` | ATP Compromisos (svc-gralgob) |
 | `sync-gralgob-atp-interno` | ATP Interno (svc-gralgob) |
+| `sync-transferencias-transparencia` | Transferencias publicadas en Transparencia (meses que falten) |
+| `sync-fuentes-oficiales` | Estadística Córdoba, RENABAP e IDECOR |
 
 Se dispara el job y no el sync directo porque cada sync tarda minutos y el gateway corta antes;
 el job corre con su propio plazo (hasta 10 min) y su propia identidad. La respuesta vuelve en
