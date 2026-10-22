@@ -1,12 +1,13 @@
 # Spec: Estados de los paneles CC / CH / ML — un listado por área
 
-**Estado**: approved
-**Versión**: 1.0.1
+**Estado**: implemented
+**Versión**: 1.0.2
 **Servicio**: `svc-vivienda` (módulos `cordon_cuneta`, `cordoba_hogar`, `mi_lugar`) + frontend `vivienda`
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-21
+**Última actualización**: 2026-10-22
 
 ### Changelog
+- **1.0.2 (2026-10-22)** — implemented. Desplegado: migración `0044` aplicada en producción (CC 19 estados → 36 copias, CH 16 → 32, ML 45 → 90; filas y historial repuntados), `svc-vivienda` `50b7efc`, frontend en Firebase Hosting.
 - **1.0.1 (2026-10-21)** — §3: el listado General arranca con todos los estados (encontrado al
   probar la migración contra la base local).
 - **1.0.0 (2026-10-21)** — aprobado. A1 y A2 según la propuesta; A3 resuelto por el usuario:

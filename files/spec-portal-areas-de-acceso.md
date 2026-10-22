@@ -1,13 +1,14 @@
 # Spec: Usuarios del portal — Rol + Secretarías + Áreas de acceso
 
-**Estado**: approved
-**Versión**: 1.1.0
+**Estado**: implemented
+**Versión**: 1.1.1
 **Servicio**: `svc-vivienda` (módulo `portal` + routers de los paneles), `svc-privada` / `svc-gasifera` / `svc-gralgob` / `svc-datos-externos` (auth), frontend (`AdminUsuariosPage`, `Layout`, `DashboardPage`)
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-21
+**Última actualización**: 2026-10-22
 **ADR a registrar al aprobar**: ADR-032 (§9)
 
 ### Changelog
+- **1.1.1 (2026-10-22)** — implemented. Desplegado: migración `0045` aplicada en producción (9 usuarios con solo la secretaría `privada` dejan de leer los paneles de Vivienda por la API, como preveía §1), `svc-vivienda` `50b7efc`, gateway `ministerio-config-v20261022b` (`GET /api/v1/portal/areas`), frontend en Firebase Hosting.
 - **1.1.0 (2026-10-21)** — implementación (§11): decisiones tomadas al implementar, sin cambiar lo
   aprobado. ADR-032 registrado.
 - **1.0.0 (2026-10-21)** — aprobado. B1, B2, B4 y B6 según la propuesta. B3: Tablero de
