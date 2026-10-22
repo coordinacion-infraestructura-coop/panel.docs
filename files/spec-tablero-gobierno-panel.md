@@ -282,7 +282,7 @@ que llegan las fuentes.
 | **E3 — Fondos** | Fondo Ambiental, Comunidades Regionales y Fondo Permanente (hecho 2026-10-20, `spec-datos-externos-fase3-fondos.md`); FOCOM, Fondo Federal y adelantos cuando lleguen sus fuentes (o como dato provisorio de la Vista, paraguas §3.9) | Paraguas Fase 3 |
 | **E4 — ATP Interno** 🔒 | Página ATP (hecho 2026-10-21, `spec-atp-interno.md`: solo 2026, sin referente) y ATP en el Resumen general como el Looker, con nota pendiente con el área; la regla de no duplicación con Compromisos sigue esperando al área | Paraguas Fase 4 |
 | **E5 — Gestión territorial** | Obras (sin montos hasta confirmar la moneda), visitas, visitas del Gobernador, reuniones y convenios (hecho 2026-10-21, `spec-datos-externos-fase5-gestion-territorial.md`); IPCAM cuando llegue su planilla | Paraguas Fase 5 |
-| **E6 — Político** 🔒 | Intendentes, legisladores, elecciones | Paraguas Fase 6 + ADR-027 |
+| **E6 — Político** 🔒 | Intendentes y elecciones (hecho 2026-10-21, `spec-datos-externos-fase6-politico.md`); legisladores cuando el área mande la fuente | Paraguas Fase 6 + ADR-027 |
 | **E7 — Reemplazo** | Paridad completa; período de convivencia; baja del Looker acordada con el área | E1–E6 |
 
 Las páginas de un fondo comparten forma (KPIs + embudo de estados + tabla), así que después de la
