@@ -1,12 +1,13 @@
 # Spec: Córdoba Hogar — Convenio Firmado como dato propio
 
-**Estado**: approved
-**Versión**: 1.0.0
+**Estado**: implemented
+**Versión**: 1.0.1
 **Servicio**: `svc-vivienda` (módulo `cordoba_hogar`) + frontend `vivienda` (`CordobaHogarPage.tsx`)
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-11-02
 
 ### Changelog
+- **1.0.1 (2026-11-02)** — implemented. Desplegado: migración `0046` aplicada en producción (262 de 284 localidades marcadas, 177 con fecha), `svc-vivienda` `84516b3`, frontend `75f9d7e` en Firebase Hosting. Falta verificación visual.
 - **1.0.0 (2026-11-02)** — aprobado por el usuario. A1 según la propuesta. A2 y A3 cerradas con la
   consulta de solo lectura a producción (§5 y §7): la carga inicial usa solo el listado Jurídico.
 - **0.1.0 (2026-11-02)** — versión inicial, con decisiones abiertas (§7).
