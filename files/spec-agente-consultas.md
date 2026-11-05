@@ -1,7 +1,7 @@
 # Spec: Agente conversacional de consultas para funcionarios (`svc-agente`)
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-11-05
 **Servicio**: `svc-agente` (nuevo, sexto microservicio) + base `db_agente` en `ministerio-postgres`
@@ -13,6 +13,21 @@ datos") remite a este spec.
 
 ## Changelog
 
+- **1.0.1** (2026-11-05): etapa 1 implementada en ramas, **sin desplegar** (backend `svc-agente`
+  en `panel.backend` rama `svc-agente`, frontend en `panel.front` rama `agente-consultas`,
+  gateway en `gestor.infra` rama `gateway-agente`). Decisiones de implementación dentro de lo
+  aprobado: (a) carga por **ETL (plan B de §2.2)** en vez de `postgres_fdw`: no hubo forma de correr
+  el spike (sin Docker local) y el ETL permite conservar por fuente el último dato bueno cuando
+  una base falla, además de ser testeable sin Postgres; las tablas `ag_*` son tablas comunes que se
+  recargan dentro de una transacción. (b) Roles: `agente_app` es también dueño del schema `ag`
+  (se fusiona con el `agente_owner` de §2.3); `agente_llm` y `agente_ro` quedan como estaban.
+  (c) Los grants por columna de `agente_ro` se generan desde los extractores
+  (`sql/generar_grants.py`) y un test falla si no coinciden. (d) Obras de Gasífera con varias
+  localidades: una fila por localidad con el monto prorrateado. (e) El SSE emite eventos de
+  progreso por tool y la respuesta completa al final, no el texto token a token. (f) Las
+  respuestas incluyen "Descargar Excel" en cada tabla (adelanto de la etapa 2, sin tool nueva).
+  Sin verificar todavía: migración contra Postgres real, llamada real a Vertex, SSE a través del
+  API Gateway.
 - **1.0.0** (2026-11-05): aprobado por el usuario. Los puntos que seguían **[A DEFINIR]** se
   resuelven así para poder implementar, sin bloquear la etapa 1: (a) `detalle` de Privada entra con
   enmascarado de DNI/teléfono/email y `observaciones` queda fuera (§4); (b) el mapeo de estados
