@@ -1,9 +1,9 @@
 # Spec: Agente conversacional de consultas para funcionarios (`svc-agente`)
 
-**Estado**: draft
-**Versión**: 0.1.0
+**Estado**: approved
+**Versión**: 1.0.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-11-04
+**Última actualización**: 2026-11-05
 **Servicio**: `svc-agente` (nuevo, sexto microservicio) + base `db_agente` en `ministerio-postgres`
 **ADR**: ADR-033 (capa analítica de solo lectura, excepción controlada a ADR-001)
 **Antecedentes**: `agente_gestionInterna_InfraestructuraV1` (Telegram + BigQuery, en producción
@@ -13,6 +13,16 @@ datos") remite a este spec.
 
 ## Changelog
 
+- **1.0.0** (2026-11-05): aprobado por el usuario. Los puntos que seguían **[A DEFINIR]** se
+  resuelven así para poder implementar, sin bloquear la etapa 1: (a) `detalle` de Privada entra con
+  enmascarado de DNI/teléfono/email y `observaciones` queda fuera (§4); (b) el mapeo de estados
+  (§5.1), la definición de "ejecutado" y los umbrales de demora (§5.3) viven como **datos** en
+  `glosario.yaml`, con la propuesta de §5.1 para Privada y ATP y un mapeo inicial para Vivienda y
+  Gasífera que el área tiene que revisar antes de anunciar el agente (cambiarlos no requiere código
+  ni nueva versión del spec); "ejecutado" arranca como suma de hitos acreditados del Checklist para
+  CC/CH/ML y monto entregado para ATP; umbral de demora por defecto 90 días; (c) cuota diaria 100
+  preguntas por usuario, configurable; (d) región de Vertex se fija en el spike. El set de 60–100
+  preguntas reales sigue siendo condición para la aceptación de la etapa 1 (§9), no para empezar.
 - **0.1.0** (2026-11-04): primera versión. Recoge las decisiones del usuario del 2026-11-03: Claude
   vía Vertex AI, chat web en el portal, etapa 1 solo `Admin`/`Autoridad`, capa semántica propia en
   `db_agente`, indicadores prediseñados para las 4 familias de preguntas, contexto fijo por
@@ -138,7 +148,7 @@ Decisión del usuario: **los datos personales quedan fuera**. Se excluyen por `G
 **[A DEFINIR]** `priv_gestiones.detalle` / `observaciones`: texto libre del pedido. Es necesario para
 preguntas como "pedidos de ambulancias", pero puede contener nombres o teléfonos de vecinos.
 Propuesta: incluir `detalle` (no `observaciones`) y aplicar en la vista un enmascarado de patrones
-de DNI, teléfono y email. Requiere confirmación.
+de DNI, teléfono y email. Resuelto en 1.0.0: se incluye `detalle` enmascarado; `observaciones` queda fuera.
 
 Los textos de comunicaciones de infraestructura/supervisión no se incluyen en la etapa 1.
 
