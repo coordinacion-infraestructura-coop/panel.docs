@@ -1,9 +1,9 @@
 # Spec: Agente conversacional de consultas para funcionarios (`svc-agente`)
 
 **Estado**: approved
-**Versión**: 1.0.1
+**Versión**: 1.0.2
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-11-05
+**Última actualización**: 2026-11-12
 **Servicio**: `svc-agente` (nuevo, sexto microservicio) + base `db_agente` en `ministerio-postgres`
 **ADR**: ADR-033 (capa analítica de solo lectura, excepción controlada a ADR-001)
 **Antecedentes**: `agente_gestionInterna_InfraestructuraV1` (Telegram + BigQuery, en producción
@@ -13,6 +13,16 @@ datos") remite a este spec.
 
 ## Changelog
 
+- **1.0.2** (2026-11-12): **cambio de proveedor del LLM, decidido por el usuario**: Claude por la
+  **API de Anthropic con API key** (secreto `svc-agente-anthropic-key` en Secret Manager) en vez de
+  Vertex AI. Motivo: con la API de Vertex habilitada, Claude Sonnet 5.5 y Haiku 5.5 tienen cuota 0
+  en `global`/`us`/`eu` para `gestorcooperativo` y Google rechazó dos pedidos de aumento. Se
+  descartó reusar la API key de Gemini del agente anterior (habría que reescribir el loop, las
+  tools y los tests, y esa key está expuesta en texto plano: hay que rotarla). Vertex queda como
+  alternativa por configuración (`PROVEEDOR_LLM=vertex`), con el mismo request. Efecto en §10: los
+  datos (agregados, sin datos personales, §4) van a Anthropic fuera de GCP; se factura aparte de
+  la cuenta de GCP. Verificado contra Postgres 15: la migración 0001 tenía un `ALTER ROLE` que
+  falla sin CREATEROLE (corregido).
 - **1.0.1** (2026-11-05): etapa 1 implementada en ramas, **sin desplegar** (backend `svc-agente`
   en `panel.backend` rama `svc-agente`, frontend en `panel.front` rama `agente-consultas`,
   gateway en `gestor.infra` rama `gateway-agente`). Decisiones de implementación dentro de lo
@@ -203,10 +213,10 @@ intendente y partido, fecha del dato (de `ag_frescura`) y link a la Ficha de Loc
 
 ### 6.1 Modelo y loop
 
-- Claude vía Vertex AI (`AnthropicVertex` del SDK oficial), autenticado con la service account de
-  Cloud Run (sin API keys). Modelo principal: Sonnet; Haiku como opción para preguntas simples si la
-  evaluación lo justifica. Región de Vertex **[A DEFINIR en el spike]**: Claude no está en
-  `southamerica-east1`; los datos que se envían son agregados, sin datos personales (§4).
+- Claude por la API de Anthropic (`AsyncAnthropic` del SDK oficial) con API key en Secret Manager
+  (desde 1.0.2; antes Vertex AI, que queda como alternativa por configuración). Modelo principal:
+  Sonnet; Haiku como opción para preguntas simples si la evaluación lo justifica. Los datos que se
+  envían son agregados, sin datos personales (§4).
 - Loop propio de tool use, sin framework (lección de los dos agentes previos). Máximo 6 rondas de
   tools por pregunta. Prompt caching del system prompt + schema + glosario.
 - Ante ambigüedad: asume la interpretación más probable, la explicita en `interpretacion` y propone
@@ -324,5 +334,5 @@ Módulo `src/modules/agente/`, ruta `/agente` con `ProtectedRoute` (Admin/Autori
   Mitigación: indicadores prediseñados para las familias frecuentes, `interpretacion` y `sql`
   visibles, set de evaluación y feedback.
 - **Datos de hasta 1 h de antigüedad** respecto del panel: se informa la frescura en cada respuesta.
-- **Envío de datos a Vertex fuera de la región**: sólo agregados y texto de gestiones sin datos
+- **Envío de datos a Anthropic, fuera de GCP** (desde 1.0.2): sólo agregados y texto de gestiones sin datos
   personales (§4).
