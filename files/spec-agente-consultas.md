@@ -1,7 +1,7 @@
 # Spec: Agente conversacional de consultas para funcionarios (`svc-agente`)
 
 **Estado**: approved
-**Versión**: 1.0.2
+**Versión**: 1.0.3
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-11-12
 **Servicio**: `svc-agente` (nuevo, sexto microservicio) + base `db_agente` en `ministerio-postgres`
@@ -13,6 +13,9 @@ datos") remite a este spec.
 
 ## Changelog
 
+- **1.0.3** (2026-11-12): **burbuja flotante del asistente, pedida por el usuario** (§8). Mismo chat,
+  mismos endpoints y mismo permiso (Admin/Autoridad); sólo cambia dónde se abre. Sin cambios de
+  backend ni de gateway.
 - **1.0.2** (2026-11-12): **cambio de proveedor del LLM, decidido por el usuario**: Claude por la
   **API de Anthropic con API key** (secreto `svc-agente-anthropic-key` en Secret Manager) en vez de
   Vertex AI. Motivo: con la API de Vertex habilitada, Claude Sonnet 5.5 y Haiku 5.5 tienen cuota 0
@@ -290,6 +293,13 @@ Módulo `src/modules/agente/`, ruta `/agente` con `ProtectedRoute` (Admin/Autori
 (con "ver todas" si `total_filas` > filas), `link`; sección plegable "Cómo lo calculé" con
 `interpretacion` + `sql`; botones de sugerencias y de feedback. Usa `apiClient`; el SSE con
 `fetch` + `ReadableStream` (Axios no soporta streaming en el navegador).
+
+**Burbuja flotante** (desde 1.0.3): botón fijo en la esquina inferior izquierda de todas las
+pantallas del portal (salvo `/agente`), visible con el mismo permiso que la pestaña "Asistente".
+Abre el mismo chat en un popup (componente compartido `ChatAgente`), sin lista de conversaciones:
+"Nueva" empieza otra y "Ampliar" lleva a `/agente/{id}` con el historial. La conversación abierta se
+recuerda en `sessionStorage` (sólo el id; los mensajes siguen en `db_agente`). Cerrar el popup no
+corta una consulta en curso. Escape lo cierra.
 
 ## 9. Evaluación y criterios de aceptación de la etapa 1
 
