@@ -218,7 +218,8 @@ Sin gráfico en el Looker y con gráfico en la maqueta (se mantienen como mejora
 
 - `svc-datos-externos`:
   - `GET /api/v1/datos-externos/tablero/inicio?anio=&codigo_indec=…` → localidades,
-    municipios y comunas, población 2022 (Censo, con la Vista de Gobierno como respaldo),
+    municipios y comunas, población de Gobierno (con el Censo 2022 al lado, `poblacion_censo`, y como respaldo si falta;
+    criterio cambiado el 2026-11-13, spec fase 1 v1.3.0),
     transferido en el año y por habitante, total y por departamento.
   - `GET /api/v1/datos-externos/tablero/transferencias/{coparticipacion|fofindes}?anio=&codigo_indec=…`
     → serie mensual del año y del anterior, acumulado, variación contra el mismo período del

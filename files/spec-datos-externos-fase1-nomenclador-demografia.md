@@ -1,9 +1,9 @@
 # Spec: Datos externos — Fase 1: nomenclador INDEC de Gobierno + ficha de localidad (demografía y datos institucionales)
 
 **Estado**: approved
-**Versión**: 1.2.2
+**Versión**: 1.3.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-19
+**Última actualización**: 2026-11-13
 **Servicios**: `svc-datos-externos` (sync + rollup) · `svc-vivienda` (`resumen_territorial`) · `frontend` (`resumen-territorial`)
 
 Spec hijo de `spec-datos-externos-tablero-gobierno.md` (approved, paraguas) — es su Fase 1.
@@ -12,6 +12,23 @@ de su §5 (superficie/densidad y población 2010/crecimiento intercensal).
 
 ## Changelog
 
+- **1.3.0** (2026-11-13): **cambio de criterio de población, por decisión del usuario** tras la
+  reunión con Gobierno Abierto. El **Tablero de Gobierno** usa como población principal la **de
+  Gobierno** (`poblacion_2022_gob`), con el Censo 2022 al lado (`poblacion_censo`) y resaltado
+  donde difiere. Motivo: Gobierno fija algunas poblaciones por coparticipación (Villa San Isidro
+  1.527 vs. 607 del Censo); el Censo está bien, pero el dato oficial del área es el suyo, y es el
+  que usa el Looker. Era la única diferencia de población entre ambos tableros (920 habitantes en
+  el total provincial). Reemplaza la decisión de §11.2 **en el Tablero de Gobierno y en el
+  Resumen Territorial**, que deben mostrar los mismos datos (instrucción del usuario): el rollup
+  entrega `poblacion_2022` = Gobierno (Censo si falta) y suma `poblacion_censo_2022`; el Resumen
+  Territorial (KPIs y ficha PDF/Excel) muestra las dos poblaciones solo donde no coinciden, y la
+  densidad y los montos por habitante usan la de Gobierno (§6.1). Cambios aditivos en las APIs
+  (`poblacion_censo` y `poblacion_censo_2022` nuevos, opcionales). Fuera de alcance: los
+  "Habitantes" de la ficha de localidad en pantalla, que salen del padrón de Privada (ADR-012). El área informó además que su base de
+  localidades es la planilla `1Bu8OV6vRFkzmGmGY40TKlg-sm5CMrc-T84K6Okq_Ex0`, que incluye las zonas
+  grises: **pendiente** de que la compartan con `svc-datos-externos@` para evaluar si reemplaza a
+  la Vista como fuente de población (y cierra §11.1.2, zonas rurales). Hasta entonces la
+  población de Gobierno sigue saliendo de la Vista.
 - **1.2.2** (2026-10-19): el Censo había vinculado el código 142672 (comuna Kilómetro 658) a la
   fila "KILOMETRO 691" del padrón, un paraje que no es gobierno local. Tras el alta de Kilómetro
   658 en el padrón (`svc-vivienda` 0042) la localidad salía dos veces en el rollup. Migración
@@ -124,7 +141,7 @@ nomenclador, con el mismo nombre de localidad; no hay valores inválidos.
 | Columna de la planilla | Campo | Visibilidad | Observado |
 |---|---|---|---|
 | `ID_LOC` | clave | — | — |
-| `POBLACION` | `poblacion_2022_gob` | No se expone (control) | 427/427. Es la población 2022 **de Gobierno**: suma 3.770.861 (el total "solo gobiernos locales" del Looker) e incluye los ajustes manuales (Villa San Isidro 1.527) |
+| `POBLACION` | `poblacion_2022_gob` | Pública desde la v1.3.0: población principal del Tablero de Gobierno (antes: solo control) | 427/427. Es la población 2022 **de Gobierno**: suma 3.770.861 (el total "solo gobiernos locales" del Looker) e incluye los ajustes manuales (Villa San Isidro 1.527) |
 | `PARTIDO` | `partido` | Admin y Autoridad | 427/427 |
 | `LOCALIDAD`, `ID_DPTO`, `DEPARTAMENTO` | — | — | Repiten el nomenclador; no se leen |
 
@@ -311,7 +328,9 @@ Todo el cambio es aditivo: no se renombra ni se quita nada del contrato actual.
   `masa_salarial`, `intendente`, `reelecto`, `partido`, `continuidad`, `legislador`,
   `partido_legislador`, `contacto_intendente`), o `null` si no hay dato.
 
-La población que se expone sigue siendo `poblacion_2022` del Censo.
+~~La población que se expone sigue siendo `poblacion_2022` del Censo.~~ Desde la v1.3.0,
+`poblacion_2022` es la población de Gobierno (`poblacion_2022_gob`; la del Censo si falta) y
+`poblacion_censo_2022` trae la del Censo, para mostrarla cuando difiere.
 
 Desde la v1.2.0, `superficie_km2` y `poblacion_2010` llegan en `null`, y `ficha_gobierno` trae
 solo `partido` con dato (el resto de las claves en `null`). Si una localidad no tiene partido,
@@ -435,7 +454,9 @@ y `fichaMunicipio.ts`.
 
 1. **Radios muy chicos**: se muestran tal cual, por ser el dato oficial. El área confirmó la
    fuente: polígono del radio según IDECOR.
-2. **Diferencias de población con el Censo**: se mantiene el dato del Censo. El área explicó que
+2. **Diferencias de población con el Censo**: ~~se mantiene el dato del Censo~~ — **reemplazada
+   en la v1.3.0 para el Tablero de Gobierno**: manda la población de Gobierno y el Censo se muestra
+   al lado. Texto original: se mantiene el dato del Censo. El área explicó que
    Villa San Isidro (1.527 vs. 607) es un ajuste manual a pedido de la localidad, que se unió con
    La Quintana; Cañada de Machado y Los Pozos probablemente también sean ajustes manuales. El
    sync las sigue informando como anomalía.
