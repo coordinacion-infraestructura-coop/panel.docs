@@ -23,8 +23,10 @@ de su §5 (superficie/densidad y población 2010/crecimiento intercensal).
   entrega `poblacion_2022` = Gobierno (Censo si falta) y suma `poblacion_censo_2022`; el Resumen
   Territorial (KPIs y ficha PDF/Excel) muestra las dos poblaciones solo donde no coinciden, y la
   densidad y los montos por habitante usan la de Gobierno (§6.1). Cambios aditivos en las APIs
-  (`poblacion_censo` y `poblacion_censo_2022` nuevos, opcionales). Fuera de alcance: los
-  "Habitantes" de la ficha de localidad en pantalla, que salen del padrón de Privada (ADR-012). El área informó además que su base de
+  (`poblacion_censo` y `poblacion_censo_2022` nuevos, opcionales). Los "Habitantes" de la ficha
+  de localidad (pantalla, PDF y Excel) también pasan a la población de Gobierno, con el Censo al
+  lado si difiere; el padrón de Privada (ADR-012) queda solo como respaldo cuando no hay dato
+  (instrucción del usuario, 2026-11-13). Electores, intendente y partido no cambian. El área informó además que su base de
   localidades es la planilla `1Bu8OV6vRFkzmGmGY40TKlg-sm5CMrc-T84K6Okq_Ex0`, que incluye las zonas
   grises: **pendiente** de que la compartan con `svc-datos-externos@` para evaluar si reemplaza a
   la Vista como fuente de población (y cierra §11.1.2, zonas rurales). Hasta entonces la
