@@ -211,6 +211,12 @@ Sistema de microservicios desplegado en Google Cloud Platform. Cada secretaría 
 **Conflicto con ADR-001 (database-per-service), explícito**: `db_agente` lee de bases de otros servicios. Se acepta como excepción acotada: (1) es solo lectura y ningún servicio lee ni escribe a otro a través de ella; (2) los servicios dueños no dependen de ella y pueden cambiar su schema, y el costo de adaptar las vistas lo paga `svc-agente`; (3) los datos personales se excluyen por `GRANT`, no por instrucción al modelo; (4) no se habilita ningún otro consumidor de `db_agente` sin un ADR nuevo.
 **Consecuencia**: Un cambio de schema en un servicio puede romper el refresco de las vistas: el refresco falla de forma visible (log + `ag_frescura`) y el agente sigue respondiendo con el último dato bueno, informando su fecha. El refresco agrega carga a la instancia compartida `db-f1-micro` (a medir en el spike). Los datos se envían a Vertex AI fuera de `southamerica-east1`, sólo agregados y sin datos personales. Spec: `docs/files/spec-agente-consultas.md`.
 
+### ADR-034: Primera escritura del sistema en una planilla de Google — espejo de solo salida para Gobierno Abierto
+**Estado**: aceptado (2026-11-16, spec approved 1.0.0).
+**Decisión**: `svc-vivienda` escribe la pestaña **Vivienda** de la planilla de Gobierno Abierto con los pagos de los hitos de obra (anticipo financiero, avance físico 40/70/100) de CC, CH y ML, tomados del Checklist Técnico. La pestaña es un **espejo**: cada sincronización borra y reescribe el rango de datos desde `db_vivienda`, al instante después de cada `PATCH` de hito (best-effort, en segundo plano) y cada hora por Cloud Scheduler. El acceso es por ADC del service account de Cloud Run (`svc-vivienda@`), compartido como Editor en la planilla, con un cliente de scope `spreadsheets` separado del cliente de solo lectura.
+**Razón**: Pedido de Gobierno Abierto (2026-11-16): el dato ya existe en el sistema y cargarlo a mano duplica trabajo. El espejo completo evita duplicados y refleja solas las correcciones de fechas.
+**Consecuencia**: Hasta ahora el sistema solo leía planillas; esta es la excepción, acotada a planillas de salida que el sistema maneja. La pestaña no se edita a mano (los cambios manuales se pierden). Una falla de Google no afecta la carga de hitos; queda en `viv_gobabierto_sync_log` y la corrida horaria la corrige. Spec: `docs/files/spec-export-gobierno-abierto-vivienda.md`.
+
 ## Sistema de roles del portal
 
 | Rol | Descripción |
