@@ -72,7 +72,7 @@ combinación. Con estos ajustes:
 | B2 | Nombre de la UI | "Áreas de acceso". |
 | B3 | Pantallas transversales de la secretaría | Tablero de programas y Tablero analítico: visibles con cualquier área de Vivienda (como hoy para `TecnicoDGV`). Informes CC/CH: atados al área CC / CH. **Resuelto (usuario):** Tablero de Gobierno y Resumen Territorial quedan como hoy, solo Admin y Autoridad, fuera del esquema de áreas. |
 | B4 | ¿Se elimina el rol `TecnicoDGV`? | Sí, tras migrar a sus usuarios. Queda aceptado en lectura un tiempo para no romper sesiones abiertas. |
-| B5 | ¿"Cada área edita sus propios estados" entra acá? | **Resuelto (usuario): no.** Es por rol: Operador crea/edita, Supervisor además borra (`spec-vivienda-estados-por-area.md §4.1`). Sin áreas de función. |
+| B5 | ¿"Cada área edita sus propios estados" entra acá? | **Resuelto (usuario): no.** Es por rol: Operador crea/edita, Supervisor además borra (`spec-vivienda-estados-por-area.md §4.1`). Sin áreas de función. **Excepción posterior (ADR-035, 2026-11-17):** área de función `usuarios` para la administración delegada (`spec-portal-administracion-delegada.md`). |
 | B6 | Usuario sin ninguna área marcada en una secretaría | No ve nada de esa secretaría (explícito, no "todo"). |
 
 ## 4. Modelo

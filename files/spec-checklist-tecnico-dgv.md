@@ -567,6 +567,11 @@ Córdoba Hogar y Mi Lugar no tienen tracking previo en base — arrancan sin fil
 
 ## 8. Permisos
 
+> **Actualización (ADR-032, ADR-035):** el rol `TecnicoDGV` y las tuplas locales de esta sección
+> fueron reemplazados por las áreas de acceso (`spec-portal-areas-de-acceso.md`). Desde
+> 2026-11-17 los catálogos `/admin/...` los administran `Admin` y `Supervisor` con el área
+> `checklist` en Editar (`spec-portal-administracion-delegada.md §5.1`).
+
 Rol nuevo: `TecnicoDGV`, agregado a `ROLES_VALIDOS` en `app/portal/schemas.py`.
 
 **Importante**: `app/auth.py` define constantes compartidas (`ROLES_LECTURA`, `ROLES_ESCRITURA`, etc.) que ya importan tal cual `cordon_cuneta/router.py`, `cordoba_hogar/router.py`, `mi_lugar/router.py` y `programas/router.py`. Agregar `TecnicoDGV` a esas constantes compartidas lo filtraría automáticamente a los 3 paneles completos — lo opuesto de lo aprobado por H. Por eso:

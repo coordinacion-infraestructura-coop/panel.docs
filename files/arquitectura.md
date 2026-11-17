@@ -217,6 +217,12 @@ Sistema de microservicios desplegado en Google Cloud Platform. Cada secretaría 
 **Razón**: Pedido de Gobierno Abierto (2026-11-16): el dato ya existe en el sistema y cargarlo a mano duplica trabajo. El espejo completo evita duplicados y refleja solas las correcciones de fechas.
 **Consecuencia**: Hasta ahora el sistema solo leía planillas; esta es la excepción, acotada a planillas de salida que el sistema maneja. La pestaña no se edita a mano (los cambios manuales se pierden). Una falla de Google no afecta la carga de hitos; queda en `viv_gobabierto_sync_log` y la corrida horaria la corrige. Spec: `docs/files/spec-export-gobierno-abierto-vivienda.md`.
 
+### ADR-035: Administración delegada por secretaría — usuarios y catálogos del Checklist (amplía ADR-032)
+**Estado**: aceptado (2026-11-17, spec approved 1.0.0).
+**Decisión**: La administración de usuarios puede delegarse por secretaría. Un `Supervisor` con el área `usuarios` de su secretaría en Editar da de alta, edita y desactiva usuarios **exclusivos de esa secretaría**, con roles hasta `Supervisor`. El backend limita el alcance en cada operación del portal; los usuarios con más de una secretaría, el borrado y la habilitación de nuevos administradores (otorgar el área `usuarios`) quedan para el `Admin`. Los catálogos del Checklist Técnico (estado del expediente, repartición, estado de ítem) pasan de solo `Admin` a `Supervisor` con el área `checklist` en Editar. Primera secretaría: Vivienda.
+**Razón**: Pedido del usuario (2026-11-17). Vivienda necesita autonomía para sus altas sin poder afectar a otras secretarías, que comparten la tabla `portal_usuarios` (ADR-003/015).
+**Consecuencia**: Amplía ADR-032 con un área de función (`usuarios`), excepción explícita a la decisión B5 de `spec-portal-areas-de-acceso.md`; `usuarios` no da acceso a ningún panel. Sin migración ni cambios del gateway (mismos paths `/portal/admin/usuarios` y `/checklist-tecnico/admin/...`). Spec: `docs/files/spec-portal-administracion-delegada.md`.
+
 ## Sistema de roles del portal
 
 | Rol | Descripción |
