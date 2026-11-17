@@ -1,14 +1,17 @@
 # Spec: Exportación de pagos de Vivienda (CC/CH/ML) a la planilla de Gobierno Abierto
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.1.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-11-16
+**Última actualización**: 2026-11-17
 **Servicios**: `svc-vivienda`
 **Specs relacionadas**: `spec-checklist-tecnico-dgv.md` (origen de los datos: hitos de obra)
 
 ## Changelog
 
+- **1.1.0** (2026-11-17): pedido de Gobierno Abierto: columna **Q "Detalle"** al final, con las
+  cantidades físicas de la obra (metros de cordón cuneta y m² de adoquinado; cantidad de
+  viviendas; lotes y hectáreas). El espejo pasa de `B:P` a `B:Q`.
 - **1.0.0** (2026-11-16): aprobada por el usuario. Decisión registrada como ADR-034. Las
   preguntas abiertas del §9 no bloquean: se implementa con 100% = 0 y monto sobre el convenio
   actual, y se ajusta si Gobierno Abierto pide otra cosa.
@@ -68,6 +71,7 @@ fila 2.
 | N | Avance físico 100% — monto | 0 (saldo), solo si está pagado |
 | O | Monto convenio | `entidad.monto` |
 | P | Id sistema | `CC-<id>` · `CH-<id>` · `ML-<id> · <nombre del proyecto>` |
+| Q | Detalle | Cantidades físicas: CC `1.200 m de cordón cuneta · 3.500 m² de adoquinado`; CH `80 viviendas`; ML `20 lotes · 1,5 ha`. Vacía si la obra no tiene cantidades cargadas. |
 
 La columna P es necesaria porque Mi Lugar puede tener varios proyectos en una misma localidad;
 así cada fila es única y trazable.
@@ -83,12 +87,12 @@ así cada fila es única y trazable.
 
 ### 3.3 Criterio de espejo
 
-La pestaña la **maneja el sistema**: cada sincronización borra `Vivienda!B2:P` y la vuelve a
-escribir completa desde la base. Consecuencias, aceptadas por el usuario:
+La pestaña la **maneja el sistema**: cada sincronización reescribe `Vivienda!B1:Q` completa desde la
+base y después borra las filas sobrantes. Consecuencias, aceptadas por el usuario:
 
 - No hay duplicados. Si el área económica corrige o borra una fecha, la planilla se corrige
   sola. Si se borra la fecha del anticipo, la fila desaparece.
-- **Nadie edita la pestaña Vivienda a mano**: cualquier cambio manual en B:P se pierde en la
+- **Nadie edita la pestaña Vivienda a mano**: cualquier cambio manual en B:Q se pierde en la
   sincronización siguiente. Gobierno Abierto trabaja en la pestaña BD o en otras pestañas.
 - Los montos salen del convenio **actual**. Si cambia el monto del convenio, los montos de la
   planilla se recalculan (es el mismo criterio que la pantalla del Checklist).
@@ -189,7 +193,7 @@ En `tests/test_gobierno_abierto_export.py`:
   - las entidades dadas de baja se excluyen;
   - fallback cuando no hay `localidad_id`.
 - Con el cliente de Sheets simulado:
-  - se borra y escribe el rango B2:P;
+  - se escribe B1:Q y se borra el sobrante;
   - la columna A no se toca.
 - El PATCH del hito responde 200 aunque falle Sheets.
 
