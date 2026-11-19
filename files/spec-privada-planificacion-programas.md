@@ -1,7 +1,7 @@
 # Spec: Planificación de programas por localidad (Privada)
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.1.0
 **Servicios**: `svc-privada` (dueño de los datos y de los endpoints), frontend
 (`resumen-territorial`). Lectura IAM-only de `svc-vivienda`, `svc-gasifera`,
 `svc-gralgob` y `svc-datos-externos` (§6).
@@ -128,8 +128,8 @@ universal). Cada escritura va además a `priv_audit_log`.
 ### 4.3 `priv_plan_prioridades` — prioridades por programa (editables)
 
 Misma forma que `priv_plan_estados`, más `codigo` (varchar(10), por ejemplo
-`1`…`5` o `X`) y `excluye` (bool: "desestimado"; la fila se ordena al final y
-se puede ocultar con un filtro). Cuando se crea un programa, se siembra la
+`1`…`5` o `X`) y `excluye` (bool: "desestimado", es decir, **el municipio no quiso el
+programa**; la fila se ordena al final y se puede ocultar con un filtro). Cuando se crea un programa, se siembra la
 escala de la planilla actual: 1 celeste, 2 verde, 3 naranja, 4 amarillo,
 5 rojo y X desestimado. Desde la configuración se puede renombrar, recolorear,
 reordenar, agregar o borrar.
@@ -137,6 +137,15 @@ reordenar, agregar o borrar.
 **Borrar una prioridad o un estado que está en uso**: es un soft delete. Las
 filas que lo tenían lo siguen mostrando tachado con la marca "(eliminado)"
 hasta que alguien lo cambie. Nunca se reasignan en silencio.
+
+**Estados por defecto** (§4.2): todo programa nuevo trae el estado **"Resuelto
+por ATP"** (lavanda `#D1C4E9` / `#4527A0`). Es la marca violeta de las planillas
+actuales. Se puede editar o borrar como cualquier otro estado.
+
+**Color de la fila** (usuario, 2026-11-19): la fila de la planilla **toma el color
+de su estado**. Si no tiene estado, toma el de su prioridad. Si no tiene ninguno
+de los dos, queda sin color. Al cambiar el estado (o su color, desde la
+configuración), cambia el color de la fila.
 
 ### 4.4 `priv_plan_columnas` — columnas editables por programa
 
@@ -408,6 +417,15 @@ ADR-012 hasta su propio spec).
     **todas** las filas por `id_geo` y muestra la cantidad (§5.1).
 
 ## Changelog
+
+- **1.1.0 (2026-11-19)** — La fila toma el color de su estado (y, si no tiene, el
+  de su prioridad). "Resuelto por ATP" (lavanda) pasa a ser estado por defecto.
+  X = el municipio no quiso el programa. Carga de CH: colores con la misma
+  escala que CC, violeta → estado "Resuelto por ATP", Paso del Durazno → 443
+  (Río Cuarto) y columna "Cantidad de viviendas" vacía. Fases 1–3 implementadas
+  en la rama `privada-planificacion`. `run.invoker` de `svc-privada@` otorgado
+  sobre svc-gasifera y svc-gralgob (svc-vivienda y svc-datos-externos ya lo
+  tenían).
 
 - **1.0.0 (2026-11-19)** — **Approved** por el usuario. Visibilidad de las visitas
   aceptada. Kilómetro 658 / Pedro E. Vivas queda para revisión manual. ADR-036
