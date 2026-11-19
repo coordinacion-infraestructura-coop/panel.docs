@@ -1,7 +1,7 @@
 # Spec: Planificación de programas por localidad (Privada)
 
-**Estado**: approved
-**Versión**: 1.1.0
+**Estado**: implemented
+**Versión**: 1.2.0
 **Servicios**: `svc-privada` (dueño de los datos y de los endpoints), frontend
 (`resumen-territorial`). Lectura IAM-only de `svc-vivienda`, `svc-gasifera`,
 `svc-gralgob` y `svc-datos-externos` (§6).
@@ -418,6 +418,17 @@ ADR-012 hasta su propio spec).
 
 ## Changelog
 
+- **1.2.0 (2026-11-19)** — **Implementado y en producción.** Migración 0005 en `db_privada`;
+  backend en `main` de panel.backend (`fb2abde`, script de carga `c305889`); gateway
+  `ministerio-config-v20261119`; frontend publicado (botón en el Resumen Territorial, ruta
+  `/resumen-territorial/planificacion` y entrada "Planificación" en el menú de Privada, porque un
+  usuario que sólo tiene Privada no entra a `/resumen-territorial`). Carga inicial aplicada con
+  `scripts/seed_planificacion/cargar.py`: Cordón Cuneta (programa 9) 424 localidades, Córdoba
+  Hogar (programa 10) 426, con historial bajo el usuario `carga-inicial`. Mapeo de montos: "MONTO
+  FIRMADO O SUGERIDO" → Monto sugerido, "MONTO" numérico → Monto firmado (millones si < 100.000);
+  los textos sueltos de la planilla van a Observación. CH fila 244 (Pedro E. Vivas) se cargó con
+  195, igual que en CC; Kilómetro 658 sigue para revisión manual. E5g también en producción
+  (snapshot recalculado). Falta: verificación visual.
 - **1.1.0 (2026-11-19)** — La fila toma el color de su estado (y, si no tiene, el
   de su prioridad). "Resuelto por ATP" (lavanda) pasa a ser estado por defecto.
   X = el municipio no quiso el programa. Carga de CH: colores con la misma
