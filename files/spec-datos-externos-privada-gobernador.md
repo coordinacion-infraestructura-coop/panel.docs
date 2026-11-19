@@ -1,7 +1,7 @@
 # Spec: Planilla "Gobierno" de la Privada del Gobernador — anuncios, FOCOM e histórico ATP
 
 **Estado**: approved
-**Versión**: 1.0.0
+**Versión**: 1.0.1
 **Responsable de spec**: Pedro Bonafe
 **Última actualización**: 2026-11-19
 **Servicio**: `svc-datos-externos` (lectura de la planilla); `svc-gralgob` (un endpoint IAM nuevo, §5.2)
@@ -12,6 +12,36 @@ ADR-033 (svc-agente, uso de la API de Anthropic)
 
 ## Changelog
 
+- **1.0.1** (2026-11-19): Etapas A y B implementadas en `svc-datos-externos` (migración `0011`,
+  rama `datos-externos-privada-gobernador`). Se verificaron con la planilla real (copia del
+  2026-11-19) contra un Postgres 15 descartable, en 4 s y sin descartes:
+
+  | Fuente | Resultado |
+  |---|---|
+  | Anuncios | 1.324; 12 con fecha fuera de rango |
+  | FOCOM | 433 convenios: puro $37.631 M (361), pagado por ATP $4.050 M, pendiente por ATP $250 M |
+  | ATP histórico | 3.807 filas, $70.356 M |
+  | Control contra ATP Interno | Coincide al peso |
+
+  Tres ajustes de implementación respecto del texto de la 1.0.0:
+  1. **Reemplazo completo en lugar de upsert más `deleted_at`** (§2 y §3.2). Las tres pestañas son
+     fuentes del sync de planillas de Gobierno ya existente, que reemplaza cada tabla en un
+     SAVEPOINT y frena si la pestaña llega vacía o con menos del 90 % de las filas anteriores. Es
+     la misma excepción documentada que las Fases 2 y 3. Los vínculos de la Etapa C se apoyan en
+     las claves naturales, que no cambian con el reemplazo.
+  2. **Localidad por `codigo_indec` del nomenclador de Gobierno, no por `id_geo`** (§3.4). El
+     Tablero filtra por código INDEC. FOCOM lo trae en `ID_LOC`. Anuncios y ATP histórico se
+     resuelven por departamento y nombre y, si el nombre es único, solo por nombre; es el mismo
+     criterio que la Fase 6.
+  3. **Fecha de anuncio** (§1.6): se descarta si el año es anterior a 2023 o si la fecha cae más de
+     60 días en el futuro. 2027 cuenta como typo.
+
+  FOCOM y el ATP histórico se sirven como secciones `focom` y `atp-historico` de
+  `GET .../tablero/transferencias/{seccion}`, una ruta que ya está en el gateway, así que no hace
+  falta config nueva.
+  - La pantalla de ATP Interno une el histórico con lo suyo, en la misma forma de respuesta.
+  - El **Resumen general** toma el ATP del histórico para los años anteriores a 2026. Antes, esos
+    años mostraban ATP en cero, porque ATP Interno solo tiene 2026.
 - **1.0.0** (2026-11-19): el usuario lo aprueba con tres decisiones:
   - **Fuente del ATP histórico**: se usa primero lo que ya tenemos accesible. Se lee la pestaña
     `Gobierno!ATP`, que trae exactamente las mismas filas que la planilla semanal. La planilla
