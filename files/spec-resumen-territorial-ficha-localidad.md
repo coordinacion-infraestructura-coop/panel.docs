@@ -1,9 +1,9 @@
 # Spec: Resumen Territorial — Ficha de localidad + federación server-side de Privada
 
-**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · exportables del RT rediseñados 2026-09-03 · E5c (Gasífera + ATP en la ficha de municipio) y E5d (filtro "Visita del gobernador") IMPLEMENTADOS 2026-09-23 · E5e (indicadores como botón al listado) y E5f (indicador "Visita del gobernador" en la ficha) IMPLEMENTADOS 2026-10-07
-**Versión**: 0.5.0
+**Estado**: E5b (ficha, drawer) implementado · E5a (federación server-side) DESPLEGADO 2026-09-02 · exportables del RT rediseñados 2026-09-03 · E5c (Gasífera + ATP en la ficha de municipio) y E5d (filtro "Visita del gobernador") IMPLEMENTADOS 2026-09-23 · E5e (indicadores como botón al listado) y E5f (indicador "Visita del gobernador" en la ficha) IMPLEMENTADOS 2026-10-07 · E5g (visita desde la planilla de visitas) APPROVED 2026-11-19, sin implementar
+**Versión**: 0.6.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-07
+**Última actualización**: 2026-11-19
 
 > **Implementado 2026-09-01 (E5b, drawer)** — `panel.front`:
 > `src/modules/resumen-territorial/api/fichaLocalidad.api.ts` + componente `FichaDemografica`
@@ -204,6 +204,33 @@ de las líneas de Privada pasa del browser al servidor.
   las fechas de anuncio distintas de los compromisos de esa localidad.
 - Si el snapshot del usuario no trae ATP (`generado_para_areas` sin `gralgob`, por la regla de
   visibilidad por área) el indicador no se muestra en pantalla — no se puede afirmar "No".
+
+### E5g — "Visita del gobernador" desde la planilla de visitas (reemplaza el criterio de E5d/E5f) — **approved 2026-11-19**
+- Decisión del usuario del 2026-11-19, tomada con el análisis de coherencia hecho
+  para `spec-privada-planificacion-programas.md` §12.1. Ese análisis cruzó 427
+  gobiernos locales: "tener ATP" deja afuera a 88 localidades visitadas (Córdoba
+  Capital, Villa Carlos Paz, Alta Gracia, Villa Allende…) y marca 8 que no figuran
+  como visitadas.
+- **Única fuente**: `ext_gob_visita_gobernador` (`svc-datos-externos`, planilla
+  "2. RECORRIDO Y VISITAS", pestaña `Visitas Gober`): `visitada` + `fecha_ultima`.
+  Ya no se infiere de ATP.
+- **Cómo llega**: `svc-datos-externos` agrega `visita_gobernador: {visitada, fecha_ultima}`
+  por `id_geo` a su `/internal/datos-externos/rollup-territorial`. `resumen_territorial`
+  (svc-vivienda) lo guarda en `ResumenLocalidad` del snapshot, como campo
+  opcional, igual que los de Fase 1. Esto **sí** toca svc-vivienda (schema
+  Pydantic del snapshot, sin migración, porque el snapshot es JSON), y está bien:
+  la restricción "no impactar svc-vivienda" es del panel de planificación de
+  Privada, no del Resumen Territorial.
+- **Filtro E5d**: SÍ = `visitada`; NO = `visitada === false`. Si el dato es
+  null (federación caída o localidad sin código), no entra en ningún valor del
+  filtro.
+- **Ficha E5f**: chip y fila "Visita del gobernador: Sí · última visita dd/mm/aaaa"
+  / "Sí (sin fecha)" / "No". Las fechas de anuncio ATP dejan de mostrarse ahí
+  (siguen en la sección ATP de la ficha).
+- **Visibilidad — aceptada por el usuario (2026-11-19)**: llevar las visitas al
+  snapshot las hace visibles a todos los usuarios del Resumen Territorial. Hasta
+  ahora el Tablero de Gobierno las servía solo a Admin/Autoridad. Se exponen solo
+  `visitada` y `fecha_ultima`.
 
 ### Fuera de alcance
 - Edición de `localidades_info`/`departamentos_info` desde el panel transversal (el `PUT` de

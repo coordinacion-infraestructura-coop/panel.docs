@@ -223,6 +223,12 @@ Sistema de microservicios desplegado en Google Cloud Platform. Cada secretaría 
 **Razón**: Pedido del usuario (2026-11-17). Vivienda necesita autonomía para sus altas sin poder afectar a otras secretarías, que comparten la tabla `portal_usuarios` (ADR-003/015).
 **Consecuencia**: Amplía ADR-032 con un área de función (`usuarios`), excepción explícita a la decisión B5 de `spec-portal-areas-de-acceso.md`; `usuarios` no da acceso a ningún panel. Sin migración ni cambios del gateway (mismos paths `/portal/admin/usuarios` y `/checklist-tecnico/admin/...`). Spec: `docs/files/spec-portal-administracion-delegada.md`.
 
+### ADR-036: La planificación de programas por localidad es dato de Privada (lectura IAM de los paneles de cada programa)
+**Estado**: aceptado (2026-11-19, spec approved 1.0.0).
+**Decisión**: La Secretaría Privada es dueña, en `db_privada`, de la planificación por (programa, localidad): prioridad, estado, OK del gobernador y valores de columnas configurables, con catálogos de prioridades, estados y columnas **por programa**, editables desde la propia pantalla (`priv_plan_*`). Los paneles de cada programa (CC, CH, ML en svc-vivienda; Gasífera; ATP) siguen siendo la fuente de verdad de lo que ya existe. svc-privada los lee server-side por IAM y nunca escribe en ellos. Para CC/CH/ML se agrega un único endpoint IAM-only de solo lectura en svc-vivienda (`/internal/planificacion/lineas`), sin tablas, migraciones ni escrituras. La prioridad por programa queda separada del semáforo político global (`priv_localidades_info.color_semaforo`), que sigue en solo lectura según ADR-012 hasta su propio spec. La "Visita del gobernador" pasa a tomarse de la planilla de visitas (`ext_gob_visita_gobernador`) y no de ATP, también en el Resumen Territorial (E5g).
+**Razón**: Pedido del usuario (2026-11-19). Privada planifica hoy en planillas externas ("Cordón Cuneta OK", Córdoba Hogar), y el requisito es no impactar a svc-vivienda. El snapshot de `resumen_territorial` no sirve como fuente porque `filtrar_por_visibilidad` le saca a un usuario solo-Privada las líneas de Vivienda, y porque no trae la fecha de firma ni `ok_gob`.
+**Consecuencia**: Primera lectura de svc-privada hacia svc-vivienda más allá del portal (ADR-015). `svc-privada@` necesita `run.invoker` sobre svc-vivienda, svc-gasifera y svc-gralgob. Acceso solo para Privada + Admin; Autoridad queda excluida a propósito. Spec: `docs/files/spec-privada-planificacion-programas.md`.
+
 ## Sistema de roles del portal
 
 | Rol | Descripción |
