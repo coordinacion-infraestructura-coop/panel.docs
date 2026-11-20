@@ -53,6 +53,11 @@ Registro vivo de auditorías de **calidad de código y bugs** (no de infraestruc
 - `frontend/src/shared/utils/exportTable.ts` usa `xlsx@0.18.5`, la última versión publicada por SheetJS en el registry de npm; las versiones parcheadas de las CVEs conocidas (prototype pollution, ReDoS) solo están disponibles vía el tarball de `cdn.sheetjs.com`, no en npm.
 - **Decisión del usuario (2026-07-23)**: dejarlo como está — el uso actual es solo de escritura (`json_to_sheet`/`writeFile`), nunca se parsean archivos de terceros, así que el riesgo práctico es bajo. Reconsiderar si en algún momento se agrega una función de *importar* un .xlsx subido por un usuario.
 
+### Clientes de lectura de Sheets cacheados y sin reintentos (riesgo latente, 2026-11-20)
+- Mismo patrón que causó #30, en los clientes de **lectura**: `svc-gasifera` y `svc-vivienda` cachean un cliente por proceso (`_service` global); `svc-gralgob` y `svc-datos-externos`, uno por hilo (`threading.local`). Ninguno pasa `num_retries` a `execute()`. Todos alimentan syncs horarios o diarios, así que pueden reusar una conexión que Google ya cerró y fallar con `Broken pipe` / `SSL: UNEXPECTED_EOF`.
+- **Estado al 2026-11-20**: no se observa en la práctica. En 7 días, cero 5xx en los syncs de gasífera y datos externos, y un único 502 en `svc-gralgob` (`/internal/sync/atp-interno`, causa no investigada). La lectura de `svc-vivienda` solo la usa el sync viejo de CC, dado de baja (#29).
+- **Si aparece una falla de red intermitente en esos syncs**: aplicar el mismo fix que #30 (cliente nuevo por llamada + `num_retries`). No se tocó sin pedido porque hoy no falla.
+
 ---
 
 ## Gaps de cobertura de tests conocidos
@@ -259,6 +264,34 @@ Fixes aplicados en el mismo commit que la bitácora de observaciones de obra:
     `checklist_sync.py`, ni las tablas `viv_cc_checklist_tecnico`/`viv_cc_checklist_items`/`viv_cc_sync_log`
     — quedan como código y datos muertos pero inofensivos, recuperables si hiciera falta retomar
     el espejo del Sheet más adelante (no se pidió esa limpieza más profunda).
+
+### 2026-11-20 — `gobierno_abierto` / escritura a Sheets (fuera del alcance de la auditoría 2026-07-23)
+
+30. **[Medio] La exportación a la planilla de Gobierno Abierto (ADR-034) fallaba de forma
+    intermitente en horario laboral, y el aviso culpaba al compartido de la planilla.**
+    14 de 72 corridas horarias de `sync-gobabierto-vivienda` entre el 2026-11-18 y el 20
+    fallaron, todas entre las 12 y las 19 UTC (9 a 16 en Córdoba), en 0 segundos, con
+    `[Errno 32] Broken pipe` o `[SSL: UNEXPECTED_EOF_WHILE_READING]`. La planilla estaba bien
+    compartida: Google nunca devolvió 403/404.
+    **Causa**: `app/integrations/google_sheets.py` cacheaba el cliente de escritura por hilo
+    (`threading.local`). httplib2 mantiene viva la conexión HTTP; en horario laboral el resto del
+    tráfico mantiene tibia la instancia de Cloud Run, así que la corrida siguiente (una hora
+    después) reusaba un socket que Google ya había cerrado por inactividad. De noche la instancia
+    escala a cero, cada corrida arranca con un cliente nuevo y funcionaba. Además `execute()` se
+    llamaba sin `num_retries`, y sin ese argumento googleapiclient no reintenta nada (ni SSL ni
+    socket). El aviso a Admin decía siempre "revisar que siga compartida", fuera cual fuera el
+    error.
+    **Cómo se diagnosticó**: el error completo no está en los logs de Cloud Run (el endpoint lo
+    devuelve en el 502, no lo loguea); se leyó de `viv_gobabierto_sync_log.error` en producción,
+    en solo lectura. Patrón horario + duración 0 s + errores de red = conexión reusada.
+    **Fix** (backend `63f6741`, revisión `svc-vivienda-00235`, spec 1.1.1): cliente nuevo por
+    llamada (las credenciales sí se reusan), `execute(num_retries=3)`, y `GobAbiertoSyncError`
+    con `es_permiso` (solo 403/404) para que el aviso mencione el compartido únicamente ante un
+    rechazo real. Tests: `test_cliente_de_escritura_es_nuevo_en_cada_llamada_y_reintenta`,
+    `test_falla_transitoria_no_manda_a_revisar_el_compartido`,
+    `test_rechazo_de_google_si_manda_a_revisar_el_compartido` en
+    `tests/test_gobierno_abierto_export.py`. Verificado en producción: 3 corridas seguidas en
+    horario laboral en 200 (2 manuales + Scheduler).
 
 ---
 
