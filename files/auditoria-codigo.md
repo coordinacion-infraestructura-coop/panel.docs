@@ -291,7 +291,8 @@ Fixes aplicados en el mismo commit que la bitácora de observaciones de obra:
     `test_falla_transitoria_no_manda_a_revisar_el_compartido`,
     `test_rechazo_de_google_si_manda_a_revisar_el_compartido` en
     `tests/test_gobierno_abierto_export.py`. Verificado en producción: 3 corridas seguidas en
-    horario laboral en 200 (2 manuales + Scheduler).
+    horario laboral en 200 (2 manuales + Scheduler), y la corrida horaria siguiente
+    (16:05 UTC, la que antes fallaba con la instancia tibia) también en 200.
 
 ---
 
