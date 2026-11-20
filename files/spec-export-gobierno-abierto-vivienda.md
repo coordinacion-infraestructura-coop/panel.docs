@@ -1,14 +1,21 @@
 # Spec: Exportación de pagos de Vivienda (CC/CH/ML) a la planilla de Gobierno Abierto
 
 **Estado**: approved
-**Versión**: 1.1.0
+**Versión**: 1.1.1
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-11-17
+**Última actualización**: 2026-11-20
 **Servicios**: `svc-vivienda`
 **Specs relacionadas**: `spec-checklist-tecnico-dgv.md` (origen de los datos: hitos de obra)
 
 ## Changelog
 
+- **1.1.1** (2026-11-20): corrección. Entre el 2026-11-18 y el 20 fallaron 14 de 72 corridas
+  horarias, todas en horario laboral, con `[Errno 32] Broken pipe` / `SSL: UNEXPECTED_EOF`, y el
+  aviso mandaba a revisar el compartido, que estaba bien. Causa: el cliente de escritura se
+  cacheaba por hilo y, con la instancia de Cloud Run tibia, reusaba una conexión que Google ya
+  había cerrado por inactividad. Ahora se crea un cliente por corrida, cada llamada reintenta
+  hasta 3 veces los errores transitorios (`num_retries`) y el aviso solo menciona el compartido
+  ante un 403/404 real. Backend `63f6741`.
 - **1.1.0** (2026-11-17): pedido de Gobierno Abierto: columna **Q "Detalle"** al final, con las
   cantidades físicas de la obra (metros de cordón cuneta y m² de adoquinado; cantidad de
   viviendas; lotes y hectáreas). El espejo pasa de `B:P` a `B:Q`.
