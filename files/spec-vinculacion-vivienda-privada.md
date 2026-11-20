@@ -1,9 +1,9 @@
 # Spec: Vinculaciones entre servicios — Vivienda → Privada (gestiones)
 
-**Estado**: approved (implementado, testeado y **activado en prod** 2026-09-14)
-**Versión**: 1.0.0
+**Estado**: approved (implementado, testeado y **activado en prod** 2026-09-14; v1.1.0 aprobada 2026-11-20)
+**Versión**: 1.1.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-09-14
+**Última actualización**: 2026-11-20
 **Servicio**: `svc-vivienda` (módulo nuevo `app/integrations/`) + `svc-privada` (`app/gestiones/vivienda_sync.py` + endpoint nuevo en `app/internal/router.py`)
 **Depende de**: `spec-checklist-tecnico-dgv.md` (patrón polimórfico `caso_tipo`/`caso_id`), `spec-resumen-territorial-ficha-localidad.md` (ADR-016, patrón de endpoint interno IAM-only cross-servicio), `spec-notificaciones.md` (ADR-019, canal de alertas), `spec-privada-categorias-programas.md` (E1, catálogos `priv_categorias`/`priv_programas`/`priv_areas`)
 **ADRs**: ADR-020 (primera escritura cross-servicio), ADR-019 (consumidor del panel de notificaciones)
@@ -101,8 +101,25 @@ guarda el `id_legacy` que recibe.
 ### 3.3 Idempotencia vía `id_legacy` determinístico
 `svc-vivienda` calcula `id_legacy = f"vivienda:{caso_tipo}:{caso_id}"` sin
 consultar nada. `svc-privada` resuelve "¿ya sincronicé este caso?" con un único
-`SELECT` sobre `priv_gestiones.id_legacy` (`UNIQUE` desde la migración `0001`)
-— un reintento, o cualquier edición posterior del mismo caso, nunca duplica.
+`SELECT` — un reintento, o cualquier edición posterior del mismo caso, nunca
+duplica.
+
+**v1.1.0 — el vínculo vive en su propia columna, `priv_gestiones.vivienda_vinculo`**
+(`UNIQUE`, migración `0006` de svc-privada). Hasta v1.0.0 se guardaba en
+`priv_gestiones.id_legacy`, pero esa columna **ya estaba ocupada**: el ETL de la
+migración desde BigQuery (`scripts/migrar_desde_bigquery.py`) la llenó con el
+`id_gestion` viejo en las ~1760 gestiones migradas, y `gestiones/service._resolve`
+la sigue usando para resolver ids viejos (contrato byte-compatible, ADR-008). El
+algoritmo de v1.0.0 interpretaba cualquier `id_legacy` no nulo como "vinculada a
+otro caso de Vivienda", así que **toda gestión migrada quedaba bloqueada para el
+match por expediente** (ver §3.4 y el incidente de §11). Desde v1.1.0:
+- el sync escribe y lee `vivienda_vinculo`; **nunca** escribe `id_legacy` (ni al
+  vincular ni al crear), así el id de BigQuery de una gestión migrada se conserva;
+- la migración `0006` copia a `vivienda_vinculo` los `id_legacy` que empiezan con
+  `vivienda:` (los 348 vínculos creados por v1.0.0), sin borrarlos de `id_legacy`;
+- por compatibilidad durante el deploy, el paso 0 también acepta
+  `id_legacy == payload.id_legacy` (una gestión creada por el código viejo entre
+  la migración y el deploy) y en ese caso completa `vivienda_vinculo`.
 
 ### 3.4 Algoritmo de matching (`app/gestiones/vivienda_sync.py`, svc-privada)
 Orden estricto, corta en el primer resultado:
@@ -112,14 +129,20 @@ Orden estricto, corta en el primer resultado:
    por estado (una gestión `FINALIZADA`/`ARCHIVADO` con el mismo expediente
    sigue siendo la gestión correcta).
    - 0 candidatos → crea una gestión nueva.
-   - 1 candidato sin `id_legacy` → vincula y sincroniza.
-   - 1 candidato con `id_legacy` de otro caso → `PENDING_REVIEW`
+   - 1 candidato no vinculado a otro caso de Vivienda → vincula y sincroniza.
+     **v1.1.0**: "vinculado a otro caso" = `vivienda_vinculo` de otro caso, o
+     `id_legacy` que empieza con `vivienda:` y no es el propio. Un `id_legacy` de
+     BigQuery (gestión migrada) **no** cuenta: esa gestión se vincula normalmente.
+   - 1 candidato vinculado a otro caso → `PENDING_REVIEW`
      (`EXPEDIENTE_YA_VINCULADO_OTRO_CASO`), no se toca nada.
    - 2+ candidatos → `PENDING_REVIEW` (`EXPEDIENTE_AMBIGUO`), no se toca nada.
 2. **`localidad + departamento`** (sólo si el caso no tiene expediente) — sólo
-   gestiones no cerradas (`estado` fuera de `FINALIZADA`/`ARCHIVADO`) y sin
-   `id_legacy` de otro caso (para no robarle el vínculo a otro caso de
-   Vivienda).
+   gestiones no cerradas (`estado` fuera de `FINALIZADA`/`ARCHIVADO`), no
+   vinculadas a otro caso de Vivienda, y **sin `id_legacy`**. v1.1.0 mantiene a
+   propósito la exclusión de las gestiones migradas en este paso: sin expediente,
+   una gestión migrada de la misma localidad puede ser un pedido de cualquier
+   otra cosa (agua, caminos…) y vincularla le pisaría la clasificación. Queda
+   como decisión pendiente (§9.5), no como bug.
    - 0 candidatos → crea. 1 candidato → vincula. 2+ → `PENDING_REVIEW`
      (`LOCALIDAD_DEPARTAMENTO_AMBIGUO`) — mismo riesgo de colisión ya
      documentado en `spec-resumen-territorial-ficha-localidad.md` (ahí, el
@@ -159,6 +182,11 @@ tocó una gestión, o que hay un caso sin poder vincularse):
 - **Corrección de campos** (`LINKED_EXISTING` con diff no vacío) — nivel
   `info`, detalla qué campos cambiaron.
 - **Pendiente de revisión manual** (`PENDING_REVIEW`) — nivel `advertencia`.
+  **v1.1.0**: el texto depende del motivo y nombra lo que hay que revisar — el
+  expediente y el id de la gestión con la que chocó (`EXPEDIENTE_YA_VINCULADO_OTRO_CASO`,
+  `EXPEDIENTE_AMBIGUO`) o la cantidad de gestiones candidatas
+  (`LOCALIDAD_DEPARTAMENTO_AMBIGUO`). Hasta v1.0.0 decía "La localidad X no se
+  pudo vincular", que hacía pensar en un problema del padrón de localidades.
 
 Deliberadamente **no** se notifica por un `ERROR` transitorio (timeout, 5xx) —
 sería ruido; el vínculo ya `LINKED` no se degrada por eso (§3.7) y el log
@@ -221,8 +249,10 @@ la alerta de usuario — precedente: `viv_cc_sync_log`/`viv_informe_snapshot`):
 `INDEX(caso_tipo, caso_id)`.
 
 ### `svc-privada`
-Sin cambios de esquema — `priv_gestiones.id_legacy` ya era `UNIQUE` nullable
-desde la migración `0001`; `categoria_id`/`programa_id`/`area_id`/
+**v1.1.0, migración `0006`**: columna nueva `priv_gestiones.vivienda_vinculo
+varchar(100) NULL UNIQUE` (`vivienda:{caso_tipo}:{caso_id}`), backfill desde los
+`id_legacy` con prefijo `vivienda:` (§3.3). v1.0.0 no tenía cambios de esquema —
+`priv_gestiones.id_legacy` ya era `UNIQUE` nullable desde la migración `0001`; `categoria_id`/`programa_id`/`area_id`/
 `ministerio_agencia_id`/`ok_gobernador`/`ok_ministro`/`nro_expediente` ya
 existían (E1, migración `0002`, y el esquema original).
 
@@ -261,7 +291,17 @@ candidatos: [str] | null             # gestion_id ambiguos
 diff: {campo: {antes, despues}} | null
 ```
 
-IAM-only, sin JWT de Firebase. No se agregan endpoints nuevos en svc-vivienda.
+IAM-only, sin JWT de Firebase.
+
+### `POST /internal/privada-sync/reintentar-pendientes` (svc-vivienda, v1.1.0)
+IAM-only (router `app/internal/router.py`, sin `get_current_user`, no declarado
+en el gateway). Vuelve a sincronizar los casos con `estado_vinculo='PENDING_REVIEW'`
+(opcional `?motivo=`, p. ej. `EXPEDIENTE_YA_VINCULADO_OTRO_CASO`), leyendo cada
+caso vivo de su tabla y llamando a la misma `sync_gestion_privada` que usan las
+altas/ediciones. `?dry_run=true` (default) sólo lista los casos que reintentaría.
+Devuelve `{dry_run, total, por_resultado, casos}`. Existe para resolver de una
+vez los pendientes que dejó el bug de v1.0.0 sin esperar a que alguien edite
+cada caso; queda disponible para futuros cambios de regla.
 
 ## 6. Frontend
 Ninguno en esta iteración — la visibilidad es a través del panel de
@@ -308,6 +348,13 @@ paneles DGV mantienen su protección actual (`ROLES_ESCRITURA`).
    de esta spec (mismo comportamiento que el resto de `svc-privada`), pero
    conviene revisar la cobertura del catálogo antes de activar.
 
+5. **(v1.1.0) Paso 2 contra gestiones migradas**: el match por localidad sigue
+   excluyendo las gestiones con `id_legacy` (migradas de BigQuery). Si el área
+   quiere que un caso sin expediente se vincule a una gestión vieja, hace falta
+   otra regla (p. ej. filtrar por categoría/programa), a definir con Privada.
+6. **(v1.1.0) Pantalla de pendientes**: sigue sin haber una vista de los casos
+   `PENDING_REVIEW` fuera de las notificaciones (§6). Evaluar si hace falta una.
+
 ## 10. Criterios de aceptación
 
 - [x] Crear un caso CC con expediente que no matchea ninguna gestión existente
@@ -335,6 +382,41 @@ paneles DGV mantienen su protección actual (`ROLES_ESCRITURA`).
       ningún cambio de comportamiento en los paneles DGV — toda la suite
       existente de `svc-vivienda` pasa sin modificaciones (272 tests).
 
+- [x] (v1.1.0) Un caso con expediente que coincide con una única gestión migrada
+      de BigQuery (`id_legacy` no `vivienda:`) se vincula (`LINKED_EXISTING`), se
+      completa `vivienda_vinculo` y el `id_legacy` original no cambia.
+- [x] (v1.1.0) La notificación de `PENDING_REVIEW` nombra el expediente y la
+      gestión con la que chocó.
+- [x] (v1.1.0) `reintentar-pendientes` en dry-run no escribe nada; sin dry-run
+      resincroniza y actualiza `viv_privada_vinculos`.
+
 Cubierto por `services/svc-privada/tests/test_vivienda_sync.py` (10 tests) y
 `services/svc-vivienda/tests/test_privada_sync.py` (8 tests, incluye un
 end-to-end real vía `POST /api/v1/vivienda/cordon-cuneta`).
+
+## 11. Incidente 2026-11-20 — gestiones migradas tratadas como "vinculadas a otro caso"
+
+Reportado por el usuario a partir de una notificación ("La localidad ARIAS, MARCOS
+JUAREZ (caso CC a72836d0-…) no se pudo vincular … (EXPEDIENTE_YA_VINCULADO_OTRO_CASO)")
+que no aparecía en ninguna pantalla de revisión: v1.0.0 no tiene frontend (§6) y la
+revisión de localidades del panel de administración es otra cosa (alias del padrón
+geo). Consulta de sólo lectura a producción (2026-11-20):
+
+- El expediente del caso (`0423-079785/2026`) coincidía con **una** gestión de Privada,
+  misma localidad, cargada en el sistema viejo el 2026-05-27, cuyo `id_legacy` era el
+  id de BigQuery — no había ningún otro caso de Vivienda con ese expediente.
+- Los **19** vínculos en `PENDING_REVIEW` con ese motivo (15 CC, 4 CH) tenían el mismo
+  patrón: ninguno era un conflicto real entre dos casos de Vivienda.
+- Cada edición del caso reintentaba y generaba una notificación nueva (Arias: 4, de
+  septiembre a noviembre).
+
+Corrección: v1.1.0 (§3.3, §3.4, §3.6, §5). Los 18 `LOCALIDAD_DEPARTAMENTO_AMBIGUO`
+(3 CC, 15 CH) no son parte de este bug — son ambigüedades reales del paso 2.
+
+## Changelog
+
+- **1.1.0** (2026-11-20) — vínculo en columna propia `vivienda_vinculo` (migración
+  `0006` svc-privada); un `id_legacy` de BigQuery ya no bloquea el match por
+  expediente; mensaje de `PENDING_REVIEW` por motivo; endpoint IAM-only
+  `reintentar-pendientes`; §9.5, §9.6 y §11 nuevos.
+- **1.0.0** (2026-09-14) — versión inicial, activada en producción.
