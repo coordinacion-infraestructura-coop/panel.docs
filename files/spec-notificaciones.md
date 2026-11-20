@@ -1,9 +1,9 @@
 # Spec: Panel de notificaciones internas
 
-**Estado**: implementado y en producción (2026-09-14)
-**Versión**: 0.1.0
+**Estado**: implementado y en producción (2026-09-14); v0.2.0 aprobada 2026-11-20
+**Versión**: 0.2.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-09-14
+**Última actualización**: 2026-11-20
 **Servicio**: `svc-vivienda` (módulo nuevo `app/notificaciones/`, sin servicio nuevo) + frontend `src/modules/notificaciones/`
 **Depende de**: ADR-007 (módulo transversal en svc-vivienda) · `spec-resumen-territorial.md` §3.4 (mismo criterio de ubicación)
 **ADRs**: ADR-019 (panel de notificaciones internas)
@@ -111,7 +111,7 @@ Router `app/notificaciones/router.py`, tupla local
 
 | Método | Path | Roles | Descripción |
 |---|---|---|---|
-| GET | `/api/v1/notificaciones?solo_no_leidas=&limit=&offset=` | `ROLES_NOTIF` | Feed visible + `total` + `no_leidas`; cada item con `leida` calculado para el usuario |
+| GET | `/api/v1/notificaciones?solo_no_leidas=&nivel=&limit=&offset=` | `ROLES_NOTIF` | Feed visible + `total` + `no_leidas`; cada item con `leida` calculado para el usuario. **v0.2.0**: `nivel` opcional (`info`/`exito`/`advertencia`/`error`, otro valor → 422) filtra el feed y `total`; `no_leidas` sigue siendo el total del usuario (es lo que muestra la campana) |
 | GET | `/api/v1/notificaciones/no-leidas/contar` | `ROLES_NOTIF` | `{ "no_leidas": N }` — lo consume el badge de la campana |
 | POST | `/api/v1/notificaciones/{id}/marcar-leida` | `ROLES_NOTIF` | Upsert de la marca de leída del usuario (idempotente). 404 si no existe/no es visible |
 | POST | `/api/v1/notificaciones/marcar-todas-leidas` | `ROLES_NOTIF` | Marca todas las visibles no leídas del usuario → `{ "marcadas": N }` |
@@ -126,7 +126,10 @@ Router `app/notificaciones/router.py`, tupla local
 - `api/notificaciones.api.ts` — `notificacionesApi` con `list` / `contarNoLeidas` / `marcarLeida` /
   `marcarTodasLeidas` (patrón `<recurso>Api` + `apiClient`).
 - `pages/NotificacionesPage.tsx` — lista (plantilla `AdminUsuariosPage` + rama de error estilo
-  `TableroPage`). Encabezado con toggle "Solo no leídas" + "Marcar todas como leídas". Fila: pill de
+  `TableroPage`). Encabezado con toggle "Solo no leídas" + "Marcar todas como leídas".
+  **v0.2.0**: fila de botones de tipo — Todas / Error / Advertencia / Info / Éxito, con los
+  mismos colores de la pill — que filtra server-side vía `nivel` (combinable con "Solo no
+  leídas"). "Marcar todas como leídas" sigue marcando todas, no sólo las del tipo filtrado. Fila: pill de
   `nivel` (sky/green/amber/red), título, mensaje, `origen` + tiempo relativo, "Marcar leída" por
   fila no leída, "Ver" si hay `enlace`. Las mutaciones invalidan `['notificaciones']` y
   `['notificaciones-contador']`.
@@ -188,5 +191,14 @@ Router `app/notificaciones/router.py`, tupla local
       `/api/v1/notificaciones/**` devuelven `401` (existen y exigen auth) — un path inexistente da
       `404` limpio, así que están bien ruteados. Falta la verificación autenticada end-to-end
       (campana + panel en el navegador) para cerrar del todo el criterio.
+- [x] (v0.2.0) `GET /api/v1/notificaciones?nivel=error` devuelve sólo ese nivel y `total`
+      acorde; `nivel` inválido → 422; la página filtra por tipo. Sin cambio de gateway (los query
+      params ya pasan por el path existente).
 - [x] `pytest tests/test_notificaciones.py` en verde (12 casos) + suite completa sin regresiones
       (272 en verde).
+
+## Changelog
+
+- **0.2.0** (2026-11-20) — filtro por tipo (`nivel`) en el feed y en la página, a pedido del
+  usuario.
+- **0.1.0** (2026-09-14) — versión inicial.
