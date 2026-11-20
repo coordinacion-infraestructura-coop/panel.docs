@@ -1,7 +1,7 @@
 # Spec: Planificación de programas por localidad (Privada)
 
 **Estado**: implemented
-**Versión**: 1.2.0
+**Versión**: 1.3.0
 **Servicios**: `svc-privada` (dueño de los datos y de los endpoints), frontend
 (`resumen-territorial`). Lectura IAM-only de `svc-vivienda`, `svc-gasifera`,
 `svc-gralgob` y `svc-datos-externos` (§6).
@@ -306,6 +306,16 @@ Validaciones: `prioridad_id`/`estado_id` deben pertenecer al programa → si no,
 - Excel (`shared/utils/exportTable.ts`): todas las columnas visibles, con el
   formato de la planilla actual para no cortar el circuito de quienes hoy
   comparten el Sheet.
+- **Imprimir** (1.3.0, pedido del usuario 2026-11-20): PDF de lo que está filtrado,
+  para control manual (el funcionario marca con lapicera). Estética simple a propósito:
+  nombre en negrita (la localidad si queda una sola, si no el departamento filtrado o
+  "Toda la provincia"), filtros aplicados y fecha, una referencia de los colores usados,
+  y la tabla con los nombres de columna y los datos (las mismas columnas de la pantalla,
+  sin el historial). Cada fila lleva el color de su estado, o el de su prioridad si no
+  tiene estado (misma regla que §4.3), y una casilla vacía al principio para el check.
+  Si hay más de un departamento, se agrupan con una fila de título por departamento.
+  Horizontal A4, se genera en el navegador (`planificacionPdf.ts`, jsPDF + autotable);
+  no necesita backend.
 - **Resumen Territorial**: se saca la "Tabla general" vieja y sus filtros. Los
   botones que vivían ahí ("Ficha de municipio PDF/Excel" y "Exportar Excel"
   del resumen) se mueven junto al selector "Ir a", para que los demás roles
@@ -417,6 +427,12 @@ ADR-012 hasta su propio spec).
     **todas** las filas por `id_geo` y muestra la cantidad (§5.1).
 
 ## Changelog
+
+- **1.3.0 (2026-11-20)** — Botón "Imprimir" (§8): PDF simple para control manual con
+  lapicera, con los colores del estado. Solo frontend. Además, la carga de las planillas
+  pasó a ser una sincronización re-ejecutable (`cargar.py`, panel.backend `b325470`) y se
+  re-sincronizó con las planillas del 2026-11-20; en CC la prioridad sale del color de fila
+  (lavanda = "Resuelto por ATP").
 
 - **1.2.0 (2026-11-19)** — **Implementado y en producción.** Migración 0005 en `db_privada`;
   backend en `main` de panel.backend (`fb2abde`, script de carga `c305889`); gateway
