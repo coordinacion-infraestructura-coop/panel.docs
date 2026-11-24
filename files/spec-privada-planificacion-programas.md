@@ -1,7 +1,7 @@
 # Spec: Planificación de programas por localidad (Privada)
 
 **Estado**: implemented
-**Versión**: 1.4.0
+**Versión**: 1.5.0
 **Servicios**: `svc-privada` (dueño de los datos y de los endpoints), frontend
 (`resumen-territorial`). Lectura IAM-only de `svc-vivienda`, `svc-gasifera`,
 `svc-gralgob` y `svc-datos-externos` (§6).
@@ -85,7 +85,7 @@ resuelven con filtros.
 - **Editar el semáforo político global** (`priv_localidades_info.color_semaforo`).
   En esta etapa **se muestra en solo lectura**. Su edición va a tener un panel
   propio en un spec posterior. ADR-012 queda como está.
-- Visibilidad para otras secretarías o para el rol Autoridad.
+- Visibilidad para otras secretarías (Autoridad sí, en solo lectura desde 1.5.0, §3).
 - Cualquier escritura en los paneles de CC/CH/ML/Gasífera/ATP.
 
 ## 3. Acceso
@@ -94,9 +94,12 @@ resuelven con filtros.
   la secretaría `privada`. `Consulta` con `privada` solo ve.
 - **Configuración de parámetros** (programas, prioridades, estados, columnas):
   Supervisor y Admin. Eliminar un programa: solo Admin.
-- Los demás roles no ven el botón ni la pantalla. **Autoridad queda afuera a
-  propósito**, aunque esté en `ROLES_LECTURA`. El backend aplica el gate con
-  403. El frontend solo oculta el botón.
+- **Autoridad (1.5.0)**: ve todos los programas en **solo lectura** (planilla, historial,
+  filtros, Excel y PDF), sin necesidad de tener la secretaría `privada`, igual que en el
+  Resumen Territorial, donde ve todas las áreas. No edita valores ni configura. Entra por el
+  botón "Planificación de programas" del Resumen Territorial.
+- Los demás roles no ven el botón ni la pantalla. El backend aplica el gate con 403
+  (también a una escritura de Autoridad). El frontend solo oculta el botón.
 
 ## 4. Modelo de datos (`db_privada`, Alembic `0005`)
 
@@ -352,8 +355,8 @@ Validaciones: `prioridad_id`/`estado_id` deben pertenecer al programa → si no,
 - Un cambio de valor persiste al recargar, aparece en el historial desplegable
   de esa fila y en `priv_audit_log`, y no hay botón Guardar.
 - Dos usuarios editan el mismo campo: el segundo recibe 409 y un aviso.
-- Un usuario sin `privada` (ni Admin), o con rol Autoridad, no ve el botón y
-  recibe 403 en la API.
+- Un usuario sin `privada` (ni Admin ni Autoridad) no ve el botón y recibe 403 en la API.
+- Autoridad ve la planilla de cualquier programa y recibe 403 si intenta escribir.
 - Con una fuente caída, su columna muestra "sin dato" y la planilla sigue editable.
 - `svc-vivienda`: sin migraciones, tablas ni escrituras nuevas. Solo el
   endpoint IAM de lectura.
@@ -429,6 +432,9 @@ ADR-012 hasta su propio spec).
     **todas** las filas por `id_geo` y muestra la cantidad (§5.1).
 
 ## Changelog
+
+- **1.5.0 (2026-11-24)** — **Autoridad en solo lectura**, todos los programas, a pedido del
+  usuario (revierte la exclusión de §3 de 1.0.0). No requiere la secretaría `privada`.
 
 - **1.4.0 (2026-11-24)** — Columna fija y filtro **"Intendente/a"** (Mujer / Varón / Sin dato), a
   pedido del usuario. Va también en el Excel y en el PDF. El dato llega con el padrón político
