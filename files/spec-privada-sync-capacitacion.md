@@ -1,7 +1,7 @@
 # Spec: Inscriptos a la capacitación en comunicación → Planificación (Privada)
 
-**Estado**: review
-**Versión**: 0.2.0
+**Estado**: approved
+**Versión**: 1.0.0
 **Servicios**: `svc-privada` (sync, tabla y endpoint IAM). Sin cambios en frontend
 ni en el gateway.
 **ADR**: ninguno nuevo. Aplica ADR-036 (la planificación por localidad es dato de
@@ -33,11 +33,11 @@ La pantalla de Planificación (`/resumen-territorial/planificacion`) ya lista to
 las localidades por programa, con estado, columnas, filtros, KPIs, exportación a
 Excel e impresión. Se usa tal como está:
 
-1. Se crea en Planificación el programa **"Capacitación en comunicación"**: área
+1. Se crea en Planificación el programa **"Congreso de Formación Digital 2026"**: área
    `privada`, **sin `fuente`**. Por eso no aparecen "¿Está en el panel?" ni
    "¿Convenio?" (§5.1 del spec de planificación).
 2. Un **sync** de svc-privada lee el Sheet y escribe en ese programa la cantidad
-   de inscriptos, los nombres y un estado "Con inscriptos" (§4).
+   de inscriptos, los nombres y un estado automático (§4).
 3. **Cloud Scheduler cada 15 minutos** dispara el sync.
 
 ## 2. Acceso a la planilla
@@ -94,19 +94,29 @@ Lo que se vio en la descarga:
 
 | Elemento | Valor |
 |---|---|
-| Programa | "Capacitación en comunicación", área `privada`, `fuente` NULL |
-| Estado | **"Con inscriptos"** (verde `#C8E6C9` / `#1B5E20`), además del "Resuelto por ATP" que trae por defecto (se puede borrar) |
+| Programa | "Congreso de Formación Digital 2026", área `privada`, `fuente` NULL |
+| Estado automático | **"Con inscriptos"** (verde `#C8E6C9` / `#1B5E20`) |
+| Estado automático | **"Solo intendente / jefe comunal"** (amarillo `#FFF9C4` / `#8D6E00`) |
 | Columna `insc_lider` | "Intendente / jefe comunal inscripto (automático)", tipo `si_no` |
 | Columna `insc_equipo` | "Equipo de comunicación (automático)", tipo `numero` |
 | Columna `insc_total` | "Inscriptos en total (automático)", tipo `numero` |
+| Columna `insc_otros` | "Legisladores / ministros (automático)", tipo `numero` |
 | Columna `insc_nombres` | "Inscriptos – nombres (automático)", tipo `texto_largo`: `APELLIDO, Nombre (cargo)` separados por "; " |
 | Columna `insc_ultima` | "Última inscripción (automático)", tipo `fecha` |
 
-**Qué cuenta como "presentó inscriptos"**: la localidad tiene al menos una
-inscripción con cargo Intendente, Jefe comunal o Equipo de comunicación.
-Legisladores y ministros **no representan a la localidad que eligen**: figuran en
-`insc_nombres` y en `insc_total`, pero solos no ponen la localidad en
-"Con inscriptos".
+**Qué cuenta como "presentó inscriptos"** (usuario, 2026-11-24): **cualquier
+inscripción cuenta**, sin importar el cargo, también la de un legislador o un
+ministro. Además, se marca aparte cuando **solo se inscribió el intendente o jefe
+comunal** y nadie más de la localidad:
+
+| Inscripciones de la localidad | Estado automático |
+|---|---|
+| Ninguna | (sin estado) |
+| Solo intendente(s) / jefe(s) comunal(es) | "Solo intendente / jefe comunal" |
+| Cualquier otra combinación | "Con inscriptos" |
+
+El programa trae además el "Resuelto por ATP" de todo programa nuevo, que no se usa
+y se puede borrar.
 
 Las cuatro columnas por defecto (anuncio, montos, observación) se **ocultan**
 (`visible=false`). La observación queda disponible para el seguimiento manual si
@@ -120,9 +130,11 @@ nunca por un id fijo. Si no existen, los crea.
 - **Columnas automáticas**: el sync es su dueño. Si alguien las edita a mano, la
   próxima corrida las pisa con lo que dice la planilla.
 - **Estado**: el sync **no pisa nunca un estado puesto por una persona**.
-  - Si la localidad presentó inscriptos (§4.1) y su estado está vacío, pasa a "Con inscriptos".
-  - Si se quedó sin inscriptos (alguien borró respuestas) y su estado es "Con
-    inscriptos", el estado se vacía.
+  - Si el estado está vacío o es uno de los dos automáticos, el sync lo lleva al
+    que corresponde según la tabla de §4.1. Eso incluye pasar de "Solo intendente"
+    a "Con inscriptos" cuando se suma el equipo.
+  - Si la localidad se quedó sin inscriptos (alguien borró respuestas), el estado
+    automático se vacía.
   - Cualquier otro estado (por ejemplo "Contactada", si Privada lo crea) se deja
     como está.
 - Solo se escribe lo que **cambió**. Una corrida sin cambios no toca filas ni
@@ -136,10 +148,11 @@ nunca por un id fijo. Si no existen, los crea.
 
 Cómo se usa en pantalla, sin tocar el frontend:
 
-- **Filtro Estado**: "Con inscriptos" muestra las que presentaron, "sin estado"
-  muestra las que faltan.
-- **Color de la fila**: verde en las que tienen inscriptos, porque toma el color
-  del estado.
+- **Filtro Estado**: "sin estado" muestra las que faltan. "Solo intendente / jefe
+  comunal" muestra las que tienen que sumar a su equipo. "Con inscriptos" muestra
+  las completas.
+- **Color de la fila**: verde, amarillo o sin color, porque la fila toma el color
+  de su estado.
 - **KPI por estado**: muestra cuántas localidades presentaron.
 - El filtro de departamento, la exportación a Excel y el botón Imprimir funcionan
   como en los demás programas.
@@ -165,7 +178,7 @@ Cómo se usa en pantalla, sin tocar el frontend:
   LOCALIDAD", la respuesta **no se pierde**: queda en la tabla del §6 con `id_geo`
   NULL, y el resultado del sync la informa.
 
-## 6. Tabla propia (`db_privada`, Alembic `0006`)
+## 6. Tabla propia (`db_privada`, Alembic `0007`)
 
 `priv_capacitacion_inscripcion`: espejo de las respuestas. Sirve para recalcular
 los conteos y para auditar qué se leyó.
@@ -186,7 +199,10 @@ los conteos y para auditar qué se leyó.
 | `synced_at` | timestamptz | |
 | `deleted_at` | timestamptz NULL | Se marca si la fila desaparece del Sheet |
 
-UNIQUE `(capacitacion, fila_origen, marca_temporal)`. La deduplicación por `email_hash` se hace al contar, no al guardar. Cada fila se escribe en su
+UNIQUE `(capacitacion, marca_temporal, email_hash)`: la clave natural de una
+respuesta. El número de fila se actualiza si alguien reordena la planilla. La
+deduplicación por persona se hace al contar, no al guardar. Una respuesta que
+desaparece de la planilla se marca con `deleted_at` y se reactiva si vuelve. Cada fila se escribe en su
 propio SAVEPOINT (patrón de `checklist_sync.py`). Una fila mala no corta el
 resto; un error al leer la planilla entera devuelve 502.
 
@@ -195,10 +211,12 @@ resto; un error al leer la planilla entera devuelve 502.
 - `POST /internal/privada/capacitacion/sync`: IAM-only, sin `/api/v1` y sin
   gateway. Devuelve un resumen con leídas, resueltas, sin resolver (con el
   texto), localidades con inscriptos y filas de Planificación cambiadas.
-- Configuración (`config.py`): `capacitacion_sheet_id` y
-  `capacitacion_sheet_rango`. Con el id vacío, el endpoint responde 200 con
-  `deshabilitado: true` y no hace nada. Se setean con `--update-env-vars`; no
-  hace falta que vayan en `cloudbuild.yaml`.
+- Configuración (`config.py`): `capacitacion_sheet_id`,
+  `capacitacion_rango_respuestas` y `capacitacion_rango_lista`. El id de la
+  planilla va **como default en el código**: no es secreto, y así un redeploy de
+  CI (`--set-env-vars` reemplaza todo) no lo borra. Con el id vacío, el endpoint
+  responde 200 con `deshabilitado: true` y no hace nada.
+- `?dry_run=true`: informa qué cambiaría sin escribir nada.
 - Cloud Scheduler `sync-privada-capacitacion`, cada 15 minutos, OIDC con la
   misma SA que ya dispara `sync-privada-padron-politico`. La inscripción cierra el
   25/11 a las 23 h: el 26/11 se corre una última vez y se **pausa** el job. Los
@@ -215,12 +233,13 @@ saber quién presentó. Cualquier otro dato se queda en la planilla. Si Privada
 quiere ver el contacto en el panel, se decide aparte, porque Planificación la ve
 todo el personal con secretaría `privada`.
 
-## 9. Pendientes antes de `approved`
+## 9. Pendientes (todos resueltos al aprobar)
 
 1. ~~Estructura del formulario~~: relevada (§3).
 2. ~~Planilla compartida con la cuenta de servicio~~: confirmado por el usuario
    el 2026-11-24.
-3. Confirmar la regla de §4.1 sobre legisladores y ministros.
+3. ~~Regla de §4.1 sobre legisladores y ministros~~: cuentan, y se marca aparte
+   "solo intendente" (usuario, 2026-11-24).
 4. Otras jornadas futuras con otro formulario: fuera de alcance. Si aparecen, se
    parametriza por planilla y programa en vez de duplicar el sync.
 
@@ -238,7 +257,22 @@ mockeado:
 - Una fila mala no corta el resto.
 - Planilla ilegible → 502.
 
-## 11. Changelog
+## 11. Validación con datos reales (2026-11-24)
+
+Corrida local del parser y el vínculo sobre la descarga de las 11:18, contra el
+padrón de producción (`priv_geo_localidades`, solo lectura):
+
+- 366 respuestas → **327 personas**, deduplicadas por correo.
+- Vínculo: 317 exactos, 9 manuales y 1 sin resolver ("OTRA LOCALIDAD").
+- **179 localidades con inscriptos** de 427. En 84 de ellas se inscribió solo el
+  intendente o jefe comunal.
+
+## 12. Changelog
+
+- 1.0.0 (2026-11-24): approved. Todo inscripto cuenta; se agrega el estado "Solo
+  intendente / jefe comunal" y la columna `insc_otros`. El programa se llama como el
+  congreso. La migración es la `0007` (la `0006` ya existía). El id de la planilla va
+  como default en `config.py`. Se agregan `dry_run` y la validación con datos reales (§11).
 
 - 0.2.0 (2026-11-24): estructura real del formulario (§3), desglose por cargo y regla
   de "presentó" (§4.1), vínculo por la pestaña `Lista` con 32 opciones manuales (§5),
