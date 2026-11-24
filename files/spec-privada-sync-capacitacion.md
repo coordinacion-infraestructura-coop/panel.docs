@@ -1,7 +1,7 @@
 # Spec: Inscriptos a la capacitación en comunicación → Planificación (Privada)
 
 **Estado**: review
-**Versión**: 0.1.0
+**Versión**: 0.2.0
 **Servicios**: `svc-privada` (sync, tabla y endpoint IAM). Sin cambios en frontend
 ni en el gateway.
 **ADR**: ninguno nuevo. Aplica ADR-036 (la planificación por localidad es dato de
@@ -56,18 +56,37 @@ que ya es dependencia. No se suma `googleapiclient`. Lo usa solo este sync.
 
 ## 3. Lo que se lee del formulario
 
-> **Pendiente (§9.1)**: la estructura real del formulario todavía no se pudo ver,
-> porque la planilla no está compartida con la cuenta del conector ni con la
-> cuenta de servicio. Esta sección se completa antes de pasar a `approved`.
+Formulario "Congreso de Formación Digital 2026": jornada para líderes territoriales y
+sus equipos de comunicación, sábado 28/11 a las 9 h en Villa Carlos Paz. Cada líder
+puede ir con hasta 2 integrantes de su equipo. **La inscripción cierra el miércoles
+25/11 a las 23 h.** Estructura relevada el 2026-11-24 sobre una descarga con 366
+respuestas.
 
-Supuestos de trabajo:
+Pestaña **`Respuestas de formulario 1`** (la que escribe el formulario):
 
-| Dato | Uso |
-|---|---|
-| Marca temporal | Identifica la respuesta junto con el número de fila. Se muestra la fecha de la última inscripción |
-| Nombre y apellido | Columna "Nombres" |
-| Localidad (y departamento, si el formulario lo pide) | Se resuelve a `id_geo` (§5) |
-| Cargo / institución, contacto | **No se copian a la tabla de control**. Ver §8 |
+| Columna | Tipo en el formulario | Uso |
+|---|---|---|
+| Marca temporal | automática | Fecha de la última inscripción; desempata duplicados |
+| Dirección de correo electrónico | texto, obligatoria | **Solo para deduplicar**. No se guarda (§8) |
+| APELLIDO, NOMBRE | texto, obligatorias | Columna de nombres |
+| LOCALIDAD | **desplegable** con 427 localidades + "OTRA LOCALIDAD" | Se resuelve a `id_geo` (§5) |
+| CARGO | desplegable: Intendente · Jefe comunal · Equipo de comunicación · Legislador · Ministro | Desglose por cargo (§4.1) |
+
+Pestaña **`Lista`** (DEPARTAMENTO, LOCALIDAD): las opciones del desplegable, con su
+departamento. Los nombres no se repiten; los homónimos vienen desambiguados, por
+ejemplo `LOS CHAÑARITOS (C. D. E.)`. El sync la lee para conocer el departamento de
+cada opción.
+
+Las otras pestañas (`Resumen`, `Para Acreditaciones`, `Intendentes y jefes
+comunales`) son fórmulas del área y no se leen.
+
+Lo que se vio en la descarga:
+- **Duplicados**: 39 correos repetidos (la persona se inscribió dos veces). Se
+  cuenta **una persona por correo** (normalizado en minúsculas), con su última
+  respuesta.
+- "OTRA LOCALIDAD": 1 respuesta. Queda sin resolver y se informa (§5).
+- Legisladores (14) y ministros (5) eligen una localidad (por ejemplo, 7 legisladores
+  en CORDOBA). Cómo cuentan: §4.1.
 
 ## 4. Qué escribe en Planificación
 
@@ -77,9 +96,17 @@ Supuestos de trabajo:
 |---|---|
 | Programa | "Capacitación en comunicación", área `privada`, `fuente` NULL |
 | Estado | **"Con inscriptos"** (verde `#C8E6C9` / `#1B5E20`), además del "Resuelto por ATP" que trae por defecto (se puede borrar) |
-| Columna `inscriptos` | "Inscriptos (automático)", tipo `numero` |
-| Columna `inscriptos_nombres` | "Inscriptos – nombres (automático)", tipo `texto_largo`, nombres separados por "; " |
-| Columna `inscriptos_ultima` | "Última inscripción (automático)", tipo `fecha` |
+| Columna `insc_lider` | "Intendente / jefe comunal inscripto (automático)", tipo `si_no` |
+| Columna `insc_equipo` | "Equipo de comunicación (automático)", tipo `numero` |
+| Columna `insc_total` | "Inscriptos en total (automático)", tipo `numero` |
+| Columna `insc_nombres` | "Inscriptos – nombres (automático)", tipo `texto_largo`: `APELLIDO, Nombre (cargo)` separados por "; " |
+| Columna `insc_ultima` | "Última inscripción (automático)", tipo `fecha` |
+
+**Qué cuenta como "presentó inscriptos"**: la localidad tiene al menos una
+inscripción con cargo Intendente, Jefe comunal o Equipo de comunicación.
+Legisladores y ministros **no representan a la localidad que eligen**: figuran en
+`insc_nombres` y en `insc_total`, pero solos no ponen la localidad en
+"Con inscriptos".
 
 Las cuatro columnas por defecto (anuncio, montos, observación) se **ocultan**
 (`visible=false`). La observación queda disponible para el seguimiento manual si
@@ -93,7 +120,7 @@ nunca por un id fijo. Si no existen, los crea.
 - **Columnas automáticas**: el sync es su dueño. Si alguien las edita a mano, la
   próxima corrida las pisa con lo que dice la planilla.
 - **Estado**: el sync **no pisa nunca un estado puesto por una persona**.
-  - Si la localidad tiene inscriptos y su estado está vacío, pasa a "Con inscriptos".
+  - Si la localidad presentó inscriptos (§4.1) y su estado está vacío, pasa a "Con inscriptos".
   - Si se quedó sin inscriptos (alguien borró respuestas) y su estado es "Con
     inscriptos", el estado se vacía.
   - Cualquier otro estado (por ejemplo "Contactada", si Privada lo crea) se deja
@@ -119,20 +146,24 @@ Cómo se usa en pantalla, sin tocar el frontend:
 
 ## 5. Vínculo con el padrón
 
-- Se resuelve contra `priv_geo_localidades`, el espejo del padrón oficial
-  (ADR-026), con las mismas reglas de normalización de `app/geo/matching.py` de
-  svc-vivienda, replicadas o reusadas en svc-privada.
-- **No se llama** a `POST /internal/geo/resolver-localidades` de svc-vivienda.
-  Cada nombre sin match registraría un pendiente y una notificación en Vivienda
+- Cada opción de la `Lista` (departamento + localidad) se resuelve contra
+  `priv_geo_localidades`, el espejo del padrón oficial (ADR-026). Se usan las reglas
+  de normalización de `app/geo/matching.py` de svc-vivienda, copiadas a svc-privada.
+  También se normaliza la puntuación del departamento (`PTE. ROQUE SAENZ PEÑA`).
+  Las respuestas se vinculan por el texto exacto de la opción.
+- Resultado sobre la Lista actual: **395 de 427 por nombre**. Las otras 32 son
+  variantes de escritura y van en un diccionario versionado en el código
+  (`opción → id_geo`). Se revisó a mano el 2026-11-24 con los mismos criterios
+  que la recarga del semáforo de ese día. Ejemplos: `BOUWER`→303 Bower,
+  `HUANCHILLA`→92, `VILLA RIO ICHO CRUZ`→158, `COLONIA BARGE`→105 Castro Urdiales,
+  `PASO DEL DURAZNO`→443 (la Lista la pone en Juárez Celman y el padrón en Río
+  Cuarto). Ningún `id_geo` queda asignado a dos opciones.
+- **No se llama** a `POST /internal/geo/resolver-localidades` de svc-vivienda:
+  cada nombre sin match registraría un pendiente y una notificación en Vivienda
   cada 15 minutos.
-- Si el formulario no pide departamento y hay nombres repetidos en la provincia
-  (por ejemplo LOS CHAÑARITOS), la respuesta queda **sin resolver**. No se asigna
-  al azar.
-- Las respuestas sin resolver **no se pierden**: quedan en la tabla del §6 con
-  `id_geo` NULL y el resultado del sync informa cuántas son y cuáles.
-- Vinculación manual: un diccionario versionado en el código del sync (texto
-  normalizado → `id_geo`), igual que se hizo con ATP. Si en el futuro hace falta
-  cargarla desde la pantalla, se especifica aparte.
+- Si se agrega al desplegable una opción que no cruza, o alguien elige "OTRA
+  LOCALIDAD", la respuesta **no se pierde**: queda en la tabla del §6 con `id_geo`
+  NULL, y el resultado del sync la informa.
 
 ## 6. Tabla propia (`db_privada`, Alembic `0006`)
 
@@ -142,18 +173,20 @@ los conteos y para auditar qué se leyó.
 | Columna | Tipo | Notas |
 |---|---|---|
 | `id` | serial PK | |
-| `capacitacion` | varchar(60) | `comunicacion-2026-11` (una planilla = una capacitación) |
+| `capacitacion` | varchar(60) | `congreso-formacion-digital-2026` (una planilla = una capacitación) |
 | `fila_origen` | int | Número de fila en el Sheet |
 | `marca_temporal` | timestamptz NULL | |
-| `nombre` | varchar(200) NULL | |
-| `localidad_texto` | varchar(200) NULL | Tal como vino |
-| `departamento_texto` | varchar(120) NULL | |
+| `apellido`, `nombre` | varchar(120) NULL | |
+| `cargo` | varchar(60) NULL | |
+| `localidad_texto` | varchar(200) NULL | Opción elegida, tal como vino |
+| `departamento_texto` | varchar(120) NULL | De la pestaña `Lista` |
+| `email_hash` | char(64) | SHA-256 del correo normalizado. Solo sirve para deduplicar; el correo no se guarda |
 | `id_geo` | varchar(30) NULL | Resultado del vínculo |
 | `match_tipo` | varchar(20) | `exacto` · `manual` · `ambiguo` · `sin_match` |
 | `synced_at` | timestamptz | |
 | `deleted_at` | timestamptz NULL | Se marca si la fila desaparece del Sheet |
 
-UNIQUE `(capacitacion, fila_origen, marca_temporal)`. Cada fila se escribe en su
+UNIQUE `(capacitacion, fila_origen, marca_temporal)`. La deduplicación por `email_hash` se hace al contar, no al guardar. Cada fila se escribe en su
 propio SAVEPOINT (patrón de `checklist_sync.py`). Una fila mala no corta el
 resto; un error al leer la planilla entera devuelve 502.
 
@@ -167,28 +200,29 @@ resto; un error al leer la planilla entera devuelve 502.
   `deshabilitado: true` y no hace nada. Se setean con `--update-env-vars`; no
   hace falta que vayan en `cloudbuild.yaml`.
 - Cloud Scheduler `sync-privada-capacitacion`, cada 15 minutos, OIDC con la
-  misma SA que ya dispara `sync-privada-padron-politico`. Después de la jornada,
-  se **pausa** el job y los datos quedan.
+  misma SA que ya dispara `sync-privada-padron-politico`. La inscripción cierra el
+  25/11 a las 23 h: el 26/11 se corre una última vez y se **pausa** el job. Los
+  datos quedan.
 - No hay botón "Sincronizar ahora" en la pantalla: con 15 minutos alcanza. Si se
   necesita antes, se dispara el job a mano desde Cloud Scheduler.
 
 ## 8. Datos personales
 
-La planilla puede traer DNI, teléfono o mail de los inscriptos. La tabla de
-control **solo guarda y muestra nombre y localidad**: es lo que hace falta para
+La planilla trae el correo de cada inscripto. La tabla de control **solo guarda y
+muestra apellido, nombre, cargo y localidad**. Del correo se guarda solo un hash,
+para deduplicar: es lo que hace falta para
 saber quién presentó. Cualquier otro dato se queda en la planilla. Si Privada
 quiere ver el contacto en el panel, se decide aparte, porque Planificación la ve
 todo el personal con secretaría `privada`.
 
 ## 9. Pendientes antes de `approved`
 
-1. **Estructura del formulario** (§3): nombres de columnas, si la localidad es
-   texto libre o lista, si pide departamento, y si una respuesta puede traer
-   varias personas.
-2. Confirmar que el dueño compartió la planilla con la cuenta de servicio (§2).
-3. Confirmar el id de la capacitación y si va a haber otras jornadas con otro
-   formulario. Si las hay, se parametriza por planilla y programa en vez de
-   duplicar el sync.
+1. ~~Estructura del formulario~~: relevada (§3).
+2. ~~Planilla compartida con la cuenta de servicio~~: confirmado por el usuario
+   el 2026-11-24.
+3. Confirmar la regla de §4.1 sobre legisladores y ministros.
+4. Otras jornadas futuras con otro formulario: fuera de alcance. Si aparecen, se
+   parametriza por planilla y programa en vez de duplicar el sync.
 
 ## 10. Pruebas
 
@@ -196,7 +230,7 @@ todo el personal con secretaría `privada`.
 mockeado:
 
 - Alta inicial: crea el programa, las columnas y el estado.
-- Conteo y nombres por localidad.
+- Conteo y nombres por localidad; deduplicación por correo; un legislador solo no marca la localidad.
 - Una segunda corrida sin cambios no escribe historial.
 - No pisa un estado manual.
 - Vacía "Con inscriptos" cuando la localidad se queda sin inscriptos.
@@ -206,5 +240,8 @@ mockeado:
 
 ## 11. Changelog
 
+- 0.2.0 (2026-11-24): estructura real del formulario (§3), desglose por cargo y regla
+  de "presentó" (§4.1), vínculo por la pestaña `Lista` con 32 opciones manuales (§5),
+  hash del correo (§6, §8), cierre el 25/11 (§7).
 - 0.1.0 (2026-11-24): borrador. Reusa Planificación (ADR-036) y el patrón de
   sync de Sheets. Pendiente la estructura del formulario.
