@@ -1,15 +1,20 @@
 # Spec: Padrón político único — cruce Gobierno ↔ Privada (ADR-027, segunda parte)
 
 **Estado**: implemented
-**Versión**: 1.0.1
+**Versión**: 1.1.0
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-22
+**Última actualización**: 2026-11-24
 **Servicios**: `svc-datos-externos`, `svc-privada`
 **Antecede**: `spec-datos-externos-fase6-politico.md` §6 (paso siguiente pedido por el usuario)
 **ADR**: ADR-027 (cierra el mecanismo: espejo hacia Privada, con Gobierno como autoridad)
 
 ## Changelog
 
+- **1.1.0** (2026-11-24): **género del intendente o intendenta** (§2.4), para el filtro de
+  Planificación (`spec-privada-planificacion-programas.md` 1.4.0). Pedido y autorizado por el
+  usuario, incluida la excepción a la privacidad de `spec-datos-externos-fase6-politico.md` §5.
+  Migración `svc-privada` 0008. Medido en producción (solo lectura): 427 de 427 con dato;
+  418 oficiales (municipales 2023) y 9 deducidos del nombre (8 interinos).
 - **1.0.1** (2026-10-22): implementado y en producción. Backend `d6c4866` (migraciones
   `svc-datos-externos` 0010 y `svc-privada` 0004 aplicadas antes del push), frontend `7d5582a`.
   `run.invoker` cruzado entre `svc-privada@` y `svc-datos-externos@`; Cloud Scheduler
@@ -62,6 +67,25 @@ falta en Privada en 4.
    disponible** (contrato byte-compatible, ADR-008), pero el próximo sync la reemplaza si Gobierno
    tiene dato. Donde Gobierno no tiene dato, lo editado en Privada pasa a ser el combinado.
    `habitantes` y `electores` no cambian.
+
+### 2.4 Género del intendente o intendenta (1.1.0)
+
+El combinado suma `intendente_sexo` (`F`/`M`) y `origen_intendente_sexo`
+(`app/gob_politico/sexo.py` de svc-datos-externos):
+
+- **`eleccion_2023`**: `ganador_sexo` de las municipales 2023 (`ext_gob_eleccion_municipal`),
+  solo si quien ganó es el intendente actual. Para decidirlo se comparan las palabras de los
+  dos nombres y se admiten diferencias mínimas de escritura (EDGARD / EDGAR).
+- **`nombre`** (deducido): cuando el ganador no es el actual. Se toma "(INTERINA)" /
+  "(INTERINO)" si figura en el nombre. Si no, se usan los votos de las palabras del nombre
+  según los ganadores 2023: una palabra vota solo si aparece al menos 2 veces y siempre con el
+  mismo sexo. Si no hay evidencia o es contradictoria, queda vacío.
+
+Privada lo guarda en `priv_localidades_info.intendente_sexo` / `intendente_sexo_origen`. Lo
+escribe el mismo sync diario:
+- **sin respaldo**: no es un dato que Privada tuviera;
+- se vacía si Gobierno deja de tenerlo;
+- no es editable desde la app.
 
 ## 3. Mecanismo
 

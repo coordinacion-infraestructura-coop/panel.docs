@@ -1,7 +1,7 @@
 # Spec: Planificación de programas por localidad (Privada)
 
 **Estado**: implemented
-**Versión**: 1.3.0
+**Versión**: 1.4.0
 **Servicios**: `svc-privada` (dueño de los datos y de los endpoints), frontend
 (`resumen-territorial`). Lectura IAM-only de `svc-vivienda`, `svc-gasifera`,
 `svc-gralgob` y `svc-datos-externos` (§6).
@@ -10,7 +10,7 @@
 espejo del padrón), `spec-resumen-territorial.md`, `spec-ch-convenio-firmado.md`,
 ADR-012, ADR-016/021/022/025
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-11-19
+**Última actualización**: 2026-11-24
 
 ---
 
@@ -206,6 +206,7 @@ tabla es para leer en pantalla.
 | Coparticipación anual | **Monto anual que recibe la localidad por coparticipación**: suma del concepto `coparticipacion_ley_8663` (`svc-datos-externos`, `ext_transferencias`, ADR-025) de los **últimos 12 meses publicados**. El tooltip muestra el período (mes desde–hasta). Si hay menos de 12 meses cargados, se muestra lo que hay y se marca "parcial (N meses)" |
 | Visita del gobernador | **Única fuente: la planilla "2. RECORRIDO Y VISITAS", pestaña `Visitas Gober`** (`svc-datos-externos`, `ext_gob_visita_gobernador`: `visitada` + `fecha_ultima`, por código INDEC → `id_geo`). Muestra "Sí · dd/mm/aaaa", "Sí (sin fecha)" o "No". Ya no se infiere de ATP (decisión del usuario del 2026-11-19, basada en el análisis de coherencia de §12.1) |
 | Semáforo (político) | `priv_localidades_info.color_semaforo`. **Solo lectura en esta etapa** |
+| Intendente/a (1.4.0) | "Mujer" / "Varón" de `priv_localidades_info.intendente_sexo` (`spec-padron-politico-gobierno-privada.md` §2.4). Con "*" y tooltip cuando se dedujo del nombre (interinos o reemplazos) en vez de salir del dato oficial de las municipales 2023 |
 | ¿Convenio de Vivienda? | Sí/No: hay **fecha de firma de convenio** en el panel de la `fuente`. CH: `convenio_firmado`/`fecha_firma_convenio` (spec-ch-convenio-firmado). **CC y ML: la columna se muestra vacía ("—") hasta que el área defina qué dato cuenta como firma** (§12.3). No se usa `ok_gob` como sustituto. El tooltip muestra la fecha |
 | ¿Está en el panel? | Sí/No: existe una fila no borrada en el panel de la `fuente` con ese `id_geo`. Si es Sí, también muestra el estado general con su color y la cantidad de filas si hay más de una. Las filas de la fuente sin `id_geo` se cuentan en un aviso y no se pierden en silencio |
 
@@ -235,7 +236,8 @@ antes → después). Se carga bajo demanda, no viene con el listado.
   cualquier columna.
 - Filtros: departamento (sincronizado con el "Ir a" del Resumen Territorial) ·
   prioridad (multi) · estado (multi) · ¿está en el panel? · ¿convenio? · visita
-  del gobernador · OK gobernador · semáforo · búsqueda por localidad.
+  del gobernador · OK gobernador · semáforo · intendente/a (Mujer / Varón / Sin
+  dato, 1.4.0) · búsqueda por localidad.
 - Columnas fijas a la izquierda (departamento/localidad) y scroll horizontal
   para las demás.
 - KPIs: localidades por prioridad y por estado, cuántas están en el panel,
@@ -427,6 +429,12 @@ ADR-012 hasta su propio spec).
     **todas** las filas por `id_geo` y muestra la cantidad (§5.1).
 
 ## Changelog
+
+- **1.4.0 (2026-11-24)** — Columna fija y filtro **"Intendente/a"** (Mujer / Varón / Sin dato), a
+  pedido del usuario. Va también en el Excel y en el PDF. El dato llega con el padrón político
+  (`spec-padron-politico-gobierno-privada.md` 1.1.0 §2.4); no lo pide el gateway. Además se
+  agregó el primer programa alimentado por un sync en vez de a mano: "Congreso de Formación
+  Digital 2026" (`spec-privada-sync-capacitacion.md`).
 
 - **1.3.0 (2026-11-20)** — Botón "Imprimir" (§8): PDF simple para control manual con
   lapicera, con los colores del estado. Solo frontend. Además, la carga de las planillas

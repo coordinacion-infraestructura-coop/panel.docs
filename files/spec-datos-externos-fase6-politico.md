@@ -1,9 +1,9 @@
 # Spec: Fase 6 — Político: padrón de intendentes y resultados electorales
 
 **Estado**: implemented
-**Versión**: 1.0.1
+**Versión**: 1.0.2
 **Responsable de spec**: Pedro Bonafe
-**Última actualización**: 2026-10-21
+**Última actualización**: 2026-11-24
 **Servicio**: `svc-datos-externos`
 **Spec padre**: `spec-datos-externos-tablero-gobierno.md` (approved 1.4.1), Fase 6
 **Pantallas que habilita**: `spec-tablero-gobierno-panel.md`, Etapa 6 (Político 🔒)
@@ -11,6 +11,10 @@
 
 ## Changelog
 
+- **1.0.2** (2026-11-24): excepción autorizada por el usuario a §5. El **género del intendente o
+  intendenta** (no el nombre de quien ganó, ni el celular, ni los resultados) viaja a
+  svc-privada con el padrón combinado y lo ve el personal de Privada en Planificación. Ver
+  `spec-padron-politico-gobierno-privada.md` §2.4.
 - **1.0.1** (2026-10-21): implementado y en producción. Backend `cd5bd0b` (migración `0009`
   aplicada), gateway `ministerio-config-v20261021c` (infra `3f15ebd`), frontend `9874d09`. Sin
   job nuevo: `intendentes` y `elecciones` entran al `sync-gob-transferencias` diario. Verificado
@@ -189,6 +193,7 @@ en la ficha de localidad de otros roles.
 | Celular del intendente | Se sincroniza y se muestra solo en Político (Admin/Autoridad). No va a logs, anomalías ni a la exportación general; sí a la exportación Excel de la tabla de intendentes, que tiene el mismo control de rol |
 | Foto | Solo el enlace; abre Drive con los permisos propios de quien mira |
 | Nombre del intendente, partido, alineación, resultados | Visibles solo para Admin/Autoridad |
+| Género del intendente o intendenta (de `ganador_sexo`, o deducido) | **Excepción (2026-11-24, autorizada por el usuario)**: viaja a svc-privada y lo ve Privada en Planificación (`spec-padron-politico-gobierno-privada.md` §2.4) |
 | Logs del sync | Solo conteos; nunca nombres, partidos por localidad ni teléfonos |
 
 ## 6. ADR-027: convivencia con Privada
