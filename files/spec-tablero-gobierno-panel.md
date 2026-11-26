@@ -258,7 +258,7 @@ Cada fila es un criterio de aceptación: "igual que el Looker con el mismo filtr
 | Comp. Gober | 5 KPIs, tabla, por ministerio | Fondos › ATP Compromisos | **ya en el sistema** | E1 |
 | ATP | 4 KPIs, tabla, gráfico, detalle por localidad (§2.5 #7) | Fondos › ATP Interno 🔒 | 4. ATP 2026 | E4 |
 | FOCOM | 3 KPIs + 8 estados, torta de forma de pago (§2.5 #8), tabla | Fondos › FOCOM | falta fuente | E3 |
-| Fondo Federal | KPIs de cuotas, saldo, aportes y repago; estados; 2 velocímetros de cuotas; tablas de etapas y de etapas pagadas (§2.6) | Fondos › Fondo Federal | falta fuente | E3 |
+| Fondo Federal | KPIs de cuotas, saldo, aportes y repago; estados; 2 velocímetros de cuotas; tablas de etapas y de etapas pagadas (§2.6) | Fondos › Fondo Federal | planilla "0. Fondo Federal" (`spec-datos-externos-fase3b-fondo-federal.md`, 2026-11-26) | E3 |
 | Fondo Ambiental | 5 KPIs + 4 estados, torta por estado, tabla | Fondos › Fondo Ambiental | planilla 9 | E3 |
 | Comu. Regionales | 5 KPIs + 6 estados, torta por estado, tablas | Fondos › Comunidades Regionales | planilla 17 | E3 |
 | Obras | 5 tablas: 1 y varios departamentos (prorrateo), 1 y varias localidades (sin prorrateo), obras generales; inicio/fin; selector de nivel (§2.5 #2) | Gestión › Obras | planilla 12 (moneda en duda) | E5 |

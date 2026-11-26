@@ -218,7 +218,10 @@ FOCOM, Fondo Federal y adelantos siguen "en preparación" con el motivo a la vis
 
 ## 8. Preguntas para el área (no bloquean la implementación)
 
-1. **¿El "Fondo Federal" del Looker es el Fondo Permanente?** El 2026-10-13 el área dijo que son
+1. **Respondida 2026-11-26** (`spec-datos-externos-fase3b-fondo-federal.md`): el área compartió la planilla
+   "0. Fondo Federal", con las etapas nuevas (1 a 4, desde 2025) que se pagan desde la cuenta del Fondo Permanente.
+   La pantalla Fondo Federal sale de ahí; esta planilla sigue en su pantalla. Texto original:
+   **¿El "Fondo Federal" del Looker es el Fondo Permanente?** El 2026-10-13 el área dijo que son
    distintos (paraguas §3.5), pero lo que muestra la página "Fondo Federal" del Looker sale de esta
    planilla: última etapa habilitada, saldo en cuenta, disponible por etapas, y los velocímetros
    de última y anteúltima etapa coinciden con `ULT_C_SOC` y `AULT_C_S`. Si es el mismo fondo, la
